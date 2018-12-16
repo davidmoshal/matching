@@ -15,6 +15,7 @@ dependencies {
 
     // Arrow
     implementation "io.arrow-kt:arrow-core:0.8.1"
+    testCompile 'io.arrow-kt:arrow-test:0.8.1'
 
 
     // JUnit
