@@ -7,21 +7,16 @@ import jasition.matching.domain.book.entry.Price
 import java.util.Comparator
 
 data class LimitBook(val entries: TreeMap<BookEntryKey, BookEntry>) {
-    constructor(ascending: Boolean) : this(
-        TreeMap.empty(
-            PriceTimeSequenceEntryComparator(ascending)
-        )
-    )
+    constructor(ascending: Boolean) : this(TreeMap.empty(PriceTimeSequenceEntryComparator(ascending)))
 
-    fun add(entry: BookEntry): LimitBook {
-        return LimitBook(entries.put(entry.key, entry))
-    }
+    fun add(entry: BookEntry): LimitBook =
+        LimitBook(entries.put(entry.key, entry))
 }
 
 class PriceTimeSequenceEntryComparator(ascending: Boolean) :
     Comparator<BookEntryKey> {
 
-    val multiplier = if (ascending) 1 else -1
+    private val multiplier = if (ascending) 1 else -1
 
     override fun compare(o1: BookEntryKey, o2: BookEntryKey): Int {
         // First Priority : Price

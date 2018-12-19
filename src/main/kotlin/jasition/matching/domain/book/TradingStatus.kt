@@ -6,9 +6,7 @@ data class TradingStatuses(
     val fastMarket: TradingStatus? = null,
     val manual: TradingStatus? = null
 ) {
-    fun effectiveStatus(): TradingStatus {
-        return manual ?: fastMarket ?: scheduled ?: default
-    }
+    fun effectiveStatus(): TradingStatus = manual ?: fastMarket ?: scheduled ?: default
 }
 
 enum class TradingStatus {
