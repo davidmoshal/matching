@@ -8,13 +8,13 @@ import jasition.matching.domain.order.TimeInForce
 import java.time.Instant
 
 data class OrderRejectedEvent(
-        val requestId: String,
-        val whoRequested: Client,
-        val bookId: String,
-        val orderType : OrderType,
-        val side : Side,
-        val size : Int,
-        val price : Long?,
-        val timeInForce: TimeInForce,
-        val whenHappened : Instant
+    val requestId: String,
+    val whoRequested: Client,
+    val bookId: String,
+    val orderType: OrderType,
+    val side: Side,
+    val size: Int,
+    val price: Long?,
+    val timeInForce: TimeInForce,
+    val whenHappened: Instant
 ) : Event
