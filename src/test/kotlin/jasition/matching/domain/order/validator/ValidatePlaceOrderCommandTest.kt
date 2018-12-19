@@ -1,12 +1,14 @@
-package jasition.matching
+package jasition.matching.domain.order.validator
 
 import arrow.core.getOrHandle
-import arrow.core.right
 import io.kotlintest.fail
 import jasition.matching.domain.book.Books
-import jasition.matching.domain.order.*
+import jasition.matching.domain.order.Client
+import jasition.matching.domain.order.OrderType
+import jasition.matching.domain.order.Side
+import jasition.matching.domain.order.TimeInForce
 import jasition.matching.domain.order.command.PlaceOrderCommand
-import jasition.matching.domain.order.validator.PlaceOrderCommandValidator
+import jasition.matching.domain.order.command.validatePlaceOrderCommand
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
@@ -17,7 +19,7 @@ import strikt.assertions.isGreaterThanOrEqualTo
 import strikt.assertions.isTrue
 import java.time.Instant
 
-object PlaceOrderCommandValidatorTest : Spek({
+object ValidatePlaceOrderCommandTest : Spek({
     given("The book is empty") {
         var books = Books(id = "book")
         on("Submit a Limit Good-till-date Order") {
@@ -27,13 +29,13 @@ object PlaceOrderCommandValidatorTest : Spek({
                     bookId = "book",
                     orderType = OrderType.LIMIT,
                     side = Side.BUY,
-                    price = Price(value = 15),
+                    price = 15,
                     size = 10,
                     timeInForce = TimeInForce.GOOD_TILL_CANCEL,
                     whenRequested = Instant.now()
                     )
 
-            var event = PlaceOrderCommandValidator(command = command, books = books)
+            var event = validatePlaceOrderCommand(command = command, books = books)
 
             it("should place the order on the book") {
                 expectThat(event.isRight()).isTrue()

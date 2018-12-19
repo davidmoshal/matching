@@ -17,6 +17,9 @@ dependencies {
     implementation "io.arrow-kt:arrow-core:0.8.1"
     testCompile 'io.arrow-kt:arrow-test:0.8.1'
 
+    // Vavr (for persistent collections)
+    compile 'io.vavr:vavr:0.9.2'
+    compile 'io.vavr:vavr-kotlin:0.9.2'
 
     // JUnit
     testCompile("org.junit.jupiter:junit-jupiter-api:5.3.2")
