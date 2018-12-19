@@ -9,7 +9,7 @@ data class BookEntry(
     val key: BookEntryKey,
     val clientRequestId: ClientRequestId,
     val client: Client,
-    val orderType: OrderType,
+    val entryType: EntryType,
     val side: Side,
     val timeInForce: TimeInForce,
     val size: EntryQuantity,

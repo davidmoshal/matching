@@ -15,7 +15,7 @@ data class PlaceOrderCommand(
     val requestId: ClientRequestId,
     val whoRequested: Client,
     val bookId: BookId,
-    val orderType: OrderType,
+    val entryType: EntryType,
     val side: Side,
     val size: Int,
     val price: Price?,
@@ -35,7 +35,7 @@ fun validatePlaceOrderCommand(
             requestId = command.requestId,
             whoRequested = command.whoRequested,
             bookId = command.bookId,
-            orderType = command.orderType,
+            entryType = command.entryType,
             side = command.side,
             size = EntryQuantity(
                 availableSize = command.size,

@@ -3,7 +3,7 @@ package jasition.matching.domain.order.validator
 import arrow.core.getOrHandle
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
-import jasition.matching.domain.book.entry.OrderType
+import jasition.matching.domain.book.entry.EntryType
 import jasition.matching.domain.book.entry.Price
 import jasition.matching.domain.book.entry.Side
 import jasition.matching.domain.book.entry.TimeInForce
@@ -29,7 +29,7 @@ object ValidatePlaceOrderCommandTest : Spek({
                 requestId = ClientRequestId(current = "req1"),
                 whoRequested = Client(firmId = "firm1", firmClientId = "client1"),
                 bookId = BookId("book"),
-                orderType = OrderType.LIMIT,
+                entryType = EntryType.LIMIT,
                 side = Side.BUY,
                 price = Price(15),
                 size = 10,
@@ -47,7 +47,7 @@ object ValidatePlaceOrderCommandTest : Spek({
                 expectThat(event.requestId).isEqualTo(command.requestId)
                 expectThat(event.whoRequested).isEqualTo(command.whoRequested)
                 expectThat(event.bookId).isEqualTo(command.bookId)
-                expectThat(event.orderType).isEqualTo(command.orderType)
+                expectThat(event.entryType).isEqualTo(command.entryType)
                 expectThat(event.side).isEqualTo(command.side)
                 expectThat(event.price).isEqualTo(command.price)
                 expectThat(event.size.availableSize).isEqualTo(command.size)

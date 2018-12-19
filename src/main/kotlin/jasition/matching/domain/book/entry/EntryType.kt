@@ -1,5 +1,5 @@
 package jasition.matching.domain.book.entry
 
-enum class OrderType {
+enum class EntryType {
     LIMIT
 }

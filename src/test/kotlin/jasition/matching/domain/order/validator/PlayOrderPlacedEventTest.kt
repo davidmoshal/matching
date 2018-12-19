@@ -24,7 +24,7 @@ object PlayOrderPlacedEventTest : Spek({
                 requestId = ClientRequestId(current = "req1"),
                 whoRequested = Client(firmId = "firm1", firmClientId = "client1"),
                 bookId = BookId("book"),
-                orderType = OrderType.LIMIT,
+                entryType = EntryType.LIMIT,
                 side = Side.BUY,
                 price = Price(15),
                 timeInForce = TimeInForce.GOOD_TILL_CANCEL,
@@ -46,7 +46,7 @@ object PlayOrderPlacedEventTest : Spek({
                 expectThat(results.b.buyLimitBook.entries.values().get(0).key.price).isEqualTo(event.price)
                 expectThat(results.b.buyLimitBook.entries.values().get(0).key.whenSubmitted).isEqualTo(event.whenHappened)
                 expectThat(results.b.buyLimitBook.entries.values().get(0).key.eventId).isEqualTo(event.eventId)
-                expectThat(results.b.buyLimitBook.entries.values().get(0).orderType).isEqualTo(event.orderType)
+                expectThat(results.b.buyLimitBook.entries.values().get(0).entryType).isEqualTo(event.entryType)
                 expectThat(results.b.buyLimitBook.entries.values().get(0).side).isEqualTo(event.side)
                 expectThat(results.b.buyLimitBook.entries.values().get(0).size).isEqualTo(event.size)
                 expectThat(results.b.buyLimitBook.entries.values().get(0).timeInForce).isEqualTo(event.timeInForce)
