@@ -1,18 +1,19 @@
-package jasition.matching.domain.book
+package jasition.matching.domain.book.entry
 
 import jasition.matching.domain.EventId
-import jasition.matching.domain.order.*
+import jasition.matching.domain.client.Client
+import jasition.matching.domain.client.ClientRequestId
 import java.time.Instant
 
 data class BookEntry(
     val key: BookEntryKey,
-    val clientEntryId: ClientEntryId,
+    val clientRequestId: ClientRequestId,
     val client: Client,
     val orderType: OrderType,
     val side: Side,
     val timeInForce: TimeInForce,
-    val size: OrderQuantity,
-    val status: OrderStatus
+    val size: EntryQuantity,
+    val status: EntryStatus
 )
 
 data class BookEntryKey(
@@ -21,8 +22,3 @@ data class BookEntryKey(
     val eventId: EventId
 )
 
-data class ClientEntryId(
-    val requestId: String,
-    val originalRequestId: String? = null,
-    val listId: String? = null
-)

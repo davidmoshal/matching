@@ -3,21 +3,21 @@ package jasition.matching.domain.order.event
 import arrow.core.Tuple2
 import jasition.matching.domain.Event
 import jasition.matching.domain.EventId
-import jasition.matching.domain.book.BookEntry
-import jasition.matching.domain.book.BookEntryKey
+import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
-import jasition.matching.domain.book.ClientEntryId
-import jasition.matching.domain.order.*
+import jasition.matching.domain.book.entry.*
+import jasition.matching.domain.client.Client
+import jasition.matching.domain.client.ClientRequestId
 import java.time.Instant
 
 data class OrderPlacedEvent(
     val eventId: EventId,
-    val requestId: String,
+    val requestId: ClientRequestId,
     val whoRequested: Client,
-    val bookId: String,
+    val bookId: BookId,
     val orderType: OrderType,
     val side: Side,
-    val size: OrderQuantity,
+    val size: EntryQuantity,
     val price: Price?,
     val timeInForce: TimeInForce,
     val whenHappened: Instant
@@ -30,15 +30,13 @@ fun convertOrderPlacedEventToBookEntry(event: OrderPlacedEvent): BookEntry {
             whenSubmitted = event.whenHappened,
             eventId = event.eventId
         ),
-        clientEntryId = ClientEntryId(
-            requestId = event.requestId
-        ),
+        clientRequestId = event.requestId,
         client = event.whoRequested,
         orderType = event.orderType,
         side = event.side,
         timeInForce = event.timeInForce,
         size = event.size,
-        status = OrderStatus.NEW
+        status = EntryStatus.NEW
     )
 }
 

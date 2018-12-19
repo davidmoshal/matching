@@ -3,7 +3,9 @@ package jasition.matching.domain.order.validator
 import jasition.matching.domain.EventId
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
-import jasition.matching.domain.order.*
+import jasition.matching.domain.book.entry.*
+import jasition.matching.domain.client.Client
+import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.order.event.OrderPlacedEvent
 import jasition.matching.domain.order.event.playOrderPlacedEvent
 import org.jetbrains.spek.api.Spek
@@ -19,16 +21,16 @@ object PlayOrderPlacedEventTest : Spek({
         var books = Books(BookId(bookId = "book"))
         on("a BUY Limit GTC Order is placed") {
             var event = OrderPlacedEvent(
-                requestId = "req1",
+                requestId = ClientRequestId(current = "req1"),
                 whoRequested = Client(firmId = "firm1", firmClientId = "client1"),
-                bookId = "book",
+                bookId = BookId("book"),
                 orderType = OrderType.LIMIT,
                 side = Side.BUY,
                 price = Price(15),
                 timeInForce = TimeInForce.GOOD_TILL_CANCEL,
                 whenHappened = Instant.now(),
                 eventId = EventId(1),
-                size = OrderQuantity(
+                size = EntryQuantity(
                     availableSize = 10,
                     tradedSize = 0,
                     cancelledSize = 0
@@ -39,7 +41,7 @@ object PlayOrderPlacedEventTest : Spek({
 
             it("should contain the order") {
                 expectThat(results.b.buyLimitBook.entries.size()).isEqualTo(1)
-                expectThat(results.b.buyLimitBook.entries.values().get(0).clientEntryId.requestId).isEqualTo(event.requestId)
+                expectThat(results.b.buyLimitBook.entries.values().get(0).clientRequestId).isEqualTo(event.requestId)
                 expectThat(results.b.buyLimitBook.entries.values().get(0).client).isEqualTo(event.whoRequested)
                 expectThat(results.b.buyLimitBook.entries.values().get(0).key.price).isEqualTo(event.price)
                 expectThat(results.b.buyLimitBook.entries.values().get(0).key.whenSubmitted).isEqualTo(event.whenHappened)
@@ -48,7 +50,7 @@ object PlayOrderPlacedEventTest : Spek({
                 expectThat(results.b.buyLimitBook.entries.values().get(0).side).isEqualTo(event.side)
                 expectThat(results.b.buyLimitBook.entries.values().get(0).size).isEqualTo(event.size)
                 expectThat(results.b.buyLimitBook.entries.values().get(0).timeInForce).isEqualTo(event.timeInForce)
-                expectThat(results.b.buyLimitBook.entries.values().get(0).status).isEqualTo(OrderStatus.NEW)
+                expectThat(results.b.buyLimitBook.entries.values().get(0).status).isEqualTo(EntryStatus.NEW)
             }
         }
     }

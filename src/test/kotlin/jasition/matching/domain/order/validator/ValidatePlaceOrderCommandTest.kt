@@ -3,7 +3,12 @@ package jasition.matching.domain.order.validator
 import arrow.core.getOrHandle
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
-import jasition.matching.domain.order.*
+import jasition.matching.domain.book.entry.OrderType
+import jasition.matching.domain.book.entry.Price
+import jasition.matching.domain.book.entry.Side
+import jasition.matching.domain.book.entry.TimeInForce
+import jasition.matching.domain.client.Client
+import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.order.command.PlaceOrderCommand
 import jasition.matching.domain.order.command.validatePlaceOrderCommand
 import org.jetbrains.spek.api.Spek
@@ -21,9 +26,9 @@ object ValidatePlaceOrderCommandTest : Spek({
         var books = Books(BookId(bookId = "book"))
         on("Submit a Limit Good-till-date Order") {
             var command = PlaceOrderCommand(
-                requestId = "req1",
+                requestId = ClientRequestId(current = "req1"),
                 whoRequested = Client(firmId = "firm1", firmClientId = "client1"),
-                bookId = "book",
+                bookId = BookId("book"),
                 orderType = OrderType.LIMIT,
                 side = Side.BUY,
                 price = Price(15),

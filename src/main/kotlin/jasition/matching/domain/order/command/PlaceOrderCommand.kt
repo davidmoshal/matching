@@ -2,16 +2,19 @@ package jasition.matching.domain.order.command
 
 import arrow.core.Either
 import jasition.matching.domain.Command
+import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
-import jasition.matching.domain.order.*
+import jasition.matching.domain.book.entry.*
+import jasition.matching.domain.client.Client
+import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.order.event.OrderPlacedEvent
 import jasition.matching.domain.order.event.OrderRejectedEvent
 import java.time.Instant
 
 data class PlaceOrderCommand(
-    val requestId: String,
+    val requestId: ClientRequestId,
     val whoRequested: Client,
-    val bookId: String,
+    val bookId: BookId,
     val orderType: OrderType,
     val side: Side,
     val size: Int,
@@ -34,7 +37,7 @@ fun validatePlaceOrderCommand(
             bookId = command.bookId,
             orderType = command.orderType,
             side = command.side,
-            size = OrderQuantity(
+            size = EntryQuantity(
                 availableSize = command.size,
                 tradedSize = 0,
                 cancelledSize = 0

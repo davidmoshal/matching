@@ -1,4 +1,4 @@
-package jasition.matching.domain.order
+package jasition.matching.domain.book.entry
 
 /**
  * The data class that models price. Long is used as we assume the value is normalised with a decimal place

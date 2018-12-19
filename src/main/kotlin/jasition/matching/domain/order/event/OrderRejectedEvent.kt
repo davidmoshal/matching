@@ -1,10 +1,10 @@
 package jasition.matching.domain.order.event
 
 import jasition.matching.domain.Event
-import jasition.matching.domain.order.Client
-import jasition.matching.domain.order.OrderType
-import jasition.matching.domain.order.Side
-import jasition.matching.domain.order.TimeInForce
+import jasition.matching.domain.book.entry.OrderType
+import jasition.matching.domain.book.entry.Side
+import jasition.matching.domain.book.entry.TimeInForce
+import jasition.matching.domain.client.Client
 import java.time.Instant
 
 data class OrderRejectedEvent(
