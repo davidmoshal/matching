@@ -1,6 +1,7 @@
 package jasition.matching.domain.order.validator
 
 import arrow.core.getOrHandle
+import io.kotlintest.shouldBe
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.EntryType
@@ -15,10 +16,6 @@ import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
-import strikt.api.expectThat
-import strikt.assertions.isEqualTo
-import strikt.assertions.isGreaterThanOrEqualTo
-import strikt.assertions.isTrue
 import java.time.Instant
 
 object ValidatePlaceOrderCommandTest : Spek({
@@ -37,24 +34,24 @@ object ValidatePlaceOrderCommandTest : Spek({
                 whenRequested = Instant.now()
             )
 
-            var event = validatePlaceOrderCommand(command = command, books = books)
+            var result = validatePlaceOrderCommand(command = command, books = books)
 
             it("should place the order on the book") {
-                expectThat(event.isRight()).isTrue()
+                result.isRight() shouldBe true
 
-                val event = event.getOrHandle { (d) -> throw IllegalArgumentException(d) }
+                val event = result.getOrHandle { (d) -> throw IllegalArgumentException(d) }
 
-                expectThat(event.requestId).isEqualTo(command.requestId)
-                expectThat(event.whoRequested).isEqualTo(command.whoRequested)
-                expectThat(event.bookId).isEqualTo(command.bookId)
-                expectThat(event.entryType).isEqualTo(command.entryType)
-                expectThat(event.side).isEqualTo(command.side)
-                expectThat(event.price).isEqualTo(command.price)
-                expectThat(event.size.availableSize).isEqualTo(command.size)
-                expectThat(event.size.tradedSize).isEqualTo(0)
-                expectThat(event.size.cancelledSize).isEqualTo(0)
-                expectThat(event.timeInForce).isEqualTo(command.timeInForce)
-                expectThat(event.whenHappened).isGreaterThanOrEqualTo(command.whenRequested)
+                event.requestId shouldBe command.requestId
+                event.whoRequested shouldBe command.whoRequested
+                event.bookId shouldBe command.bookId
+                event.entryType shouldBe command.entryType
+                event.side shouldBe command.side
+                event.price shouldBe command.price
+                event.size.availableSize shouldBe command.size
+                event.size.tradedSize shouldBe 0
+                event.size.cancelledSize shouldBe 0
+                event.timeInForce shouldBe command.timeInForce
+                (event.whenHappened >= command.whenRequested) shouldBe true
             }
         }
     }
