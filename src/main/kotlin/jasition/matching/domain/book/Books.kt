@@ -46,8 +46,8 @@ data class Books(
     }
 
     private fun verifyEventId(eventId: EventId) {
-        if (lastEventId >= eventId) {
-            throw IllegalArgumentException("Incoming Entry has a lower event ID. lastEventId=$lastEventId, incomingEventId=${eventId}")
+        if (!eventId.isNextOf(lastEventId)) {
+            throw IllegalArgumentException("Incoming Entry is not the next expected event ID. lastEventId=$lastEventId, incomingEventId=${eventId}")
         }
     }
 }

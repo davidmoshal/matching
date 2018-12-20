@@ -17,6 +17,9 @@ data class EventId(val value: Long) : Comparable<EventId> {
 
     fun next(): EventId = EventId(nextSequenceNumber(value))
 
+    fun isNextOf(other: EventId) : Boolean =
+        if (value == 0L && other.value == Long.MAX_VALUE) true else (value == other.value + 1)
+
     private fun nextSequenceNumber(current: Long): Long =
         if (current == Long.MAX_VALUE) 0 else current + 1
 
