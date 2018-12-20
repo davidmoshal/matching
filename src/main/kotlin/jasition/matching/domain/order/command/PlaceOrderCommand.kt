@@ -4,10 +4,12 @@ import arrow.core.Either
 import jasition.matching.domain.Command
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
+import jasition.matching.domain.book.TradingStatus
 import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.order.event.OrderPlacedEvent
+import jasition.matching.domain.order.event.OrderRejectReason
 import jasition.matching.domain.order.event.OrderRejectedEvent
 import java.time.Instant
 
@@ -21,7 +23,58 @@ data class PlaceOrderCommand(
     val price: Price?,
     val timeInForce: TimeInForce,
     val whenRequested: Instant
-) : Command
+) : Command {
+
+    fun toPlacedEvent(
+        books: Books,
+        currentTime: Instant = Instant.now()
+    ): OrderPlacedEvent {
+
+        return OrderPlacedEvent(
+            eventId = books.lastEventId.next(),
+            requestId = requestId,
+            whoRequested = whoRequested,
+            bookId = bookId,
+            entryType = entryType,
+            side = side,
+            size = EntryQuantity(
+                availableSize = size,
+                tradedSize = 0,
+                cancelledSize = 0
+            ),
+            price = price,
+            timeInForce = timeInForce,
+            whenHappened = currentTime
+        )
+    }
+
+    fun toRejectedEvent(
+        books: Books,
+        currentTime: Instant = Instant.now(),
+        rejectReason: OrderRejectReason = OrderRejectReason.OTHER,
+        rejectText: String?
+    ): OrderRejectedEvent {
+
+        return OrderRejectedEvent(
+            eventId = books.lastEventId.next(),
+            requestId = requestId,
+            whoRequested = whoRequested,
+            bookId = bookId,
+            entryType = entryType,
+            side = side,
+            size = EntryQuantity(
+                availableSize = size,
+                tradedSize = 0,
+                cancelledSize = 0
+            ),
+            price = price,
+            timeInForce = timeInForce,
+            whenHappened = currentTime,
+            rejectReason = rejectReason,
+            rejectText = rejectText
+        )
+    }
+}
 
 fun validatePlaceOrderCommand(
     command: PlaceOrderCommand,
@@ -29,22 +82,28 @@ fun validatePlaceOrderCommand(
     currentTime: Instant = Instant.now()
 ): Either<OrderRejectedEvent, OrderPlacedEvent> {
 
-    return Either.right(
-        OrderPlacedEvent(
-            eventId = books.lastEventId.next(),
-            requestId = command.requestId,
-            whoRequested = command.whoRequested,
-            bookId = command.bookId,
-            entryType = command.entryType,
-            side = command.side,
-            size = EntryQuantity(
-                availableSize = command.size,
-                tradedSize = 0,
-                cancelledSize = 0
-            ),
-            price = command.price,
-            timeInForce = command.timeInForce,
-            whenHappened = currentTime
+    if (command.size <= 0) {
+        return Either.left(
+            command.toRejectedEvent(
+                books = books,
+                currentTime = currentTime,
+                rejectReason = OrderRejectReason.INCORRECT_QUANTITY,
+                rejectText = "Order size must be positive : ${command.size}"
+            )
         )
-    )
+    }
+
+    if (TradingStatus.OPEN_FOR_TRADING != books.tradingStatuses.effectiveStatus()) {
+        return Either.left(
+            command.toRejectedEvent(
+                books = books,
+                currentTime = currentTime,
+                rejectReason = OrderRejectReason.EXCHANGE_CLOSED,
+                rejectText = "The Book is current not open for trading : ${books.tradingStatuses.effectiveStatus()}"
+            )
+        )
+    }
+
+    return Either.right(command.toPlacedEvent(books = books, currentTime = currentTime))
+
 }

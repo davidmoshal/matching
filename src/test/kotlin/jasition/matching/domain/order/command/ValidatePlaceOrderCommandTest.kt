@@ -39,7 +39,7 @@ object ValidatePlaceOrderCommandTest : Spek({
             it("should place the order on the book") {
                 result.isRight() shouldBe true
 
-                val event = result.getOrHandle { (d) -> throw IllegalArgumentException(d) }
+                val event = result.getOrHandle { (d) -> throw IllegalArgumentException() }
 
                 event.requestId shouldBe command.requestId
                 event.whoRequested shouldBe command.whoRequested

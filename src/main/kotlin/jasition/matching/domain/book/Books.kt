@@ -13,16 +13,14 @@ data class Books(
     val buyLimitBook: LimitBook = LimitBook(false),
     val sellLimitBook: LimitBook = LimitBook(true),
     val businessDate: LocalDate = LocalDate.now(),
-    val tradingStatuses: TradingStatuses = TradingStatuses(default = TradingStatus.OPEN_FOR_TRADING),
+    val tradingStatuses: TradingStatuses = TradingStatuses(TradingStatus.OPEN_FOR_TRADING),
     val lastEventId: EventId = EventId(0)
 ) : Aggregate {
 
     fun addBookEntry(
         entry: BookEntry
     ): Books {
-        if (lastEventId >= entry.key.eventId) {
-            throw IllegalArgumentException("Incoming Entry has a lower event ID. lastEventId=$lastEventId, incomingEventId=${entry.key.eventId}")
-        }
+        verifyEventId(entry.key.eventId)
 
         return Books(
             bookId = bookId,
@@ -32,6 +30,25 @@ data class Books(
             tradingStatuses = tradingStatuses,
             lastEventId = entry.key.eventId
         )
+    }
+
+    operator fun plus(eventId: EventId): Books {
+        verifyEventId(eventId)
+
+        return Books(
+            bookId = bookId,
+            buyLimitBook = buyLimitBook,
+            sellLimitBook = sellLimitBook,
+            businessDate = businessDate,
+            tradingStatuses = tradingStatuses,
+            lastEventId = eventId
+        )
+    }
+
+    private fun verifyEventId(eventId: EventId) {
+        if (lastEventId >= eventId) {
+            throw IllegalArgumentException("Incoming Entry has a lower event ID. lastEventId=$lastEventId, incomingEventId=${eventId}")
+        }
     }
 }
 
