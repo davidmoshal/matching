@@ -2,8 +2,8 @@ package jasition.matching.domain.book.entry
 
 data class EntryQuantity(
     val availableSize: Int,
-    val tradedSize: Int,
-    val cancelledSize: Int
+    val tradedSize: Int = 0,
+    val cancelledSize: Int = 0
 ) {
     init {
         if (availableSize < 0 || tradedSize < 0 || cancelledSize < 0) {

@@ -21,25 +21,26 @@ data class OrderPlacedEvent(
     val price: Price?,
     val timeInForce: TimeInForce,
     val whenHappened: Instant
-) : Event
+) : Event {
 
-fun convertOrderPlacedEventToBookEntry(event: OrderPlacedEvent): BookEntry {
-    return BookEntry(
-        key = BookEntryKey(
-            price = event.price,
-            whenSubmitted = event.whenHappened,
-            eventId = event.eventId
-        ),
-        clientRequestId = event.requestId,
-        client = event.whoRequested,
-        entryType = event.entryType,
-        side = event.side,
-        timeInForce = event.timeInForce,
-        size = event.size,
-        status = EntryStatus.NEW
-    )
+    fun toBookEntry(): BookEntry {
+        return BookEntry(
+            key = BookEntryKey(
+                price = price,
+                whenSubmitted = whenHappened,
+                eventId = eventId
+            ),
+            clientRequestId = requestId,
+            client = whoRequested,
+            entryType = entryType,
+            side = side,
+            timeInForce = timeInForce,
+            size = size,
+            status = EntryStatus.NEW
+        )
+    }
 }
 
 fun playOrderPlacedEvent(event: OrderPlacedEvent, books: Books): Tuple2<List<Event>, Books> {
-    return Tuple2(emptyList(), books.addBookEntry(convertOrderPlacedEventToBookEntry(event)))
+    return Tuple2(emptyList(), books.addBookEntry(event.toBookEntry()))
 }

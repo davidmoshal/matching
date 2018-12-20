@@ -1,4 +1,4 @@
-package jasition.matching.domain.order.validator
+package jasition.matching.domain.order.command
 
 import arrow.core.getOrHandle
 import io.kotlintest.shouldBe
@@ -20,9 +20,9 @@ import java.time.Instant
 
 object ValidatePlaceOrderCommandTest : Spek({
     given("The book is empty") {
-        var books = Books(BookId(bookId = "book"))
+        val books = Books(BookId(bookId = "book"))
         on("Submit a Limit Good-till-date Order") {
-            var command = PlaceOrderCommand(
+            val command = PlaceOrderCommand(
                 requestId = ClientRequestId(current = "req1"),
                 whoRequested = Client(firmId = "firm1", firmClientId = "client1"),
                 bookId = BookId("book"),
@@ -34,7 +34,7 @@ object ValidatePlaceOrderCommandTest : Spek({
                 whenRequested = Instant.now()
             )
 
-            var result = validatePlaceOrderCommand(command = command, books = books)
+            val result = validatePlaceOrderCommand(command = command, books = books)
 
             it("should place the order on the book") {
                 result.isRight() shouldBe true

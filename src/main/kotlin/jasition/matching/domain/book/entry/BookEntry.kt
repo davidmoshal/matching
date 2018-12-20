@@ -13,7 +13,7 @@ data class BookEntry(
     val side: Side,
     val timeInForce: TimeInForce,
     val size: EntryQuantity,
-    val status: EntryStatus
+    val status: EntryStatus = EntryStatus.NEW
 )
 
 data class BookEntryKey(
