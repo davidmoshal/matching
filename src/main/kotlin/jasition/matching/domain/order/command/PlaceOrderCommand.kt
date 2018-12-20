@@ -28,52 +28,46 @@ data class PlaceOrderCommand(
     fun toPlacedEvent(
         books: Books,
         currentTime: Instant = Instant.now()
-    ): OrderPlacedEvent {
-
-        return OrderPlacedEvent(
-            eventId = books.lastEventId.next(),
-            requestId = requestId,
-            whoRequested = whoRequested,
-            bookId = bookId,
-            entryType = entryType,
-            side = side,
-            size = EntryQuantity(
-                availableSize = size,
-                tradedSize = 0,
-                cancelledSize = 0
-            ),
-            price = price,
-            timeInForce = timeInForce,
-            whenHappened = currentTime
-        )
-    }
+    ): OrderPlacedEvent = OrderPlacedEvent(
+        eventId = books.lastEventId.next(),
+        requestId = requestId,
+        whoRequested = whoRequested,
+        bookId = bookId,
+        entryType = entryType,
+        side = side,
+        size = EntryQuantity(
+            availableSize = size,
+            tradedSize = 0,
+            cancelledSize = 0
+        ),
+        price = price,
+        timeInForce = timeInForce,
+        whenHappened = currentTime
+    )
 
     fun toRejectedEvent(
         books: Books,
         currentTime: Instant = Instant.now(),
         rejectReason: OrderRejectReason = OrderRejectReason.OTHER,
         rejectText: String?
-    ): OrderRejectedEvent {
-
-        return OrderRejectedEvent(
-            eventId = books.lastEventId.next(),
-            requestId = requestId,
-            whoRequested = whoRequested,
-            bookId = bookId,
-            entryType = entryType,
-            side = side,
-            size = EntryQuantity(
-                availableSize = size,
-                tradedSize = 0,
-                cancelledSize = 0
-            ),
-            price = price,
-            timeInForce = timeInForce,
-            whenHappened = currentTime,
-            rejectReason = rejectReason,
-            rejectText = rejectText
-        )
-    }
+    ): OrderRejectedEvent = OrderRejectedEvent(
+        eventId = books.lastEventId.next(),
+        requestId = requestId,
+        whoRequested = whoRequested,
+        bookId = bookId,
+        entryType = entryType,
+        side = side,
+        size = EntryQuantity(
+            availableSize = size,
+            tradedSize = 0,
+            cancelledSize = 0
+        ),
+        price = price,
+        timeInForce = timeInForce,
+        whenHappened = currentTime,
+        rejectReason = rejectReason,
+        rejectText = rejectText
+    )
 }
 
 fun validatePlaceOrderCommand(

@@ -37,6 +37,5 @@ enum class OrderRejectReason {
     OTHER
 }
 
-fun playOrderRejectedEvent(event: OrderRejectedEvent, books: Books): Tuple2<List<Event>, Books> {
-    return Tuple2(emptyList(), books + event.eventId)
-}
+fun playOrderRejectedEvent(event: OrderRejectedEvent, books: Books): Tuple2<List<Event>, Books> =
+    Tuple2(emptyList(), books + event.eventId)

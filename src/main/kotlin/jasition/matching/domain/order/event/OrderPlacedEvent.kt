@@ -23,8 +23,7 @@ data class OrderPlacedEvent(
     val whenHappened: Instant
 ) : Event {
 
-    fun toBookEntry(): BookEntry {
-        return BookEntry(
+    fun toBookEntry(): BookEntry = BookEntry(
             key = BookEntryKey(
                 price = price,
                 whenSubmitted = whenHappened,
@@ -38,7 +37,6 @@ data class OrderPlacedEvent(
             size = size,
             status = EntryStatus.NEW
         )
-    }
 }
 
 fun playOrderPlacedEvent(event: OrderPlacedEvent, books: Books): Tuple2<List<Event>, Books> {
