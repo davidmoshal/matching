@@ -34,10 +34,10 @@ object OrderPlacedScenariosTest : Spek({
                 val results = play(event, books)
 
                 it("should contain the order") {
-                    results.b.buyLimitBook.entries.size() shouldBe 1
-                    results.b.sellLimitBook.entries.size() shouldBe 0
+                    results.aggregate.buyLimitBook.entries.size() shouldBe 1
+                    results.aggregate.sellLimitBook.entries.size() shouldBe 0
 
-                    val entry = results.b.buyLimitBook.entries.values().get(0)
+                    val entry = results.aggregate.buyLimitBook.entries.values().get(0)
 
                     assertEntry(
                         entry = entry,
@@ -65,10 +65,10 @@ object OrderPlacedScenariosTest : Spek({
                 val result = play(event, books)
 
                 it("should contain the order") {
-                    result.b.buyLimitBook.entries.size() shouldBe 0
-                    result.b.sellLimitBook.entries.size() shouldBe 1
+                    result.aggregate.buyLimitBook.entries.size() shouldBe 0
+                    result.aggregate.sellLimitBook.entries.size() shouldBe 1
 
-                    val entry = result.b.sellLimitBook.entries.values().get(0)
+                    val entry = result.aggregate.sellLimitBook.entries.values().get(0)
 
                     assertEntry(
                         entry = entry,
@@ -98,10 +98,7 @@ object OrderPlacedScenariosTest : Spek({
                 size = EntryQuantity(4),
                 status = EntryStatus.NEW
             )
-            val books = Books(BookId("book"))
-                .addBookEntry(
-                    existingEntry
-                )
+            val books = Books(BookId("book")).addBookEntry(existingEntry).aggregate
             on("a BUY Limit GTC Order 5@11 is placed") {
                 val event = OrderPlacedEvent(
                     requestId = ClientRequestId("req1"),
@@ -119,18 +116,18 @@ object OrderPlacedScenariosTest : Spek({
                     val results = play(event, books)
 
                     it("should contain the order") {
-                        results.b.buyLimitBook.entries.size() shouldBe 2
-                        results.b.sellLimitBook.entries.size() shouldBe 0
+                        results.aggregate.buyLimitBook.entries.size() shouldBe 2
+                        results.aggregate.sellLimitBook.entries.size() shouldBe 0
 
                         assertEntry(
-                            entry = results.b.buyLimitBook.entries.values().get(0),
+                            entry = results.aggregate.buyLimitBook.entries.values().get(0),
                             clientRequestId = event.requestId,
                             availableSize = event.size.availableSize,
                             price = event.price,
                             client = event.whoRequested
                         )
                         assertEntry(
-                            entry = results.b.buyLimitBook.entries.values().get(1),
+                            entry = results.aggregate.buyLimitBook.entries.values().get(1),
                             clientRequestId = existingEntry.clientRequestId,
                             availableSize = existingEntry.size.availableSize,
                             price = existingEntry.key.price,
@@ -156,18 +153,18 @@ object OrderPlacedScenariosTest : Spek({
                     val results = play(event, books)
 
                     it("should contain the order") {
-                        results.b.buyLimitBook.entries.size() shouldBe 2
-                        results.b.sellLimitBook.entries.size() shouldBe 0
+                        results.aggregate.buyLimitBook.entries.size() shouldBe 2
+                        results.aggregate.sellLimitBook.entries.size() shouldBe 0
 
                         assertEntry(
-                            entry = results.b.buyLimitBook.entries.values().get(0),
+                            entry = results.aggregate.buyLimitBook.entries.values().get(0),
                             clientRequestId = existingEntry.clientRequestId,
                             availableSize = existingEntry.size.availableSize,
                             price = existingEntry.key.price,
                             client = existingEntry.client
                         )
                         assertEntry(
-                            entry = results.b.buyLimitBook.entries.values().get(1),
+                            entry = results.aggregate.buyLimitBook.entries.values().get(1),
                             clientRequestId = event.requestId,
                             availableSize = event.size.availableSize,
                             price = event.price,
@@ -193,18 +190,18 @@ object OrderPlacedScenariosTest : Spek({
                     val results = play(event, books)
 
                     it("should contain the order") {
-                        results.b.buyLimitBook.entries.size() shouldBe 2
-                        results.b.sellLimitBook.entries.size() shouldBe 0
+                        results.aggregate.buyLimitBook.entries.size() shouldBe 2
+                        results.aggregate.sellLimitBook.entries.size() shouldBe 0
 
                         assertEntry(
-                            entry = results.b.buyLimitBook.entries.values().get(0),
+                            entry = results.aggregate.buyLimitBook.entries.values().get(0),
                             clientRequestId = existingEntry.clientRequestId,
                             availableSize = existingEntry.size.availableSize,
                             price = existingEntry.key.price,
                             client = existingEntry.client
                         )
                         assertEntry(
-                            entry = results.b.buyLimitBook.entries.values().get(1),
+                            entry = results.aggregate.buyLimitBook.entries.values().get(1),
                             clientRequestId = event.requestId,
                             availableSize = event.size.availableSize,
                             price = event.price,
@@ -233,10 +230,7 @@ object OrderPlacedScenariosTest : Spek({
                 size = EntryQuantity(4),
                 status = EntryStatus.NEW
             )
-            val books = Books(BookId("book"))
-                .addBookEntry(
-                    existingEntry
-                )
+            val books = Books(BookId("book")).addBookEntry(existingEntry).aggregate
             on("a SELL Limit GTC Order 5@11 is placed") {
                 val event = OrderPlacedEvent(
                     requestId = ClientRequestId("req1"),
@@ -254,18 +248,18 @@ object OrderPlacedScenariosTest : Spek({
                     val results = play(event, books)
 
                     it("should contain the order") {
-                        results.b.buyLimitBook.entries.size() shouldBe 0
-                        results.b.sellLimitBook.entries.size() shouldBe 2
+                        results.aggregate.buyLimitBook.entries.size() shouldBe 0
+                        results.aggregate.sellLimitBook.entries.size() shouldBe 2
 
                         assertEntry(
-                            entry = results.b.buyLimitBook.entries.values().get(0),
+                            entry = results.aggregate.buyLimitBook.entries.values().get(0),
                             clientRequestId = existingEntry.clientRequestId,
                             availableSize = existingEntry.size.availableSize,
                             price = existingEntry.key.price,
                             client = existingEntry.client
                         )
                         assertEntry(
-                            entry = results.b.buyLimitBook.entries.values().get(1),
+                            entry = results.aggregate.buyLimitBook.entries.values().get(1),
                             clientRequestId = event.requestId,
                             availableSize = event.size.availableSize,
                             price = event.price,
@@ -291,18 +285,18 @@ object OrderPlacedScenariosTest : Spek({
                     val results = play(event, books)
 
                     it("should contain the order") {
-                        results.b.buyLimitBook.entries.size() shouldBe 0
-                        results.b.sellLimitBook.entries.size() shouldBe 2
+                        results.aggregate.buyLimitBook.entries.size() shouldBe 0
+                        results.aggregate.sellLimitBook.entries.size() shouldBe 2
 
                         assertEntry(
-                            entry = results.b.buyLimitBook.entries.values().get(0),
+                            entry = results.aggregate.buyLimitBook.entries.values().get(0),
                             clientRequestId = existingEntry.clientRequestId,
                             availableSize = existingEntry.size.availableSize,
                             price = existingEntry.key.price,
                             client = existingEntry.client
                         )
                         assertEntry(
-                            entry = results.b.buyLimitBook.entries.values().get(1),
+                            entry = results.aggregate.buyLimitBook.entries.values().get(1),
                             clientRequestId = event.requestId,
                             availableSize = event.size.availableSize,
                             price = event.price,
@@ -328,18 +322,18 @@ object OrderPlacedScenariosTest : Spek({
                     val results = play(event, books)
 
                     it("should contain the order") {
-                        results.b.buyLimitBook.entries.size() shouldBe 0
-                        results.b.sellLimitBook.entries.size() shouldBe 2
+                        results.aggregate.buyLimitBook.entries.size() shouldBe 0
+                        results.aggregate.sellLimitBook.entries.size() shouldBe 2
 
                         assertEntry(
-                            entry = results.b.buyLimitBook.entries.values().get(0),
+                            entry = results.aggregate.buyLimitBook.entries.values().get(0),
                             clientRequestId = event.requestId,
                             availableSize = event.size.availableSize,
                             price = event.price,
                             client = event.whoRequested
                         )
                         assertEntry(
-                            entry = results.b.buyLimitBook.entries.values().get(1),
+                            entry = results.aggregate.buyLimitBook.entries.values().get(1),
                             clientRequestId = existingEntry.clientRequestId,
                             availableSize = existingEntry.size.availableSize,
                             price = existingEntry.key.price,

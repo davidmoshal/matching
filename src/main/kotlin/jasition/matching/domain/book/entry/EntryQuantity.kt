@@ -10,4 +10,23 @@ data class EntryQuantity(
             throw IllegalStateException("Order sizes cannot be negative: available=$availableSize, traded=$tradedSize, cancelled=$cancelledSize")
         }
     }
+
+    fun traded(size: Int): EntryQuantity = EntryQuantity(
+        availableSize = availableSize - size,
+        tradedSize = tradedSize + size,
+        cancelledSize = cancelledSize
+    )
+
+    fun amended(newOrderSize: Int): EntryQuantity = EntryQuantity(
+        availableSize = newOrderSize - tradedSize - cancelledSize,
+        tradedSize = tradedSize,
+        cancelledSize = cancelledSize
+    )
+
+    fun cancelled(): EntryQuantity = EntryQuantity(
+        availableSize = 0,
+        tradedSize = tradedSize,
+        cancelledSize = cancelledSize + availableSize
+    )
+
 }

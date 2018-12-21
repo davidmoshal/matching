@@ -1,24 +1,49 @@
 package jasition.matching.domain.book
 
 import io.vavr.collection.TreeMap
+import jasition.matching.domain.EventId
 import jasition.matching.domain.book.entry.BookEntry
 import jasition.matching.domain.book.entry.BookEntryKey
 import jasition.matching.domain.book.entry.Price
+import jasition.matching.domain.book.entry.Side
+import jasition.matching.domain.order.event.TradeSideEntry
 import java.util.Comparator
 
 data class LimitBook(val entries: TreeMap<BookEntryKey, BookEntry>) {
-    constructor(ascending: Boolean) : this(TreeMap.empty(PriceTimeSequenceEntryComparator(ascending)))
+    constructor(side: Side) : this(TreeMap.empty(PriceTimeSequenceEntryComparator(side)))
 
     fun add(entry: BookEntry): LimitBook =
         LimitBook(entries.put(entry.key, entry))
+
+    fun update(entry: TradeSideEntry): LimitBook {
+        val bookEntryKey = entry.toBookEntryKey()
+
+        return LimitBook(
+            if (entry.size.availableSize <= 0)
+                entries.remove(bookEntryKey)
+            else
+                entries.put(
+                    bookEntryKey, BookEntry(
+                        key = bookEntryKey,
+                        clientRequestId = entry.requestId,
+                        client = entry.whoRequested,
+                        entryType = entry.entryType,
+                        side = entry.side,
+                        timeInForce = entry.timeInForce,
+                        size = entry.size,
+                        status = entry.entryStatus
+                    )
+                )
+        )
+    }
 }
 
-class PriceTimeSequenceEntryComparator(ascending: Boolean) :
+class PriceTimeSequenceEntryComparator(val side: Side) :
     Comparator<BookEntryKey> {
 
-    private val multiplier = if (ascending) 1 else -1
-
     override fun compare(o1: BookEntryKey, o2: BookEntryKey): Int {
+        val multiplier = side.comparatorMultipler()
+
         // First Priority : Price
         val samePrice = compare(o1.price, o2.price)
         if (samePrice != 0) {

@@ -33,10 +33,10 @@ object PlayOrderPlacedEventTest : Spek({
             val results = play(event, books)
 
             it("should contain the order") {
-                results.b.buyLimitBook.entries.size() shouldBe 1
-                results.b.sellLimitBook.entries.size() shouldBe 0
+                results.aggregate.buyLimitBook.entries.size() shouldBe 1
+                results.aggregate.sellLimitBook.entries.size() shouldBe 0
 
-                val entry = results.b.buyLimitBook.entries.values().get(0)
+                val entry = results.aggregate.buyLimitBook.entries.values().get(0)
 
                 entry.clientRequestId shouldBe event.requestId
                 entry.client shouldBe event.whoRequested

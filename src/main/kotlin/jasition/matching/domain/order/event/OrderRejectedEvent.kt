@@ -1,8 +1,10 @@
 package jasition.matching.domain.order.event
 
 import arrow.core.Tuple2
+import io.vavr.collection.List
 import jasition.matching.domain.Event
 import jasition.matching.domain.EventId
+import jasition.matching.domain.Transaction
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.*
@@ -37,5 +39,5 @@ enum class OrderRejectReason {
     OTHER
 }
 
-fun playOrderRejectedEvent(event: OrderRejectedEvent, books: Books): Tuple2<List<Event>, Books> =
-    Tuple2(emptyList(), books + event.eventId)
+fun play(event: OrderRejectedEvent, books: Books): Transaction<Books> =
+    Transaction(books + event.eventId)
