@@ -1,4 +1,4 @@
-package jasition.matching.domain.order.event
+package jasition.matching.domain.trade.event
 
 import jasition.matching.domain.Event
 import jasition.matching.domain.EventId

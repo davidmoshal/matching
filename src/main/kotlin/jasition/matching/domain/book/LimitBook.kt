@@ -5,7 +5,7 @@ import jasition.matching.domain.book.entry.BookEntry
 import jasition.matching.domain.book.entry.BookEntryKey
 import jasition.matching.domain.book.entry.Price
 import jasition.matching.domain.book.entry.Side
-import jasition.matching.domain.order.event.TradeSideEntry
+import jasition.matching.domain.trade.event.TradeSideEntry
 import java.util.Comparator
 
 data class LimitBook(val entries: TreeMap<BookEntryKey, BookEntry>) {

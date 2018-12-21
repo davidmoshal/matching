@@ -9,9 +9,9 @@ import jasition.matching.domain.Transaction
 import jasition.matching.domain.book.entry.BookEntry
 import jasition.matching.domain.book.entry.BookEntryKey
 import jasition.matching.domain.book.entry.Side
-import jasition.matching.domain.order.event.TradeEvent
-import jasition.matching.domain.order.event.TradeSideEntry
-import jasition.matching.domain.order.event.play
+import jasition.matching.domain.trade.event.TradeEvent
+import jasition.matching.domain.trade.event.TradeSideEntry
+import jasition.matching.domain.trade.event.play
 import java.lang.Integer.min
 import java.time.LocalDate
 import java.util.function.BiPredicate

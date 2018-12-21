@@ -3,7 +3,7 @@ package jasition.matching.domain.book.entry
 import jasition.matching.domain.EventId
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
-import jasition.matching.domain.order.event.TradeSideEntry
+import jasition.matching.domain.trade.event.TradeSideEntry
 import java.time.Instant
 
 data class BookEntry(
