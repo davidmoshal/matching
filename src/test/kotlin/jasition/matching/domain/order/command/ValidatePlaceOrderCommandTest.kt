@@ -10,8 +10,6 @@ import jasition.matching.domain.book.entry.Side
 import jasition.matching.domain.book.entry.TimeInForce
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
-import jasition.matching.domain.order.command.PlaceOrderCommand
-import jasition.matching.domain.order.command.validatePlaceOrderCommand
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
@@ -34,7 +32,7 @@ object ValidatePlaceOrderCommandTest : Spek({
                 whenRequested = Instant.now()
             )
 
-            val result = validatePlaceOrderCommand(command = command, books = books)
+            val result = validate(command = command, books = books)
 
             it("should place the order on the book") {
                 result.isRight() shouldBe true

@@ -39,6 +39,6 @@ data class OrderPlacedEvent(
         )
 }
 
-fun playOrderPlacedEvent(event: OrderPlacedEvent, books: Books): Tuple2<List<Event>, Books> {
+fun play(event: OrderPlacedEvent, books: Books): Tuple2<List<Event>, Books> {
     return Tuple2(emptyList(), books.addBookEntry(event.toBookEntry()))
 }

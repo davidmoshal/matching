@@ -7,8 +7,6 @@ import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
-import jasition.matching.domain.order.event.OrderPlacedEvent
-import jasition.matching.domain.order.event.playOrderPlacedEvent
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
@@ -32,7 +30,7 @@ object PlayOrderPlacedEventTest : Spek({
                 size = EntryQuantity(10)
             )
 
-            val results = playOrderPlacedEvent(event, books)
+            val results = play(event, books)
 
             it("should contain the order") {
                 results.b.buyLimitBook.entries.size() shouldBe 1
