@@ -2,6 +2,7 @@ package jasition.matching.domain.order.event
 
 import jasition.matching.domain.Event
 import jasition.matching.domain.EventId
+import jasition.matching.domain.EventType
 import jasition.matching.domain.Transaction
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
@@ -23,6 +24,7 @@ data class OrderPlacedEvent(
     val whenHappened: Instant,
     val entryStatus: EntryStatus = EntryStatus.NEW
 ) : Event {
+    override fun type(): EventType = EventType.PRIMARY
 
     fun toBookEntry(): BookEntry = BookEntry(
         key = BookEntryKey(

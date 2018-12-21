@@ -2,6 +2,7 @@ package jasition.matching.domain.order.event
 
 import jasition.matching.domain.Event
 import jasition.matching.domain.EventId
+import jasition.matching.domain.EventType
 import jasition.matching.domain.Transaction
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
@@ -23,7 +24,9 @@ data class OrderRejectedEvent(
     val whenHappened: Instant,
     val rejectReason: OrderRejectReason,
     val rejectText: String?
-) : Event
+) : Event {
+    override fun type(): EventType = EventType.PRIMARY
+}
 
 enum class OrderRejectReason {
     BROKER_EXCHANGE_OPTION,

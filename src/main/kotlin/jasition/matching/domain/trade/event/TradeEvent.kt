@@ -2,6 +2,7 @@ package jasition.matching.domain.trade.event
 
 import jasition.matching.domain.Event
 import jasition.matching.domain.EventId
+import jasition.matching.domain.EventType
 import jasition.matching.domain.Transaction
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
@@ -18,7 +19,9 @@ data class TradeEvent(
     val whenHappened: Instant,
     val aggressor: TradeSideEntry,
     val passive: TradeSideEntry
-) : Event
+) : Event {
+    override fun type(): EventType = EventType.SIDE_EFFECT
+}
 
 data class TradeSideEntry(
     val requestId: ClientRequestId,

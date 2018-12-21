@@ -3,13 +3,28 @@ package jasition.matching.domain
 import io.vavr.collection.List
 import java.util.function.BiFunction
 
+interface Aggregate
+
 interface Command
 
 interface Query
 
-interface Event
+interface Event {
+    fun type() : EventType
+}
 
-interface Aggregate
+enum class EventType {
+    /**
+     * A Primary [Event] is a direct response to a [Command].
+     */
+    PRIMARY,
+
+    /**
+     * An [Event] that is generated when playing another [Event]. During recovery stage, Side-effect [Event]s are not
+     * re-played because they will be re-generated when re-playing the Primary [Event].
+     */
+    SIDE_EFFECT
+}
 
 data class EventId(val value: Long) : Comparable<EventId> {
     init {
