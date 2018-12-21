@@ -1,7 +1,6 @@
 package jasition.matching.domain.book
 
 import io.vavr.collection.TreeMap
-import jasition.matching.domain.EventId
 import jasition.matching.domain.book.entry.BookEntry
 import jasition.matching.domain.book.entry.BookEntryKey
 import jasition.matching.domain.book.entry.Price

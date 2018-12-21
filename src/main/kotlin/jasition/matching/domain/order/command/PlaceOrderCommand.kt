@@ -99,5 +99,4 @@ fun validate(
     }
 
     return Either.right(command.toPlacedEvent(books = books, currentTime = currentTime))
-
 }

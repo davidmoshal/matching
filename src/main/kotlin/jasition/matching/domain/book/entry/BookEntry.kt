@@ -35,6 +35,7 @@ data class BookEntry(
 
     fun traded(tradeSize: Int, tradePrice: Price): BookEntry {
         val newQuantity = size.traded(tradeSize)
+
         return BookEntry(
             key = key,
             clientRequestId = clientRequestId,

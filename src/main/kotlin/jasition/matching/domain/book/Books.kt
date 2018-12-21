@@ -27,20 +27,16 @@ data class Books(
     val lastEventId: EventId = EventId(0)
 ) : Aggregate {
 
-    fun addBookEntry(entry: BookEntry): Transaction<Books> {
-        verifyEventId(entry.key.eventId)
-
-        return Transaction(
-            Books(
-                bookId = bookId,
-                buyLimitBook = if (Side.BUY == entry.side) buyLimitBook.add(entry) else buyLimitBook,
-                sellLimitBook = if (Side.SELL == entry.side) sellLimitBook.add(entry) else sellLimitBook,
-                businessDate = businessDate,
-                tradingStatuses = tradingStatuses,
-                lastEventId = entry.key.eventId
-            )
+    fun addBookEntry(entry: BookEntry): Transaction<Books> = Transaction(
+        Books(
+            bookId = bookId,
+            buyLimitBook = if (Side.BUY == entry.side) buyLimitBook.add(entry) else buyLimitBook,
+            sellLimitBook = if (Side.SELL == entry.side) sellLimitBook.add(entry) else sellLimitBook,
+            businessDate = businessDate,
+            tradingStatuses = tradingStatuses,
+            lastEventId = verifyEventId(entry.key.eventId)
         )
-    }
+    )
 
     fun match(entry: BookEntry): Tuple2<BookEntry, Transaction<Books>> {
         verifyEventId(entry.key.eventId)
@@ -70,8 +66,8 @@ data class Books(
         )
     }
 
-    private fun filterByPrice(entry: BookEntry, book: LimitBook): LimitBook {
-        return LimitBook(book.entries.filter(BiPredicate(function = fun(
+    private fun filterByPrice(entry: BookEntry, book: LimitBook): LimitBook =
+        LimitBook(book.entries.filter(BiPredicate(function = fun(
             otherKey: BookEntryKey,
             otherEntry: BookEntry
         ): Boolean {
@@ -87,7 +83,6 @@ data class Books(
 
             return entry.side.comparatorMultipler() * entry.key.price.value.compareTo(otherKey.price.value) <= 0
         })))
-    }
 
     private fun match(
         aggressor: BookEntry,
@@ -126,22 +121,19 @@ data class Books(
         )
     }
 
-    operator fun plus(eventId: EventId): Books {
-        verifyEventId(eventId)
+    operator fun plus(eventId: EventId): Books = Books(
+        bookId = bookId,
+        buyLimitBook = buyLimitBook,
+        sellLimitBook = sellLimitBook,
+        businessDate = businessDate,
+        tradingStatuses = tradingStatuses,
+        lastEventId = verifyEventId(eventId)
+    )
 
-        return Books(
-            bookId = bookId,
-            buyLimitBook = buyLimitBook,
-            sellLimitBook = sellLimitBook,
-            businessDate = businessDate,
-            tradingStatuses = tradingStatuses,
-            lastEventId = eventId
-        )
-    }
-
-    fun verifyEventId(eventId: EventId) {
+    fun verifyEventId(eventId: EventId): EventId {
         if (!eventId.isNextOf(lastEventId)) {
             throw IllegalArgumentException("Incoming Entry is not the next expected event ID. lastEventId=$lastEventId, incomingEventId=${eventId}")
         }
+        return eventId
     }
 }

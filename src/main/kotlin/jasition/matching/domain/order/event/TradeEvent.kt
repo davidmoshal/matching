@@ -1,7 +1,5 @@
 package jasition.matching.domain.order.event
 
-import arrow.core.Tuple2
-import io.vavr.collection.List
 import jasition.matching.domain.Event
 import jasition.matching.domain.EventId
 import jasition.matching.domain.Transaction
@@ -39,14 +37,9 @@ data class TradeSideEntry(
 
 }
 
-fun play(event: TradeEvent, books: Books): Transaction<Books> {
-    books.verifyEventId(event.eventId)
-
-    val updatedBooks = books
-        .traded(event.aggressor)
+fun play(event: TradeEvent, books: Books): Transaction<Books> = Transaction(
+    books.traded(event.aggressor)
         .traded(event.passive)
-        .plus(event.eventId)
-
-    return Transaction(updatedBooks)
-}
+        .plus(books.verifyEventId(event.eventId))
+)
 

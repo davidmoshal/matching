@@ -1,7 +1,6 @@
 package jasition.matching.domain
 
 import io.vavr.collection.List
-import java.lang.IllegalArgumentException
 import java.util.function.BiFunction
 
 interface Command

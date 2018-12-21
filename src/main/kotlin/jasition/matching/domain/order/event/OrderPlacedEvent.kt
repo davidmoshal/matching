@@ -1,7 +1,5 @@
 package jasition.matching.domain.order.event
 
-import arrow.core.Tuple2
-import io.vavr.collection.List
 import jasition.matching.domain.Event
 import jasition.matching.domain.EventId
 import jasition.matching.domain.Transaction
