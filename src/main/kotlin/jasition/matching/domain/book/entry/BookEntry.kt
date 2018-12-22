@@ -60,7 +60,7 @@ class EarliestSubmittedTimeFirst : Comparator<BookEntryKey> {
 }
 
 class SmallestEventIdFirst : Comparator<BookEntryKey> {
-    override fun compare(o1: BookEntryKey, o2: BookEntryKey): Int = o1.whenSubmitted.compareTo(o2.whenSubmitted)
+    override fun compare(o1: BookEntryKey, o2: BookEntryKey): Int = o1.eventId.compareTo(o2.eventId)
 }
 
 class HighestBuyOrLowestSellPriceFirst(val side: Side) : Comparator<BookEntryKey> {

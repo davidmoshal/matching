@@ -71,7 +71,7 @@ object OrderPlacedOnSameSideScenariosTest : Spek({
                     )
                 }
             }
-            on("a BUY Limit GTC Order 5@10 is placed") {
+            on("a BUY Limit GTC Order 5@10 is placed at a later time") {
                 val event = OrderPlacedEvent(
                     requestId = ClientRequestId("req1"),
                     whoRequested = Client(firmId = "firm1", firmClientId = "client1"),
@@ -80,7 +80,43 @@ object OrderPlacedOnSameSideScenariosTest : Spek({
                     side = Side.BUY,
                     price = Price(10),
                     timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-                    whenHappened = Instant.now(),
+                    whenHappened = Instant.now().plusMillis(1),
+                    eventId = EventId(2),
+                    size = EntryQuantity(5)
+                )
+                it("places the new order below the existing") {
+                    val result = play(event, books)
+
+                    result.aggregate.buyLimitBook.entries.size() shouldBe 2
+                    result.aggregate.sellLimitBook.entries.size() shouldBe 0
+                    result.events.size() shouldBe 0
+
+                    assertEntry(
+                        entry = result.aggregate.buyLimitBook.entries.values().get(0),
+                        clientRequestId = existingEntry.clientRequestId,
+                        availableSize = existingEntry.size.availableSize,
+                        price = existingEntry.key.price,
+                        client = existingEntry.client
+                    )
+                    assertEntry(
+                        entry = result.aggregate.buyLimitBook.entries.values().get(1),
+                        clientRequestId = event.requestId,
+                        availableSize = event.size.availableSize,
+                        price = event.price,
+                        client = event.whoRequested
+                    )
+                }
+            }
+            on("a BUY Limit GTC Order 5@10 is placed at the same instant") {
+                val event = OrderPlacedEvent(
+                    requestId = ClientRequestId("req1"),
+                    whoRequested = Client(firmId = "firm1", firmClientId = "client1"),
+                    bookId = BookId("book"),
+                    entryType = EntryType.LIMIT,
+                    side = Side.BUY,
+                    price = Price(10),
+                    timeInForce = TimeInForce.GOOD_TILL_CANCEL,
+                    whenHappened = existingEntry.key.whenSubmitted,
                     eventId = EventId(2),
                     size = EntryQuantity(5)
                 )
@@ -147,7 +183,6 @@ object OrderPlacedOnSameSideScenariosTest : Spek({
         }
     }
 
-
     describe(": Book Entry Priority : Sell Price ascending then submitted time ascending then Event ID ascending") {
         given("The book has a Sell Limit GTC Order 4@10") {
             val existingEntry = BookEntry(
@@ -203,7 +238,7 @@ object OrderPlacedOnSameSideScenariosTest : Spek({
                     )
                 }
             }
-            on("a SELL Limit GTC Order 5@10 is placed") {
+            on("a SELL Limit GTC Order 5@10 is placed at a later time") {
                 val event = OrderPlacedEvent(
                     requestId = ClientRequestId("req1"),
                     whoRequested = Client(firmId = "firm1", firmClientId = "client1"),
@@ -212,7 +247,43 @@ object OrderPlacedOnSameSideScenariosTest : Spek({
                     side = Side.SELL,
                     price = Price(10),
                     timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-                    whenHappened = Instant.now(),
+                    whenHappened = Instant.now().plusMillis(1),
+                    eventId = EventId(2),
+                    size = EntryQuantity(5)
+                )
+                it("places the new order below the existing") {
+                    val result = play(event, books)
+
+                    result.aggregate.buyLimitBook.entries.size() shouldBe 0
+                    result.aggregate.sellLimitBook.entries.size() shouldBe 2
+                    result.events.size() shouldBe 0
+
+                    assertEntry(
+                        entry = result.aggregate.sellLimitBook.entries.values().get(0),
+                        clientRequestId = existingEntry.clientRequestId,
+                        availableSize = existingEntry.size.availableSize,
+                        price = existingEntry.key.price,
+                        client = existingEntry.client
+                    )
+                    assertEntry(
+                        entry = result.aggregate.sellLimitBook.entries.values().get(1),
+                        clientRequestId = event.requestId,
+                        availableSize = event.size.availableSize,
+                        price = event.price,
+                        client = event.whoRequested
+                    )
+                }
+            }
+            on("a SELL Limit GTC Order 5@10 is placed at the same instant") {
+                val event = OrderPlacedEvent(
+                    requestId = ClientRequestId("req1"),
+                    whoRequested = Client(firmId = "firm1", firmClientId = "client1"),
+                    bookId = BookId("book"),
+                    entryType = EntryType.LIMIT,
+                    side = Side.SELL,
+                    price = Price(10),
+                    timeInForce = TimeInForce.GOOD_TILL_CANCEL,
+                    whenHappened = existingEntry.key.whenSubmitted,
                     eventId = EventId(2),
                     size = EntryQuantity(5)
                 )
