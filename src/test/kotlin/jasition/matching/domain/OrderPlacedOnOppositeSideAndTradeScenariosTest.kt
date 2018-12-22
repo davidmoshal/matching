@@ -1,5 +1,7 @@
 package jasition.matching.domain
 
+import io.kotlintest.matchers.beOfType
+import io.kotlintest.should
 import io.kotlintest.shouldBe
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
@@ -8,6 +10,7 @@ import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.order.event.OrderPlacedEvent
 import jasition.matching.domain.order.event.play
+import jasition.matching.domain.trade.event.TradeEvent
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.context
 import org.jetbrains.spek.api.dsl.given
@@ -16,7 +19,7 @@ import org.jetbrains.spek.api.dsl.on
 import java.time.Instant
 
 object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
-    context(": Able to match a resting Buy order if the Price agrees") {
+    context(": Matching Rule : Match if aggressor price is same or better than passive") {
         given("The book has a Buy Limit GTC Order 4@10") {
             val existingEntry = BookEntry(
                 key = BookEntryKey(
@@ -69,14 +72,13 @@ object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
                     )
                 }
             }
-            /*
-            on("a BUY Limit GTC Order 5@10 is placed") {
+            on("a SELL Limit GTC Order 5@10 is placed") {
                 val event = OrderPlacedEvent(
                     requestId = ClientRequestId("req1"),
                     whoRequested = Client(firmId = "firm1", firmClientId = "client1"),
                     bookId = BookId("book"),
                     entryType = EntryType.LIMIT,
-                    side = Side.BUY,
+                    side = Side.SELL,
                     price = Price(10),
                     timeInForce = TimeInForce.GOOD_TILL_CANCEL,
                     whenHappened = Instant.now(),
@@ -84,20 +86,18 @@ object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
                     size = EntryQuantity(5)
                 )
                 it("places the new order below the existing") {
-                    val results = play(event, books)
+                    val result = play(event, books)
 
-                    results.aggregate.buyLimitBook.entries.size() shouldBe 2
-                    results.aggregate.sellLimitBook.entries.size() shouldBe 0
+                    result.aggregate.buyLimitBook.entries.size() shouldBe 0
+                    result.aggregate.sellLimitBook.entries.size() shouldBe 1
+                    result.events.size() shouldBe  1
+
+                    val sideEffectEvent = result.events.get(0)
+
+                    sideEffectEvent should beOfType<TradeEvent>()
 
                     assertEntry(
-                        entry = results.aggregate.buyLimitBook.entries.values().get(0),
-                        clientRequestId = existingEntry.clientRequestId,
-                        availableSize = existingEntry.size.availableSize,
-                        price = existingEntry.key.price,
-                        client = existingEntry.client
-                    )
-                    assertEntry(
-                        entry = results.aggregate.buyLimitBook.entries.values().get(1),
+                        entry = result.aggregate.sellLimitBook.entries.values().get(0),
                         clientRequestId = event.requestId,
                         availableSize = event.size.availableSize,
                         price = event.price,
@@ -105,6 +105,7 @@ object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
                     )
                 }
             }
+            /*
             on("a BUY Limit GTC Order 5@9 is placed") {
                 val event = OrderPlacedEvent(
                     requestId = ClientRequestId("req1"),

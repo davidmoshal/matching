@@ -1,6 +1,8 @@
 package jasition.matching.domain.order.command
 
 import arrow.core.getOrHandle
+import io.kotlintest.matchers.beGreaterThanOrEqualTo
+import io.kotlintest.should
 import io.kotlintest.shouldBe
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
@@ -49,7 +51,7 @@ object ValidatePlaceOrderCommandTest : Spek({
                 event.size.tradedSize shouldBe 0
                 event.size.cancelledSize shouldBe 0
                 event.timeInForce shouldBe command.timeInForce
-                (event.whenHappened >= command.whenRequested) shouldBe true
+                event.whenHappened should beGreaterThanOrEqualTo(command.whenRequested)
             }
         }
     }

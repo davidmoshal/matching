@@ -1,5 +1,7 @@
 package jasition.matching.domain
 
+import io.kotlintest.matchers.haveLength
+import io.kotlintest.should
 import io.kotlintest.shouldBe
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
@@ -9,14 +11,14 @@ import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.order.event.OrderPlacedEvent
 import jasition.matching.domain.order.event.play
 import org.jetbrains.spek.api.Spek
-import org.jetbrains.spek.api.dsl.context
+import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import java.time.Instant
 
 object OrderPlacedOnSameSideScenariosTest : Spek({
-    context(": Able to maintain the priority of the Buy Limit book (Price descending then time descending)") {
+    describe(": Book Entry Priority : Buy Price descending then submitted time ascending then Event ID ascending") {
         given("The book has a Buy Limit GTC Order 4@10") {
             val existingEntry = BookEntry(
                 key = BookEntryKey(
@@ -146,7 +148,7 @@ object OrderPlacedOnSameSideScenariosTest : Spek({
     }
 
 
-    context(": Able to maintain the priority of the Sell Limit book (Price ascending then time descending)") {
+    describe(": Book Entry Priority : Sell Price ascending then submitted time ascending then Event ID ascending") {
         given("The book has a Sell Limit GTC Order 4@10") {
             val existingEntry = BookEntry(
                 key = BookEntryKey(
@@ -182,6 +184,8 @@ object OrderPlacedOnSameSideScenariosTest : Spek({
                     result.aggregate.buyLimitBook.entries.size() shouldBe 0
                     result.aggregate.sellLimitBook.entries.size() shouldBe 2
                     result.events.size() shouldBe 0
+
+                    "abc" should haveLength(3)
 
                     assertEntry(
                         entry = result.aggregate.sellLimitBook.entries.values().get(0),

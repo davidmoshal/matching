@@ -16,22 +16,23 @@ data class LimitBook(val entries: TreeMap<BookEntryKey, BookEntry>) {
     fun update(entry: TradeSideEntry): LimitBook {
         val bookEntryKey = entry.toBookEntryKey()
 
+        val newEntries = if (entry.size.availableSize <= 0)
+            entries.remove(bookEntryKey)
+        else
+            entries.computeIfPresent(bookEntryKey, { existingKey: BookEntryKey, existingEntry: BookEntry ->
+                BookEntry(
+                    key = existingKey,
+                    clientRequestId = existingEntry.clientRequestId,
+                    client = existingEntry.client,
+                    entryType = existingEntry.entryType,
+                    side = existingEntry.side,
+                    timeInForce = existingEntry.timeInForce,
+                    size = entry.size,
+                    status = entry.entryStatus
+                )
+            })._2()
         return LimitBook(
-            if (entry.size.availableSize <= 0)
-                entries.remove(bookEntryKey)
-            else
-                entries.computeIfPresent(bookEntryKey, { existingKey: BookEntryKey, existingEntry: BookEntry ->
-                    BookEntry(
-                        key = existingKey,
-                        clientRequestId = existingEntry.clientRequestId,
-                        client = existingEntry.client,
-                        entryType = existingEntry.entryType,
-                        side = existingEntry.side,
-                        timeInForce = existingEntry.timeInForce,
-                        size = entry.size,
-                        status = entry.entryStatus
-                    )
-                })._2()
+            newEntries
         )
     }
 }

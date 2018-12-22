@@ -7,7 +7,7 @@ This is a lightweight matching engine written in Kotlin.
 ### Functional programming
 There are two basic constructs:
 
-* Persistent collection as immutable state. Every state is immutable, though the state could provide some functions: 
+* Persistent data structure as immutable state. Every state is immutable, though the state could provide some functions: 
     * Transformation of representation - e.g. `toString`
     * Mutation - Mutate the current state by creating a new one
     * Derived property getter

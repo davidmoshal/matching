@@ -9,14 +9,14 @@ import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.order.event.OrderPlacedEvent
 import jasition.matching.domain.order.event.play
 import org.jetbrains.spek.api.Spek
-import org.jetbrains.spek.api.dsl.context
+import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import java.time.Instant
 
 object OrderPlacedOnEmptyBookScenariosTest : Spek({
-    context(": Able to place an order on an empty book") {
+    describe(": Behaviour : Able to place an order on an empty book") {
         given("The book is empty") {
             val books = Books(BookId("book"))
             on("a BUY Limit GTC Order is placed") {

@@ -49,5 +49,9 @@ fun play(event: OrderPlacedEvent, books: Books): Transaction<Books> {
     val entry = result.a
     val transaction = result.b
 
-    return if (entry.timeInForce.canStayOnBook(entry.size)) transaction.append(books.addBookEntry(entry)) else transaction
+    if (entry.timeInForce.canStayOnBook(entry.size)) {
+        val otherTransaction = transaction.aggregate.addBookEntry(entry)
+        return transaction.append(otherTransaction)
+    }
+    return transaction
 }

@@ -41,6 +41,7 @@ data class Books(
     fun match(entry: BookEntry): Tuple2<BookEntry, Transaction<Books>> {
         verifyEventId(entry.key.eventId)
 
+        // TODO: Do not filter book, instead traverse the entries by offset and filter
         return match(entry, filterByPrice(entry), List.empty())
     }
 
