@@ -6,3 +6,7 @@ package jasition.matching.domain.book.entry
  * places is the constant for the given instrument.
  */
 data class Price(val value: Long)
+
+class PriceComparator : Comparator<Price> {
+    override fun compare(o1: Price, o2: Price): Int = o1.value.compareTo(o2.value)
+}

@@ -55,3 +55,21 @@ data class BookEntryKey(
     val eventId: EventId
 )
 
+class EarliestSubmittedTimeFirst : Comparator<BookEntryKey> {
+    override fun compare(o1: BookEntryKey, o2: BookEntryKey): Int = o1.whenSubmitted.compareTo(o2.whenSubmitted)
+}
+
+class SmallestEventIdFirst : Comparator<BookEntryKey> {
+    override fun compare(o1: BookEntryKey, o2: BookEntryKey): Int = o1.whenSubmitted.compareTo(o2.whenSubmitted)
+}
+
+class HighestBuyOrLowestSellPriceFirst(val side: Side) : Comparator<BookEntryKey> {
+    private val priceComparator = nullsFirst(PriceComparator())
+
+    override fun compare(o1: BookEntryKey, o2: BookEntryKey): Int =
+        side.comparatorMultipler() * priceComparator.compare(o1.price, o2.price)
+}
+
+fun entryComparator(side: Side): Comparator<BookEntryKey> {
+    return HighestBuyOrLowestSellPriceFirst(side) then EarliestSubmittedTimeFirst() then SmallestEventIdFirst()
+}
