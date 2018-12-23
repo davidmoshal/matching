@@ -19,7 +19,7 @@ object OrderPlacedOnEmptyBookScenariosTest : Spek({
     describe(": Behaviour : Able to place an order on an empty book") {
         given("The book is empty") {
             val books = Books(BookId("book"))
-            on("a BUY Limit GTC Order is placed") {
+            on("a BUY Limit GTC order placed") {
                 val event = OrderPlacedEvent(
                     requestId = ClientRequestId("req1"),
                     whoRequested = Client(firmId = "firm1", firmClientId = "client1"),
@@ -33,10 +33,14 @@ object OrderPlacedOnEmptyBookScenariosTest : Spek({
                     size = EntryQuantity(10)
                 )
                 val result = play(event, books)
-                it("should contain the order") {
-                    result.aggregate.buyLimitBook.entries.size() shouldBe 1
-                    result.aggregate.sellLimitBook.entries.size() shouldBe 0
+                it("has no side-effect event") {
                     result.events.size() shouldBe 0
+                }
+                it("has no entry on the SELL side") {
+                    result.aggregate.sellLimitBook.entries.size() shouldBe 0
+                }
+                it("places the entry on the BUY side with expected order data") {
+                    result.aggregate.buyLimitBook.entries.size() shouldBe 1
 
                     val entry = result.aggregate.buyLimitBook.entries.values().get(0)
 
@@ -49,7 +53,7 @@ object OrderPlacedOnEmptyBookScenariosTest : Spek({
                     )
                 }
             }
-            on("a SELL Limit GTC Order is placed") {
+            on("a SELL Limit GTC order placed") {
                 val event = OrderPlacedEvent(
                     requestId = ClientRequestId("req1"),
                     whoRequested = Client(firmId = "firm1", firmClientId = "client1"),
@@ -63,8 +67,13 @@ object OrderPlacedOnEmptyBookScenariosTest : Spek({
                     size = EntryQuantity(10)
                 )
                 val result = play(event, books)
-                it("should contain the order") {
+                it("has no side-effect event") {
+                    result.events.size() shouldBe 0
+                }
+                it("has no entry on the BUY side") {
                     result.aggregate.buyLimitBook.entries.size() shouldBe 0
+                }
+                it("places the entry on the SELL side with expected order data") {
                     result.aggregate.sellLimitBook.entries.size() shouldBe 1
                     result.events.size() shouldBe 0
 
@@ -81,6 +90,5 @@ object OrderPlacedOnEmptyBookScenariosTest : Spek({
             }
         }
     }
-
 })
 

@@ -36,7 +36,7 @@ object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
                 status = EntryStatus.NEW
             )
             val books = Books(BookId("book")).addBookEntry(existingEntry).aggregate
-            on("a SELL Limit GTC Order 5@11 is placed") {
+            on("a SELL Limit GTC Order 5@11 placed") {
                 val event = OrderPlacedEvent(
                     requestId = ClientRequestId("req1"),
                     whoRequested = Client(firmId = "firm1", firmClientId = "client2"),
@@ -50,11 +50,11 @@ object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
                     size = EntryQuantity(5)
                 )
                 val result = play(event, books)
-                it("places the new order in the opposite book") {
-
-                    result.aggregate.buyLimitBook.entries.size() shouldBe 1
-                    result.aggregate.sellLimitBook.entries.size() shouldBe 1
+                it("has no side-effect event") {
                     result.events.size() shouldBe 0
+                }
+                it("has the existing entry on the BUY side") {
+                    result.aggregate.buyLimitBook.entries.size() shouldBe 1
 
                     assertEntry(
                         entry = result.aggregate.buyLimitBook.entries.values().get(0),
@@ -63,6 +63,11 @@ object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
                         price = existingEntry.key.price,
                         client = existingEntry.client
                     )
+                }
+                it("places the entry on the SELL side with expected order data") {
+                    result.aggregate.sellLimitBook.entries.size() shouldBe 1
+                    result.events.size() shouldBe 0
+
                     assertEntry(
                         entry = result.aggregate.sellLimitBook.entries.values().get(0),
                         clientRequestId = event.requestId,
@@ -72,7 +77,7 @@ object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
                     )
                 }
             }
-            on("a SELL Limit GTC Order 5@10 is placed") {
+            on("a SELL Limit GTC Order 5@10 placed") {
                 val event = OrderPlacedEvent(
                     requestId = ClientRequestId("req1"),
                     whoRequested = Client(firmId = "firm1", firmClientId = "client1"),
@@ -87,7 +92,6 @@ object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
                 )
                 val result = play(event, books)
                 it("generates a Trade 4@10") {
-
                     result.events.size() shouldBe 1
 
                     val sideEffectEvent = result.events.get(0)
@@ -99,8 +103,10 @@ object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
                         sideEffectEvent.price shouldBe Price(10)
                     }
                 }
-                it("places a Sell 1@10 on the book") {
+                it("remove the existing entry on the BUY side") {
                     result.aggregate.buyLimitBook.entries.size() shouldBe 0
+                }
+                it("places a Sell 1@10 on the SELL side") {
                     result.aggregate.sellLimitBook.entries.size() shouldBe 1
 
                     assertEntry(

@@ -16,7 +16,7 @@ import java.time.Instant
 object PlayOrderPlacedEventTest : Spek({
     given("The book is empty") {
         val books = Books(BookId("book"))
-        on("an Order is placed") {
+        on("an order placed") {
             val event = OrderPlacedEvent(
                 requestId = ClientRequestId("req1"),
                 whoRequested = Client(firmId = "firm1", firmClientId = "client1"),
@@ -30,13 +30,18 @@ object PlayOrderPlacedEventTest : Spek({
                 size = EntryQuantity(10)
             )
 
-            val results = play(event, books)
+            val result = play(event, books)
 
-            it("should contain the order") {
-                results.aggregate.buyLimitBook.entries.size() shouldBe 1
-                results.aggregate.sellLimitBook.entries.size() shouldBe 0
+            it("has no side-effect event") {
+                result.events.size() shouldBe 0
+            }
+            it("has no effect on the opposite side") {
+                result.aggregate.sellLimitBook.entries.size() shouldBe 0
+            }
+            it("adds the order to the book") {
+                result.aggregate.buyLimitBook.entries.size() shouldBe 1
 
-                val entry = results.aggregate.buyLimitBook.entries.values().get(0)
+                val entry = result.aggregate.buyLimitBook.entries.values().get(0)
 
                 entry.clientRequestId shouldBe event.requestId
                 entry.client shouldBe event.whoRequested

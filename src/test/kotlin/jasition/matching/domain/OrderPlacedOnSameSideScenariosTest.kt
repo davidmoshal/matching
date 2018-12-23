@@ -1,7 +1,5 @@
 package jasition.matching.domain
 
-import io.kotlintest.matchers.haveLength
-import io.kotlintest.should
 import io.kotlintest.shouldBe
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
@@ -19,7 +17,7 @@ import java.time.Instant
 
 object OrderPlacedOnSameSideScenariosTest : Spek({
     describe(": Book Entry Priority : Buy Price descending then submitted time ascending then Event ID ascending") {
-        given("The book has a Buy Limit GTC Order 4@10") {
+        given("The book has a Buy Limit GTC order 4@10") {
             val existingEntry = BookEntry(
                 key = BookEntryKey(
                     price = Price(10),
@@ -35,7 +33,7 @@ object OrderPlacedOnSameSideScenariosTest : Spek({
                 status = EntryStatus.NEW
             )
             val books = Books(BookId("book")).addBookEntry(existingEntry).aggregate
-            on("a BUY Limit GTC Order 5@11 is placed") {
+            on("a BUY Limit GTC order 5@11 placed") {
                 val event = OrderPlacedEvent(
                     requestId = ClientRequestId("req1"),
                     whoRequested = Client(firmId = "firm1", firmClientId = "client1"),
@@ -49,11 +47,15 @@ object OrderPlacedOnSameSideScenariosTest : Spek({
                     size = EntryQuantity(5)
                 )
                 val result = play(event, books)
-                it("places the new order above the existing") {
+                it("has no side-effect event") {
+                    result.events.size() shouldBe 0
+                }
+                it("has no entry on the SELL side") {
+                    result.aggregate.sellLimitBook.entries.size() shouldBe 0
+                }
+                it("places the entry on the BUY side with expected order data above the existing") {
 
                     result.aggregate.buyLimitBook.entries.size() shouldBe 2
-                    result.aggregate.sellLimitBook.entries.size() shouldBe 0
-                    result.events.size() shouldBe 0
 
                     assertEntry(
                         entry = result.aggregate.buyLimitBook.entries.values().get(0),
@@ -71,7 +73,7 @@ object OrderPlacedOnSameSideScenariosTest : Spek({
                     )
                 }
             }
-            on("a BUY Limit GTC Order 5@10 is placed at a later time") {
+            on("a BUY Limit GTC order 5@10 is placed at a later time") {
                 val event = OrderPlacedEvent(
                     requestId = ClientRequestId("req1"),
                     whoRequested = Client(firmId = "firm1", firmClientId = "client1"),
@@ -85,11 +87,15 @@ object OrderPlacedOnSameSideScenariosTest : Spek({
                     size = EntryQuantity(5)
                 )
                 val result = play(event, books)
-                it("places the new order below the existing") {
+                it("has no side-effect event") {
+                    result.events.size() shouldBe 0
+                }
+                it("has no entry on the SELL side") {
+                    result.aggregate.sellLimitBook.entries.size() shouldBe 0
+                }
+                it("places the entry on the BUY side with expected order data below the existing") {
 
                     result.aggregate.buyLimitBook.entries.size() shouldBe 2
-                    result.aggregate.sellLimitBook.entries.size() shouldBe 0
-                    result.events.size() shouldBe 0
 
                     assertEntry(
                         entry = result.aggregate.buyLimitBook.entries.values().get(0),
@@ -107,7 +113,7 @@ object OrderPlacedOnSameSideScenariosTest : Spek({
                     )
                 }
             }
-            on("a BUY Limit GTC Order 5@10 is placed at the same instant") {
+            on("a BUY Limit GTC order 5@10 is placed at the same instant") {
                 val event = OrderPlacedEvent(
                     requestId = ClientRequestId("req1"),
                     whoRequested = Client(firmId = "firm1", firmClientId = "client1"),
@@ -121,11 +127,14 @@ object OrderPlacedOnSameSideScenariosTest : Spek({
                     size = EntryQuantity(5)
                 )
                 val result = play(event, books)
-                it("places the new order below the existing") {
-
-                    result.aggregate.buyLimitBook.entries.size() shouldBe 2
-                    result.aggregate.sellLimitBook.entries.size() shouldBe 0
+                it("has no side-effect event") {
                     result.events.size() shouldBe 0
+                }
+                it("has no entry on the SELL side") {
+                    result.aggregate.sellLimitBook.entries.size() shouldBe 0
+                }
+                it("places the entry on the BUY side with expected order data below the existing") {
+                    result.aggregate.buyLimitBook.entries.size() shouldBe 2
 
                     assertEntry(
                         entry = result.aggregate.buyLimitBook.entries.values().get(0),
@@ -143,7 +152,7 @@ object OrderPlacedOnSameSideScenariosTest : Spek({
                     )
                 }
             }
-            on("a BUY Limit GTC Order 5@9 is placed") {
+            on("a BUY Limit GTC order 5@9 is placed") {
                 val event = OrderPlacedEvent(
                     requestId = ClientRequestId("req1"),
                     whoRequested = Client(firmId = "firm1", firmClientId = "client1"),
@@ -157,11 +166,14 @@ object OrderPlacedOnSameSideScenariosTest : Spek({
                     size = EntryQuantity(5)
                 )
                 val result = play(event, books)
-                it("places the new order below the existing") {
-
-                    result.aggregate.buyLimitBook.entries.size() shouldBe 2
-                    result.aggregate.sellLimitBook.entries.size() shouldBe 0
+                it("has no side-effect event") {
                     result.events.size() shouldBe 0
+                }
+                it("has no entry on the SELL side") {
+                    result.aggregate.sellLimitBook.entries.size() shouldBe 0
+                }
+                it("places the entry on the BUY side with expected order data below the existing") {
+                    result.aggregate.buyLimitBook.entries.size() shouldBe 2
 
                     assertEntry(
                         entry = result.aggregate.buyLimitBook.entries.values().get(0),
@@ -184,7 +196,7 @@ object OrderPlacedOnSameSideScenariosTest : Spek({
     }
 
     describe(": Book Entry Priority : Sell Price ascending then submitted time ascending then Event ID ascending") {
-        given("The book has a Sell Limit GTC Order 4@10") {
+        given("The book has a Sell Limit GTC order 4@10") {
             val existingEntry = BookEntry(
                 key = BookEntryKey(
                     price = Price(10),
@@ -200,7 +212,7 @@ object OrderPlacedOnSameSideScenariosTest : Spek({
                 status = EntryStatus.NEW
             )
             val books = Books(BookId("book")).addBookEntry(existingEntry).aggregate
-            on("a SELL Limit GTC Order 5@11 is placed") {
+            on("a SELL Limit GTC order 5@11 is placed") {
                 val event = OrderPlacedEvent(
                     requestId = ClientRequestId("req1"),
                     whoRequested = Client(firmId = "firm1", firmClientId = "client1"),
@@ -214,13 +226,14 @@ object OrderPlacedOnSameSideScenariosTest : Spek({
                     size = EntryQuantity(5)
                 )
                 val result = play(event, books)
-                it("places the new order below the existing") {
-
-                    result.aggregate.buyLimitBook.entries.size() shouldBe 0
-                    result.aggregate.sellLimitBook.entries.size() shouldBe 2
+                it("has no side-effect event") {
                     result.events.size() shouldBe 0
-
-                    "abc" should haveLength(3)
+                }
+                it("has no entry on the BUY side") {
+                    result.aggregate.buyLimitBook.entries.size() shouldBe 0
+                }
+                it("places the entry on the BUY side with expected order data below the existing") {
+                    result.aggregate.sellLimitBook.entries.size() shouldBe 2
 
                     assertEntry(
                         entry = result.aggregate.sellLimitBook.entries.values().get(0),
@@ -238,7 +251,7 @@ object OrderPlacedOnSameSideScenariosTest : Spek({
                     )
                 }
             }
-            on("a SELL Limit GTC Order 5@10 is placed at a later time") {
+            on("a SELL Limit GTC order 5@10 is placed at a later time") {
                 val event = OrderPlacedEvent(
                     requestId = ClientRequestId("req1"),
                     whoRequested = Client(firmId = "firm1", firmClientId = "client1"),
@@ -252,11 +265,14 @@ object OrderPlacedOnSameSideScenariosTest : Spek({
                     size = EntryQuantity(5)
                 )
                 val result = play(event, books)
-                it("places the new order below the existing") {
-
-                    result.aggregate.buyLimitBook.entries.size() shouldBe 0
-                    result.aggregate.sellLimitBook.entries.size() shouldBe 2
+                it("has no side-effect event") {
                     result.events.size() shouldBe 0
+                }
+                it("has no entry on the BUY side") {
+                    result.aggregate.buyLimitBook.entries.size() shouldBe 0
+                }
+                it("places the entry on the BUY side with expected order data below the existing") {
+                    result.aggregate.sellLimitBook.entries.size() shouldBe 2
 
                     assertEntry(
                         entry = result.aggregate.sellLimitBook.entries.values().get(0),
@@ -274,7 +290,7 @@ object OrderPlacedOnSameSideScenariosTest : Spek({
                     )
                 }
             }
-            on("a SELL Limit GTC Order 5@10 is placed at the same instant") {
+            on("a SELL Limit GTC order 5@10 is placed at the same instant") {
                 val event = OrderPlacedEvent(
                     requestId = ClientRequestId("req1"),
                     whoRequested = Client(firmId = "firm1", firmClientId = "client1"),
@@ -288,11 +304,14 @@ object OrderPlacedOnSameSideScenariosTest : Spek({
                     size = EntryQuantity(5)
                 )
                 val result = play(event, books)
-                it("places the new order below the existing") {
-
-                    result.aggregate.buyLimitBook.entries.size() shouldBe 0
-                    result.aggregate.sellLimitBook.entries.size() shouldBe 2
+                it("has no side-effect event") {
                     result.events.size() shouldBe 0
+                }
+                it("has no entry on the BUY side") {
+                    result.aggregate.buyLimitBook.entries.size() shouldBe 0
+                }
+                it("places the entry on the BUY side with expected order data below the existing") {
+                    result.aggregate.sellLimitBook.entries.size() shouldBe 2
 
                     assertEntry(
                         entry = result.aggregate.sellLimitBook.entries.values().get(0),
@@ -310,7 +329,7 @@ object OrderPlacedOnSameSideScenariosTest : Spek({
                     )
                 }
             }
-            on("a SELL Limit GTC Order 5@9 is placed") {
+            on("a SELL Limit GTC order 5@9 is placed") {
                 val event = OrderPlacedEvent(
                     requestId = ClientRequestId("req1"),
                     whoRequested = Client(firmId = "firm1", firmClientId = "client1"),
@@ -324,11 +343,14 @@ object OrderPlacedOnSameSideScenariosTest : Spek({
                     size = EntryQuantity(5)
                 )
                 val result = play(event, books)
-                it("places the new order above the existing") {
-
-                    result.aggregate.buyLimitBook.entries.size() shouldBe 0
-                    result.aggregate.sellLimitBook.entries.size() shouldBe 2
+                it("has no side-effect event") {
                     result.events.size() shouldBe 0
+                }
+                it("has no entry on the BUY side") {
+                    result.aggregate.buyLimitBook.entries.size() shouldBe 0
+                }
+                it("places the entry on the BUY side with expected order data above the existing") {
+                    result.aggregate.sellLimitBook.entries.size() shouldBe 2
 
                     assertEntry(
                         entry = result.aggregate.sellLimitBook.entries.values().get(0),

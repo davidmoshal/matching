@@ -21,7 +21,7 @@ import java.time.Instant
 object ValidatePlaceOrderCommandTest : Spek({
     given("The book is empty") {
         val books = Books(BookId(bookId = "book"))
-        on("Submit a Limit Good-till-date Order") {
+        on("an order submitted") {
             val command = PlaceOrderCommand(
                 requestId = ClientRequestId(current = "req1"),
                 whoRequested = Client(firmId = "firm1", firmClientId = "client1"),
@@ -36,7 +36,7 @@ object ValidatePlaceOrderCommandTest : Spek({
 
             val result = validate(command = command, books = books)
 
-            it("should place the order on the book") {
+            it("places the order on the book") {
                 result.isRight() shouldBe true
 
                 val event = result.getOrHandle { (d) -> throw IllegalArgumentException() }
