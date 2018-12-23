@@ -5,7 +5,9 @@ package jasition.matching.domain.book.entry
  * or precision value constant in the the instrument. E.g. 1234 is used to represent 12.34 while 2 as decimal
  * places is the constant for the given instrument.
  */
-data class Price(val value: Long)
+data class Price(val value: Long) : Comparable<Price> {
+    override fun compareTo(other: Price): Int = value.compareTo(other.value)
+}
 
 class PriceComparator : Comparator<Price> {
     override fun compare(o1: Price, o2: Price): Int = o1.value.compareTo(o2.value)

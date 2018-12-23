@@ -9,6 +9,7 @@ import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
+import jasition.matching.domain.trade.match
 import java.time.Instant
 
 data class OrderPlacedEvent(
@@ -45,7 +46,7 @@ data class OrderPlacedEvent(
 fun play(event: OrderPlacedEvent, books: Books): Transaction<Books> {
     books.verifyEventId(event.eventId)
 
-    val result = books.match(event.toBookEntry())
+    val result = match(aggressor = event.toBookEntry(), books = books)
     val entry = result.a
     val transaction = result.b
 

@@ -32,9 +32,7 @@ object OrderPlacedOnEmptyBookScenariosTest : Spek({
                     eventId = EventId(1),
                     size = EntryQuantity(10)
                 )
-
                 val result = play(event, books)
-
                 it("should contain the order") {
                     result.aggregate.buyLimitBook.entries.size() shouldBe 1
                     result.aggregate.sellLimitBook.entries.size() shouldBe 0
@@ -64,9 +62,7 @@ object OrderPlacedOnEmptyBookScenariosTest : Spek({
                     eventId = EventId(1),
                     size = EntryQuantity(10)
                 )
-
                 val result = play(event, books)
-
                 it("should contain the order") {
                     result.aggregate.buyLimitBook.entries.size() shouldBe 0
                     result.aggregate.sellLimitBook.entries.size() shouldBe 1

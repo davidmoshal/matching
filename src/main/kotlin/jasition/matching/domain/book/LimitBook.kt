@@ -10,6 +10,11 @@ import jasition.matching.domain.trade.event.TradeSideEntry
 data class LimitBook(val entries: TreeMap<BookEntryKey, BookEntry>) {
     constructor(side: Side) : this(TreeMap.empty(entryComparator(side)))
 
+
+    fun isEmpty() : Boolean {
+        return entries.isEmpty
+    }
+
     fun add(entry: BookEntry): LimitBook =
         LimitBook(entries.put(entry.key, entry))
 
@@ -19,7 +24,7 @@ data class LimitBook(val entries: TreeMap<BookEntryKey, BookEntry>) {
         val newEntries = if (entry.size.availableSize <= 0)
             entries.remove(bookEntryKey)
         else
-            entries.computeIfPresent(bookEntryKey, { existingKey: BookEntryKey, existingEntry: BookEntry ->
+            entries.computeIfPresent(bookEntryKey) { existingKey: BookEntryKey, existingEntry: BookEntry ->
                 BookEntry(
                     key = existingKey,
                     clientRequestId = existingEntry.clientRequestId,
@@ -30,7 +35,7 @@ data class LimitBook(val entries: TreeMap<BookEntryKey, BookEntry>) {
                     size = entry.size,
                     status = entry.entryStatus
                 )
-            })._2()
+            }._2()
         return LimitBook(
             newEntries
         )

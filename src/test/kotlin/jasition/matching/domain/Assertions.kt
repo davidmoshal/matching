@@ -25,4 +25,3 @@ fun assertEntry(
     entry.client shouldBe client
     entry.status shouldBe status
 }
-

@@ -48,8 +48,8 @@ object OrderPlacedOnSameSideScenariosTest : Spek({
                     eventId = EventId(2),
                     size = EntryQuantity(5)
                 )
+                val result = play(event, books)
                 it("places the new order above the existing") {
-                    val result = play(event, books)
 
                     result.aggregate.buyLimitBook.entries.size() shouldBe 2
                     result.aggregate.sellLimitBook.entries.size() shouldBe 0
@@ -84,8 +84,8 @@ object OrderPlacedOnSameSideScenariosTest : Spek({
                     eventId = EventId(2),
                     size = EntryQuantity(5)
                 )
+                val result = play(event, books)
                 it("places the new order below the existing") {
-                    val result = play(event, books)
 
                     result.aggregate.buyLimitBook.entries.size() shouldBe 2
                     result.aggregate.sellLimitBook.entries.size() shouldBe 0
@@ -120,8 +120,8 @@ object OrderPlacedOnSameSideScenariosTest : Spek({
                     eventId = EventId(2),
                     size = EntryQuantity(5)
                 )
+                val result = play(event, books)
                 it("places the new order below the existing") {
-                    val result = play(event, books)
 
                     result.aggregate.buyLimitBook.entries.size() shouldBe 2
                     result.aggregate.sellLimitBook.entries.size() shouldBe 0
@@ -156,8 +156,8 @@ object OrderPlacedOnSameSideScenariosTest : Spek({
                     eventId = EventId(2),
                     size = EntryQuantity(5)
                 )
+                val result = play(event, books)
                 it("places the new order below the existing") {
-                    val result = play(event, books)
 
                     result.aggregate.buyLimitBook.entries.size() shouldBe 2
                     result.aggregate.sellLimitBook.entries.size() shouldBe 0
@@ -213,8 +213,8 @@ object OrderPlacedOnSameSideScenariosTest : Spek({
                     eventId = EventId(2),
                     size = EntryQuantity(5)
                 )
+                val result = play(event, books)
                 it("places the new order below the existing") {
-                    val result = play(event, books)
 
                     result.aggregate.buyLimitBook.entries.size() shouldBe 0
                     result.aggregate.sellLimitBook.entries.size() shouldBe 2
@@ -251,8 +251,8 @@ object OrderPlacedOnSameSideScenariosTest : Spek({
                     eventId = EventId(2),
                     size = EntryQuantity(5)
                 )
+                val result = play(event, books)
                 it("places the new order below the existing") {
-                    val result = play(event, books)
 
                     result.aggregate.buyLimitBook.entries.size() shouldBe 0
                     result.aggregate.sellLimitBook.entries.size() shouldBe 2
@@ -287,8 +287,8 @@ object OrderPlacedOnSameSideScenariosTest : Spek({
                     eventId = EventId(2),
                     size = EntryQuantity(5)
                 )
+                val result = play(event, books)
                 it("places the new order below the existing") {
-                    val result = play(event, books)
 
                     result.aggregate.buyLimitBook.entries.size() shouldBe 0
                     result.aggregate.sellLimitBook.entries.size() shouldBe 2
@@ -323,8 +323,8 @@ object OrderPlacedOnSameSideScenariosTest : Spek({
                     eventId = EventId(2),
                     size = EntryQuantity(5)
                 )
+                val result = play(event, books)
                 it("places the new order above the existing") {
-                    val result = play(event, books)
 
                     result.aggregate.buyLimitBook.entries.size() shouldBe 0
                     result.aggregate.sellLimitBook.entries.size() shouldBe 2
