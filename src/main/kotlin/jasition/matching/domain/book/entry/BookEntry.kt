@@ -47,6 +47,21 @@ data class BookEntry(
             status = status.traded(newQuantity)
         )
     }
+
+    fun withEventId(eventId: EventId) : BookEntry {
+        return BookEntry(
+            key = BookEntryKey(price = key.price,
+                whenSubmitted = key.whenSubmitted,
+                eventId = eventId),
+            clientRequestId = clientRequestId,
+            client = client,
+            side = side,
+            timeInForce = timeInForce,
+            entryType = entryType,
+            size = size,
+            status = status
+        )
+    }
 }
 
 data class BookEntryKey(

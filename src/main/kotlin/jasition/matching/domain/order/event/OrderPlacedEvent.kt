@@ -25,6 +25,7 @@ data class OrderPlacedEvent(
     val whenHappened: Instant,
     val entryStatus: EntryStatus = EntryStatus.NEW
 ) : Event {
+    override fun eventId(): EventId = eventId
     override fun type(): EventType = EventType.PRIMARY
 
     fun toBookEntry(): BookEntry = BookEntry(
@@ -44,15 +45,14 @@ data class OrderPlacedEvent(
 }
 
 fun play(event: OrderPlacedEvent, books: Books): Transaction<Books> {
-    books.verifyEventId(event.eventId)
-
-    val result = match(aggressor = event.toBookEntry(), books = books)
+    val result = match(aggressor = event.toBookEntry(), books = books.withEventId(books.verifyEventId(event.eventId)))
     val entry = result.a
-    val transaction = result.b
+    val matchTransaction = result.b
 
     if (entry.timeInForce.canStayOnBook(entry.size)) {
-        val otherTransaction = transaction.aggregate.addBookEntry(entry)
-        return transaction.append(otherTransaction)
+        val maxEventId = matchTransaction.maxEventId(event.eventId)
+        val newAggregate = matchTransaction.aggregate.addBookEntry(entry.withEventId(maxEventId))
+        return matchTransaction.withAggregate(newAggregate)
     }
-    return transaction
+    return matchTransaction
 }

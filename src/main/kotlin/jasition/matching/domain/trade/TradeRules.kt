@@ -3,15 +3,12 @@ package jasition.matching.domain.trade
 import jasition.matching.domain.book.entry.BookEntry
 import jasition.matching.domain.book.entry.Price
 
-fun noFirmClientButOfSameFirm(aggressor: BookEntry, passive: BookEntry): Boolean =
-    if (aggressor.client.firmClientId == null && passive.client.firmClientId == null)
-        aggressor.client.firmId != passive.client.firmId
-    else true
+fun sameFirmButPossibleFirmAgainstClient(aggressor: BookEntry, passive: BookEntry): Boolean =
+    aggressor.client.firmId == passive.client.firmId
+            && (aggressor.client.firmClientId == null || passive.client.firmClientId == null)
 
-fun sameFirmClientAndSameFirm(aggressor: BookEntry, passive: BookEntry): Boolean =
-    if (aggressor.client.firmClientId == null && passive.client.firmClientId == null)
-        aggressor.client.firmId != passive.client.firmId
-    else true
+fun sameFirmAndSameFirmClient(aggressor: BookEntry, passive: BookEntry): Boolean =
+    aggressor.client == passive.client
 
 fun priceHasCrossed(aggressor: BookEntry, passive: BookEntry): Boolean {
     val aggressorPrice = aggressor.key.price

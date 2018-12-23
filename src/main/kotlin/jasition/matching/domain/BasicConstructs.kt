@@ -1,6 +1,7 @@
 package jasition.matching.domain
 
 import io.vavr.collection.List
+import java.util.*
 import java.util.function.BiFunction
 
 interface Aggregate
@@ -10,7 +11,8 @@ interface Command
 interface Query
 
 interface Event {
-    fun type() : EventType
+    fun eventId(): EventId
+    fun type(): EventType
 }
 
 enum class EventType {
@@ -40,7 +42,19 @@ data class EventId(val value: Long) : Comparable<EventId> {
         if (value == Long.MAX_VALUE && other.value == 0L) -1 else value.compareTo(other.value)
 }
 
+object EventComparator : Comparator<Event> {
+    override fun compare(o1: Event, o2: Event): Int = o1.eventId().compareTo(o2.eventId())
+}
+
 data class Transaction<A : Aggregate>(val aggregate: A, val events: List<Event> = List.empty()) {
+    fun maxEventId(default: EventId): EventId {
+        return events.maxBy(EventComparator)
+            .map(Event::eventId)
+            .getOrElse(default)
+    }
+
+    fun withAggregate(aggregate: A) = Transaction(aggregate = aggregate, events = events)
+
     fun append(
         other: Transaction<A>,
         mergeFunction: BiFunction<A, A, A> = BiFunction { _, right -> right }
@@ -50,3 +64,5 @@ data class Transaction<A : Aggregate>(val aggregate: A, val events: List<Event> 
             events = events.appendAll(other.events)
         )
 }
+
+

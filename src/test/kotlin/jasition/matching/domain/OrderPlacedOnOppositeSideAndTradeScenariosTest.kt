@@ -35,7 +35,7 @@ object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
                 size = EntryQuantity(4),
                 status = EntryStatus.NEW
             )
-            val books = Books(BookId("book")).addBookEntry(existingEntry).aggregate
+            val books = Books(BookId("book")).addBookEntry(existingEntry).withEventId(existingEntry.key.eventId)
             on("a SELL Limit GTC Order 5@11 placed") {
                 val event = OrderPlacedEvent(
                     requestId = ClientRequestId("req1"),
@@ -80,7 +80,7 @@ object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
             on("a SELL Limit GTC Order 5@10 placed") {
                 val event = OrderPlacedEvent(
                     requestId = ClientRequestId("req1"),
-                    whoRequested = Client(firmId = "firm1", firmClientId = "client1"),
+                    whoRequested = Client(firmId = "firm1", firmClientId = "client2"),
                     bookId = BookId("book"),
                     entryType = EntryType.LIMIT,
                     side = Side.SELL,
@@ -91,7 +91,7 @@ object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
                     size = EntryQuantity(5)
                 )
                 val result = play(event, books)
-                it("generates a Trade 4@10") {
+                it("generates a Trade 4@10 and no more side-effect event") {
                     result.events.size() shouldBe 1
 
                     val sideEffectEvent = result.events.get(0)
@@ -112,9 +112,11 @@ object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
                     assertEntry(
                         entry = result.aggregate.sellLimitBook.entries.values().get(0),
                         clientRequestId = event.requestId,
-                        availableSize = event.size.availableSize,
-                        price = event.price,
-                        client = event.whoRequested
+                        availableSize = 1,
+                        tradedSize = 4,
+                        price = Price(10),
+                        client = event.whoRequested,
+                        status = EntryStatus.PARTIAL_FILL
                     )
                 }
             }

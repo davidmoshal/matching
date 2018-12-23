@@ -25,6 +25,7 @@ data class OrderRejectedEvent(
     val rejectReason: OrderRejectReason,
     val rejectText: String?
 ) : Event {
+    override fun eventId(): EventId = eventId
     override fun type(): EventType = EventType.PRIMARY
 }
 
@@ -41,4 +42,4 @@ enum class OrderRejectReason {
 }
 
 fun play(event: OrderRejectedEvent, books: Books): Transaction<Books> =
-    Transaction(books + event.eventId)
+    Transaction(books.withEventId(books.verifyEventId(event.eventId)))

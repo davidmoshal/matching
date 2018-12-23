@@ -59,8 +59,8 @@ fun findNextMatch(
 
     val passive = passives.get(offset)
 
-    if (noFirmClientButOfSameFirm(aggressor, passive)
-        || sameFirmClientAndSameFirm(aggressor, passive)
+    if (sameFirmAndSameFirmClient(aggressor, passive)
+        || sameFirmButPossibleFirmAgainstClient(aggressor, passive)
         || findTradePrice(aggressor, passive) == null
     ) {
         return findNextMatch(aggressor, passives, offset + 1)

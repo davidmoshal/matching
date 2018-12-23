@@ -2,7 +2,6 @@ package jasition.matching.domain.book
 
 import jasition.matching.domain.Aggregate
 import jasition.matching.domain.EventId
-import jasition.matching.domain.Transaction
 import jasition.matching.domain.book.entry.BookEntry
 import jasition.matching.domain.book.entry.Side
 import jasition.matching.domain.trade.event.TradeSideEntry
@@ -19,35 +18,31 @@ data class Books(
     val lastEventId: EventId = EventId(0)
 ) : Aggregate {
 
-    fun addBookEntry(entry: BookEntry): Transaction<Books> = Transaction(
-        Books(
-            bookId = bookId,
-            buyLimitBook = if (Side.BUY == entry.side) buyLimitBook.add(entry) else buyLimitBook,
-            sellLimitBook = if (Side.SELL == entry.side) sellLimitBook.add(entry) else sellLimitBook,
-            businessDate = businessDate,
-            tradingStatuses = tradingStatuses,
-            lastEventId = verifyEventId(entry.key.eventId)
-        )
+    fun addBookEntry(entry: BookEntry): Books = Books(
+        bookId = bookId,
+        buyLimitBook = if (Side.BUY == entry.side) buyLimitBook.add(entry) else buyLimitBook,
+        sellLimitBook = if (Side.SELL == entry.side) sellLimitBook.add(entry) else sellLimitBook,
+        businessDate = businessDate,
+        tradingStatuses = tradingStatuses,
+        lastEventId = lastEventId
     )
 
-    fun traded(entry: TradeSideEntry): Books {
-        return Books(
-            bookId = bookId,
-            buyLimitBook = if (Side.BUY == entry.side) buyLimitBook.update(entry) else buyLimitBook,
-            sellLimitBook = if (Side.SELL == entry.side) sellLimitBook.update(entry) else sellLimitBook,
-            businessDate = businessDate,
-            tradingStatuses = tradingStatuses,
-            lastEventId = lastEventId
-        )
-    }
+    fun traded(entry: TradeSideEntry): Books = Books(
+        bookId = bookId,
+        buyLimitBook = if (Side.BUY == entry.side) buyLimitBook.update(entry) else buyLimitBook,
+        sellLimitBook = if (Side.SELL == entry.side) sellLimitBook.update(entry) else sellLimitBook,
+        businessDate = businessDate,
+        tradingStatuses = tradingStatuses,
+        lastEventId = lastEventId
+    )
 
-    operator fun plus(eventId: EventId): Books = Books(
+    fun withEventId(eventId: EventId): Books = Books(
         bookId = bookId,
         buyLimitBook = buyLimitBook,
         sellLimitBook = sellLimitBook,
         businessDate = businessDate,
         tradingStatuses = tradingStatuses,
-        lastEventId = verifyEventId(eventId)
+        lastEventId = eventId
     )
 
     fun verifyEventId(eventId: EventId): EventId {
