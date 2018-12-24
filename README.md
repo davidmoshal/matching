@@ -3,12 +3,7 @@ Matching
 
 This is a lightweight matching engine written in Kotlin.
 
-## The Domain
-The domain borrows a lot of languages and terms from the [FIX Protocol](http://fiximate.fixtrading.org/latestEP/), meanwhile abstract away from the verbose and vintage style of naming.  
-![Domain](/doc/images/domain.png) 
-
-### Behaviours
-#### The farmer's market
+## The farmer's market
 If you are not familiar with matching engine, read this example. You are an apple farmers and you have 100 apples ripe to be sold. You can sell them into two ways. You can either let the customers knock your door, or you could bring them to the farmer's market. You are not the only apple farmers in the town. Waiting to have customers turning up to your door and asking to buy your apples, you either are an apple farmer celebrity, or you are insane, or just plain lazy. Statistically you have a better chance to sell your apples in the farmer's market, where the farmers and customers both have strong intentions to trade, and they are more committed to settle trades (exchange of goods and services). So assume you go to the farmer's market. There are tens of apple farmers, and thousands of customers. You could set up your booth and wait for the customers, which is better than waiting at home, but you are still passively selling. Or you could active go around and ask every stranger to buy your apples, probably with desperation on your face.
 
 The farmer's market owner does not want farmers and customers running in the market like headless chickens, because it is simply dangerous and chaotic. The market owner announces that farmers and customers can now put their intention of either buying or selling in a centralised book anonymously, and the market will match the buying and selling in a fair and orderly manner. However, the market owner requires both buyers and sellers to commit to honouring the trades, that is, if you said you wanted to sell 50 apples for 1 pound each, you need to be ready to hand over 50 apples and get 50 pounds back in your pocket, and pay transaction fees to the market owner for helping you out. So selling and buying are more than intentions, they are obligations. So we call them Orders. The centralised book is called the Order Book. 
@@ -20,6 +15,12 @@ There are also opportunists that watch the market and are willing to buy and sel
 The operation of the Order Book is the Matching Engine. And the farmer's market is the Exchange.
 
 The Orders and Quotes sitting in the Order Book are passively waiting to match, so they are passive entries. While the new coming Orders and Quotes are called the aggressors.
+
+## The Domain
+The domain borrows a lot of languages and terms from the [FIX Protocol](http://fiximate.fixtrading.org/latestEP/), meanwhile abstract away from the verbose and vintage style of naming.  
+![Domain](/doc/images/domain.png) 
+
+### Behaviours
 
 #### Order Type
 * Limit - willingness to buy up to or sell down to a given price
