@@ -108,9 +108,12 @@ Machine-time is stateful and randomisation is indeterministic. They are supplied
 
 ## Dependencies
 Production 
-* Arrow - Monads
-* Vavr - Persistent collections minus its Monads
+* [Arrow](https://arrow-kt.io/) - Monads
+* [Vavr](http://www.vavr.io/) - Persistent collections minus its Monads
 
 Testing
-* Spek - Specifications framework
-* Kotlintest - Fluent DSL assertions
+* [Spek](https://spekframework.org/) - Specifications framework
+* [Kotlintest](https://github.com/kotlintest/kotlintest) - Fluent DSL assertions
+
+## References
+[My technical blog](https://jasition.github.io)
