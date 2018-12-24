@@ -41,5 +41,5 @@ enum class OrderRejectReason {
     OTHER
 }
 
-fun play(event: OrderRejectedEvent, books: Books): Transaction<Books> =
+fun orderRejected(event: OrderRejectedEvent, books: Books): Transaction<Books> =
     Transaction(books.withEventId(books.verifyEventId(event.eventId)))

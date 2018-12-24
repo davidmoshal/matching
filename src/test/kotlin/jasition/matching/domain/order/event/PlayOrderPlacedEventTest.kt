@@ -1,10 +1,14 @@
 package jasition.matching.domain.order.event
 
+import io.kotlintest.matchers.beOfType
+import io.kotlintest.should
 import io.kotlintest.shouldBe
 import jasition.matching.domain.EventId
+import jasition.matching.domain.assertEntry
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.*
+import jasition.matching.domain.book.event.EntryAddedToBookEvent
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
 import org.jetbrains.spek.api.Spek
@@ -30,15 +34,26 @@ object PlayOrderPlacedEventTest : Spek({
                 size = EntryQuantity(10)
             )
 
-            val result = play(event, books)
+            val result = orderPlaced(event, books)
 
-            it("has no side-effect event") {
-                result.events.size() shouldBe 0
-            }
             it("has no effect on the opposite side") {
                 result.aggregate.sellLimitBook.entries.size() shouldBe 0
             }
             it("adds the order to the book") {
+                result.events.size() shouldBe 1
+                val entryAddedToBookEvent = result.events.get(0)
+                entryAddedToBookEvent should beOfType<EntryAddedToBookEvent>()
+                if (entryAddedToBookEvent is EntryAddedToBookEvent) {
+
+                    assertEntry(
+                        entry = entryAddedToBookEvent.entry,
+                        clientRequestId = event.requestId,
+                        availableSize = event.size.availableSize,
+                        price = event.price,
+                        client = event.whoRequested
+                    )
+                }
+
                 result.aggregate.buyLimitBook.entries.size() shouldBe 1
 
                 val entry = result.aggregate.buyLimitBook.entries.values().get(0)
@@ -50,7 +65,7 @@ object PlayOrderPlacedEventTest : Spek({
                 entry.key.price shouldBe event.price
                 entry.timeInForce shouldBe event.timeInForce
                 entry.key.whenSubmitted shouldBe event.whenHappened
-                entry.key.eventId shouldBe event.eventId
+                entry.key.eventId shouldBe entryAddedToBookEvent.eventId()
                 entry.size.availableSize shouldBe event.size.availableSize
                 entry.size.tradedSize shouldBe 0
                 entry.size.cancelledSize shouldBe 0

@@ -15,10 +15,17 @@ data class EntryAddedToBookEvent(
     val entry: BookEntry,
     val whenHappened: Instant
 ) : Event {
+    init {
+        if (eventId != entry.key.eventId) throw IllegalArgumentException("Event ID must match the Event ID in the Book Entry: eventId=$eventId, entry.eventId=${entry.key.eventId}")
+    }
+
     override fun eventId(): EventId = eventId
     override fun type(): EventType = EventType.SIDE_EFFECT
 }
 
-fun play(event: EntryAddedToBookEvent, books: Books): Transaction<Books> {
-    TODO("to implement")
+fun entryAddedToBook(event: EntryAddedToBookEvent, books: Books): Transaction<Books> {
+    books.verifyEventId(event.eventId)
+    books.verifyEventId(event.entry.key.eventId)
+
+    return Transaction(books.addBookEntry(event.entry))
 }

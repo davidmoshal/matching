@@ -41,9 +41,10 @@ data class TradeSideEntry(
 
 }
 
-fun play(event: TradeEvent, books: Books): Transaction<Books> = Transaction(
-    books.traded(event.aggressor)
+fun trade(event: TradeEvent, books: Books): Transaction<Books> = Transaction(
+    books.withEventId(books.verifyEventId(event.eventId))
+        .traded(event.aggressor)
         .traded(event.passive)
-        .withEventId(books.verifyEventId(event.eventId))
+
 )
 

@@ -70,7 +70,7 @@ data class PlaceOrderCommand(
     )
 }
 
-fun validate(
+fun placeOrder(
     command: PlaceOrderCommand,
     books: Books,
     currentTime: Instant = Instant.now()

@@ -8,7 +8,7 @@ import jasition.matching.domain.Transaction
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.BookEntry
 import jasition.matching.domain.trade.event.TradeEvent
-import jasition.matching.domain.trade.event.play
+import jasition.matching.domain.trade.event.trade
 
 fun match(
     aggressor: BookEntry,
@@ -39,7 +39,7 @@ fun match(
         passive = passive.toTradeSideEntry(tradeSize)
     )
 
-    val result = play(event, books)
+    val result = trade(event, books)
 
     return match(
         aggressor = aggressor.traded(tradeSize, tradePrice),

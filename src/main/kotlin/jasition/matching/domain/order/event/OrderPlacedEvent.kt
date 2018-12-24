@@ -7,6 +7,8 @@ import jasition.matching.domain.Transaction
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.*
+import jasition.matching.domain.book.event.EntryAddedToBookEvent
+import jasition.matching.domain.book.event.entryAddedToBook
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.trade.match
@@ -44,15 +46,23 @@ data class OrderPlacedEvent(
     )
 }
 
-fun play(event: OrderPlacedEvent, books: Books): Transaction<Books> {
+fun orderPlaced(event: OrderPlacedEvent, books: Books): Transaction<Books> {
     val result = match(aggressor = event.toBookEntry(), books = books.withEventId(books.verifyEventId(event.eventId)))
     val entry = result.a
     val matchTransaction = result.b
 
     if (entry.timeInForce.canStayOnBook(entry.size)) {
-        val maxEventId = matchTransaction.maxEventId(event.eventId)
-        val newAggregate = matchTransaction.aggregate.addBookEntry(entry.withEventId(maxEventId))
-        return matchTransaction.withAggregate(newAggregate)
+        val newBooks = matchTransaction.aggregate
+        val nextEventId = newBooks.lastEventId.next()
+        val entryAddedToBookEvent = EntryAddedToBookEvent(
+            eventId = nextEventId,
+            bookId = books.bookId,
+            entry = entry.withEventId(nextEventId),
+            whenHappened = event.whenHappened
+        )
+
+        return matchTransaction.append(entryAddedToBookEvent)
+            .append(entryAddedToBook(entryAddedToBookEvent, newBooks))
     }
     return matchTransaction
 }

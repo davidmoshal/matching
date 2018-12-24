@@ -47,14 +47,6 @@ object EventComparator : Comparator<Event> {
 }
 
 data class Transaction<A : Aggregate>(val aggregate: A, val events: List<Event> = List.empty()) {
-    fun maxEventId(default: EventId): EventId {
-        return events.maxBy(EventComparator)
-            .map(Event::eventId)
-            .getOrElse(default)
-    }
-
-    fun withAggregate(aggregate: A) = Transaction(aggregate = aggregate, events = events)
-
     fun append(
         other: Transaction<A>,
         mergeFunction: BiFunction<A, A, A> = BiFunction { _, right -> right }
@@ -63,6 +55,11 @@ data class Transaction<A : Aggregate>(val aggregate: A, val events: List<Event> 
             aggregate = mergeFunction.apply(aggregate, other.aggregate),
             events = events.appendAll(other.events)
         )
+
+    fun append(event: Event): Transaction<A> = Transaction(
+        aggregate = aggregate,
+        events = events.append(event)
+    )
 }
 
 

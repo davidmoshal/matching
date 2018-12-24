@@ -24,7 +24,7 @@ data class Books(
         sellLimitBook = if (Side.SELL == entry.side) sellLimitBook.add(entry) else sellLimitBook,
         businessDate = businessDate,
         tradingStatuses = tradingStatuses,
-        lastEventId = lastEventId
+        lastEventId = entry.key.eventId
     )
 
     fun traded(entry: TradeSideEntry): Books = Books(

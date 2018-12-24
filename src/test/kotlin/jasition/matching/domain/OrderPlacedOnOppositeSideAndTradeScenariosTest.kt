@@ -6,10 +6,11 @@ import io.kotlintest.shouldBe
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.*
+import jasition.matching.domain.book.event.EntryAddedToBookEvent
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.order.event.OrderPlacedEvent
-import jasition.matching.domain.order.event.play
+import jasition.matching.domain.order.event.orderPlaced
 import jasition.matching.domain.trade.event.TradeEvent
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.context
@@ -49,10 +50,7 @@ object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
                     eventId = EventId(2),
                     size = EntryQuantity(5)
                 )
-                val result = play(event, books)
-                it("has no side-effect event") {
-                    result.events.size() shouldBe 0
-                }
+                val result = orderPlaced(event, books)
                 it("has the existing entry on the BUY side") {
                     result.aggregate.buyLimitBook.entries.size() shouldBe 1
 
@@ -65,8 +63,21 @@ object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
                     )
                 }
                 it("places the entry on the SELL side with expected order data") {
+                    result.events.size() shouldBe 1
+                    val entryAddedToBookEvent = result.events.get(0)
+                    entryAddedToBookEvent should beOfType<EntryAddedToBookEvent>()
+                    if (entryAddedToBookEvent is EntryAddedToBookEvent) {
+
+                        assertEntry(
+                            entry = entryAddedToBookEvent.entry,
+                            clientRequestId = event.requestId,
+                            availableSize = event.size.availableSize,
+                            price = event.price,
+                            client = event.whoRequested
+                        )
+                    }
+
                     result.aggregate.sellLimitBook.entries.size() shouldBe 1
-                    result.events.size() shouldBe 0
 
                     assertEntry(
                         entry = result.aggregate.sellLimitBook.entries.values().get(0),
@@ -90,9 +101,9 @@ object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
                     eventId = EventId(2),
                     size = EntryQuantity(5)
                 )
-                val result = play(event, books)
+                val result = orderPlaced(event, books)
                 it("generates a Trade 4@10 and no more side-effect event") {
-                    result.events.size() shouldBe 1
+                    result.events.size() shouldBe 2
 
                     val sideEffectEvent = result.events.get(0)
 
@@ -107,6 +118,22 @@ object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
                     result.aggregate.buyLimitBook.entries.size() shouldBe 0
                 }
                 it("places a Sell 1@10 on the SELL side") {
+                    result.events.size() shouldBe 2
+                    val entryAddedToBookEvent = result.events.get(1)
+                    entryAddedToBookEvent should beOfType<EntryAddedToBookEvent>()
+                    if (entryAddedToBookEvent is EntryAddedToBookEvent) {
+
+                        assertEntry(
+                            entry = entryAddedToBookEvent.entry,
+                            clientRequestId = event.requestId,
+                            availableSize = 1,
+                            tradedSize = 4,
+                            price = event.price,
+                            client = event.whoRequested,
+                            status = EntryStatus.PARTIAL_FILL
+                        )
+                    }
+
                     result.aggregate.sellLimitBook.entries.size() shouldBe 1
 
                     assertEntry(
@@ -114,7 +141,7 @@ object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
                         clientRequestId = event.requestId,
                         availableSize = 1,
                         tradedSize = 4,
-                        price = Price(10),
+                        price = event.price,
                         client = event.whoRequested,
                         status = EntryStatus.PARTIAL_FILL
                     )
@@ -135,7 +162,7 @@ object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
                     size = EntryQuantity(5)
                 )
                 it("places the new order below the existing") {
-                    val results = play(event, books)
+                    val results = orderPlaced(event, books)
 
                     results.aggregate.buyLimitBook.entries.size() shouldBe 2
                     results.aggregate.sellLimitBook.entries.size() shouldBe 0
@@ -191,7 +218,7 @@ object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
                     size = EntryQuantity(5)
                 )
                 it("places the new order below the existing") {
-                    val results = play(event, books)
+                    val results = orderPlaced(event, books)
 
                     results.aggregate.buyLimitBook.entries.size() shouldBe 0
                     results.aggregate.sellLimitBook.entries.size() shouldBe 2
@@ -226,7 +253,7 @@ object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
                     size = EntryQuantity(5)
                 )
                 it("places the new order below the existing") {
-                    val results = play(event, books)
+                    val results = orderPlaced(event, books)
 
                     results.aggregate.buyLimitBook.entries.size() shouldBe 0
                     results.aggregate.sellLimitBook.entries.size() shouldBe 2
@@ -261,7 +288,7 @@ object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
                     size = EntryQuantity(5)
                 )
                 it("places the new order above the existing") {
-                    val results = play(event, books)
+                    val results = orderPlaced(event, books)
 
                     results.aggregate.buyLimitBook.entries.size() shouldBe 0
                     results.aggregate.sellLimitBook.entries.size() shouldBe 2
