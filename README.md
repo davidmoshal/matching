@@ -6,9 +6,9 @@ This is a lightweight matching engine written in Kotlin.
 ## The farmer's market
 If you are not familiar with matching engine, read this example. You are an apple farmers and you have 100 apples ripe to be sold. You can sell them into two ways. You can either let the customers knock your door, or you could bring them to the farmer's market. You are not the only apple farmers in the town. Waiting to have customers turning up to your door and asking to buy your apples, you either are an apple farmer celebrity, or you are insane, or just plain lazy. Statistically you have a better chance to sell your apples in the farmer's market, where the farmers and customers both have strong intentions to trade, and they are more committed to settle trades (exchange of goods and services). So assume you go to the farmer's market. There are tens of apple farmers, and thousands of customers. You could set up your booth and wait for the customers, which is better than waiting at home, but you are still passively selling. Or you could active go around and ask every stranger to buy your apples, probably with desperation on your face.
 
-The farmer's market owner does not want farmers and customers running in the market like headless chickens, because it is simply dangerous and chaotic. The market owner announces that farmers and customers can now put their intention of either buying or selling in a centralised book anonymously, and the market will match the buying and selling in a fair and orderly manner. However, the market owner requires both buyers and sellers to commit to honouring the trades, that is, if you said you wanted to sell 50 apples for 1 pound each, you need to be ready to hand over 50 apples and get 50 pounds back in your pocket, and pay transaction fees to the market owner for helping you out. So selling and buying are more than intentions, they are obligations. So we call them Orders. The centralised book is called the Order Book. 
+The farmer's market owner does not want farmers and customers running in the market like headless chickens, because it is simply dangerous and chaotic. The market owner announces that farmers and customers can now put their intention to either buying or selling in a centralised book anonymously, and the market will match the buying and selling in a fair and orderly manner. However, the market owner requires both buyers and sellers to commit to honouring the trades, that is, if you said you wanted to sell 50 apples for 1 pound each, you need to be ready to hand over 50 apples and get 50 pounds back in your pocket, and pay transaction fees to the market owner for helping you out. So selling and buying are more than intentions, they are obligations. So we call them Orders. The centralised book is called the Order Book. 
 
-Then some genius businessmen come and say, "I can buy the apples for my customers on their behalf, and I could deliver the apples to their doors, and of course, with a fee. So customers no longer need to even spend time out in the market". Brokers are the names of these businessmen. Fair enough, so customers can wait just sit home and enjoy the apples, knowing they have paid a fee to the Brokers for each apple they purchased. 
+Then some genius businessmen come and say, "I can buy the apples for my customers on their behalf, and I could deliver the apples to their doors, and of course, with a fee". So customers no longer need to even spend time out in the market. Brokers are the names of these businessmen. Fair enough, so customers can wait just sit home and enjoy the apples, knowing they have paid a fee to the Brokers for each apple they purchased. 
 
 There are also opportunists that watch the market and are willing to buy and sell at the same time, and aim to gain profit by arbitraging (Buy low, sell high). The market owner is very happy with these activities because it makes the market looks very busy and active, even when there are no real customers and farmers around, so the market owner called these opportunists "Market Makers". Market Makers provide Quotes that are usually in pairs (Buy and Sell). Some Market Makers prefer quoting in multiple levels (multiple pairs) at the same time, and this aggregation is called a Mass Quote. 
 
@@ -28,15 +28,15 @@ The domain borrows a lot of languages and terms from the [FIX Protocol](http://f
 
 #### Time in Force
 Determines when the Order is in effect.
-* Good till cancel - Effective until cancelled (by request or by the exchange) 
-* Day - Effective until the current business date is over
-* Good till day - Effective until the given business date is over
-* Immediate or cancel - Immediately match book entries and cancel the unmatched quantities
+* Good till cancel - Effective until cancelled (by request or by the Exchange) 
+* Day - Effective until the current Business Date is over
+* Good till day - Effective until the given Business Date is over
+* Immediate or cancel - Immediately match Book entries and cancel the unmatched quantities
 * Fill or kill - Fill the full quantity of the Order or kill the Order
 
 #### Trade rules
 * Aggressors take the better execution price. For example, if a Sell @ 15 is passive, and a Buy @ 20 is aggressor, then the Trade is executed @ 15 so the aggressor gets a better execution price.
-* The Order Book is prioritised by price and then time. Firstly, better prices come first, i.e. higher buy prices and lower buy prices. For the same price, the earlier Orders come first.
+* The Order Book is prioritised by price and then time. Firstly, better prices come first, i.e. higher buy prices and lower buy prices. For the same price, the earlier Orders or Quotes come first.
 * No customer can match its own Orders.
 * Market makers cannot match another Market makers. One of parties in the trade must have real products or money. 
 
@@ -65,7 +65,8 @@ There are two basic constructs:
     * Transformation of representation - e.g. `toString`
     * Mutation - Mutate the current state by creating a new one
     * Derived property getter
-* Stateless function. Stateless function makes all the business decisions. 
+    * Business decisions are passed in and captured. Persistent data structures do not make any business decision.
+* Stateless function or Pure function. Stateless function makes all the business decisions. The output is deterministic at all time given the same input parameters. 
 
 ### Domain-driven development
 The entire library focuses on the [domain](https://airbrake.io/blog/software-design/domain-driven-design) logic of a matching engine, and therefore, will not depend on any particular technology like Kafka or REST.
