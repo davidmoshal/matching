@@ -99,3 +99,10 @@ The transaction is completed when all Events are played and the final new State 
 
 During recovery, only Primary events need to be re-played as the Side-effect events will be re-generated.
 
+### Machine-time and randomisation
+Machine-time and randomisation are strictly prohibited in the domain, because 
+* Functions are no longer deterministic, and therefore
+* States recovered from re-playing Events will be different from the previous.
+
+Machine-time is stateful and randomisation is indeterministic. They are supplied outside of the domain.
+
