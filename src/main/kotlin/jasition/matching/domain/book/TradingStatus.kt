@@ -1,5 +1,7 @@
 package jasition.matching.domain.book
 
+import jasition.matching.domain.order.command.PlaceOrderCommand
+
 data class TradingStatuses(
     val default: TradingStatus,
     val scheduled: TradingStatus? = null,
@@ -10,6 +12,12 @@ data class TradingStatuses(
 }
 
 enum class TradingStatus {
-    OPEN_FOR_TRADING,
-    CLOSED
+    OPEN_FOR_TRADING {
+        override fun allows(command: PlaceOrderCommand): Boolean = true
+    },
+    CLOSED {
+        override fun allows(command: PlaceOrderCommand): Boolean = false
+    };
+
+    abstract fun allows(command: PlaceOrderCommand) : Boolean
 }

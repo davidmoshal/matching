@@ -8,7 +8,6 @@ import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.book.event.EntryAddedToBookEvent
-import jasition.matching.domain.book.event.entryAddedToBook
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.trade.match
@@ -26,9 +25,30 @@ data class OrderPlacedEvent(
     val timeInForce: TimeInForce,
     val whenHappened: Instant,
     val entryStatus: EntryStatus = EntryStatus.NEW
-) : Event {
+) : Event<Books> {
     override fun eventId(): EventId = eventId
     override fun type(): EventType = EventType.PRIMARY
+
+    override fun play(aggregate: Books): Transaction<Books> {
+        val result = match(aggressor = toBookEntry(), books = aggregate.withEventId(aggregate.verifyEventId(eventId)))
+        val entry = result.a
+        val matchTransaction = result.b
+
+        if (entry.timeInForce.canStayOnBook(entry.size)) {
+            val newBooks = matchTransaction.aggregate
+            val nextEventId = newBooks.lastEventId.next()
+            val entryAddedToBookEvent = EntryAddedToBookEvent(
+                eventId = nextEventId,
+                bookId = aggregate.bookId,
+                entry = entry.withEventId(nextEventId),
+                whenHappened = whenHappened
+            )
+
+            return matchTransaction.append(entryAddedToBookEvent)
+                .append(entryAddedToBookEvent.play(newBooks))
+        }
+        return matchTransaction
+    }
 
     fun toBookEntry(): BookEntry = BookEntry(
         key = BookEntryKey(
@@ -46,23 +66,3 @@ data class OrderPlacedEvent(
     )
 }
 
-fun orderPlaced(event: OrderPlacedEvent, books: Books): Transaction<Books> {
-    val result = match(aggressor = event.toBookEntry(), books = books.withEventId(books.verifyEventId(event.eventId)))
-    val entry = result.a
-    val matchTransaction = result.b
-
-    if (entry.timeInForce.canStayOnBook(entry.size)) {
-        val newBooks = matchTransaction.aggregate
-        val nextEventId = newBooks.lastEventId.next()
-        val entryAddedToBookEvent = EntryAddedToBookEvent(
-            eventId = nextEventId,
-            bookId = books.bookId,
-            entry = entry.withEventId(nextEventId),
-            whenHappened = event.whenHappened
-        )
-
-        return matchTransaction.append(entryAddedToBookEvent)
-            .append(entryAddedToBook(entryAddedToBookEvent, newBooks))
-    }
-    return matchTransaction
-}

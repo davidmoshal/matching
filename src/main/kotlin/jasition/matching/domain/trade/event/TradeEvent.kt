@@ -19,9 +19,16 @@ data class TradeEvent(
     val whenHappened: Instant,
     val aggressor: TradeSideEntry,
     val passive: TradeSideEntry
-) : Event {
+) : Event<Books> {
     override fun eventId(): EventId = eventId
     override fun type(): EventType = EventType.SIDE_EFFECT
+
+    override fun play(aggregate: Books): Transaction<Books> = Transaction(
+        aggregate.withEventId(aggregate.verifyEventId(eventId))
+            .traded(aggressor)
+            .traded(passive)
+
+    )
 }
 
 data class TradeSideEntry(
@@ -41,10 +48,4 @@ data class TradeSideEntry(
 
 }
 
-fun trade(event: TradeEvent, books: Books): Transaction<Books> = Transaction(
-    books.withEventId(books.verifyEventId(event.eventId))
-        .traded(event.aggressor)
-        .traded(event.passive)
-
-)
 

@@ -34,7 +34,7 @@ object ValidatePlaceOrderCommandTest : Spek({
                 whenRequested = Instant.now()
             )
 
-            val result = placeOrder(command = command, books = books)
+            val result = validate(command = command, books = books)
 
             it("places the order on the book") {
                 result.isRight() shouldBe true

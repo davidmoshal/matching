@@ -8,12 +8,11 @@ import jasition.matching.domain.Transaction
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.BookEntry
 import jasition.matching.domain.trade.event.TradeEvent
-import jasition.matching.domain.trade.event.trade
 
 fun match(
     aggressor: BookEntry,
     books: Books,
-    events: List<Event> = List.empty()
+    events: List<Event<Books>> = List.empty()
 ): Tuple2<BookEntry, Transaction<Books>> {
     val limitBook = aggressor.side.oppositeSideBook(books)
 
@@ -29,7 +28,7 @@ fun match(
     val tradePrice = findTradePrice(aggressor, passive)
         ?: throw IllegalArgumentException("Cannot match two entries without price")
 
-    val event = TradeEvent(
+    val tradeEvent = TradeEvent(
         bookId = books.bookId,
         eventId = books.lastEventId.next(),
         size = tradeSize,
@@ -39,12 +38,12 @@ fun match(
         passive = passive.toTradeSideEntry(tradeSize)
     )
 
-    val result = trade(event, books)
+    val result = tradeEvent.play(books)
 
     return match(
         aggressor = aggressor.traded(tradeSize, tradePrice),
         books = result.aggregate,
-        events = events.append(event).appendAll(result.events)
+        events = events.append(tradeEvent).appendAll(result.events)
     )
 }
 

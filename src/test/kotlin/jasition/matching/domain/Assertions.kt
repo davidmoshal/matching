@@ -3,6 +3,7 @@ package jasition.matching.domain
 import io.kotlintest.matchers.beOfType
 import io.kotlintest.should
 import io.kotlintest.shouldBe
+import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.BookEntry
 import jasition.matching.domain.book.entry.EntryStatus
 import jasition.matching.domain.book.entry.Price
@@ -31,7 +32,7 @@ fun assertEntry(
 }
 
 fun assertOrderPlacedAndEntryAddedToBookEquals(
-    entryAddedToBookEvent: Event?,
+    entryAddedToBookEvent: Event<Books>?,
     event: OrderPlacedEvent
 ) {
     entryAddedToBookEvent should beOfType<EntryAddedToBookEvent>()

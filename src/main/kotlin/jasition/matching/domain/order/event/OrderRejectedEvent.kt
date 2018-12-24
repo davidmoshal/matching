@@ -24,9 +24,13 @@ data class OrderRejectedEvent(
     val whenHappened: Instant,
     val rejectReason: OrderRejectReason,
     val rejectText: String?
-) : Event {
+) : Event<Books> {
     override fun eventId(): EventId = eventId
     override fun type(): EventType = EventType.PRIMARY
+
+    override fun play(aggregate: Books): Transaction<Books> =
+        Transaction(aggregate.withEventId(aggregate.verifyEventId(eventId)))
+
 }
 
 enum class OrderRejectReason {
@@ -40,6 +44,3 @@ enum class OrderRejectReason {
     UNKNOWN_ACCOUNTS,
     OTHER
 }
-
-fun orderRejected(event: OrderRejectedEvent, books: Books): Transaction<Books> =
-    Transaction(books.withEventId(books.verifyEventId(event.eventId)))

@@ -4,7 +4,6 @@ import arrow.core.Either
 import jasition.matching.domain.Command
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
-import jasition.matching.domain.book.TradingStatus
 import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
@@ -70,7 +69,7 @@ data class PlaceOrderCommand(
     )
 }
 
-fun placeOrder(
+fun validate(
     command: PlaceOrderCommand,
     books: Books,
     currentTime: Instant = Instant.now()
@@ -87,7 +86,7 @@ fun placeOrder(
         )
     }
 
-    if (TradingStatus.OPEN_FOR_TRADING != books.tradingStatuses.effectiveStatus()) {
+    if (!books.tradingStatuses.effectiveStatus().allows(command)) {
         return Either.left(
             command.toRejectedEvent(
                 books = books,

@@ -10,7 +10,6 @@ import jasition.matching.domain.book.event.EntryAddedToBookEvent
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.order.event.OrderPlacedEvent
-import jasition.matching.domain.order.event.orderPlaced
 import jasition.matching.domain.trade.event.TradeEvent
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.context
@@ -38,7 +37,7 @@ object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
             )
             val books = Books(BookId("book")).addBookEntry(existingEntry).withEventId(existingEntry.key.eventId)
             on("a SELL Limit GTC Order 5@11 placed") {
-                val event = OrderPlacedEvent(
+                val orderPlacedEvent = OrderPlacedEvent(
                     requestId = ClientRequestId("req1"),
                     whoRequested = Client(firmId = "firm1", firmClientId = "client2"),
                     bookId = BookId("book"),
@@ -50,7 +49,7 @@ object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
                     eventId = EventId(2),
                     size = EntryQuantity(5)
                 )
-                val result = orderPlaced(event, books)
+                val result = orderPlacedEvent.play(books)
                 it("has the existing entry on the BUY side") {
                     result.aggregate.buyLimitBook.entries.size() shouldBe 1
 
@@ -64,21 +63,21 @@ object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
                 }
                 it("places the entry on the SELL side with expected order data") {
                     result.events.size() shouldBe 1
-                    assertOrderPlacedAndEntryAddedToBookEquals(result.events.get(0), event)
+                    assertOrderPlacedAndEntryAddedToBookEquals(result.events.get(0), orderPlacedEvent)
 
                     result.aggregate.sellLimitBook.entries.size() shouldBe 1
 
                     assertEntry(
                         entry = result.aggregate.sellLimitBook.entries.values().get(0),
-                        clientRequestId = event.requestId,
-                        availableSize = event.size.availableSize,
-                        price = event.price,
-                        client = event.whoRequested
+                        clientRequestId = orderPlacedEvent.requestId,
+                        availableSize = orderPlacedEvent.size.availableSize,
+                        price = orderPlacedEvent.price,
+                        client = orderPlacedEvent.whoRequested
                     )
                 }
             }
             on("a SELL Limit GTC Order 5@10 placed") {
-                val event = OrderPlacedEvent(
+                val orderPlacedEvent = OrderPlacedEvent(
                     requestId = ClientRequestId("req1"),
                     whoRequested = Client(firmId = "firm1", firmClientId = "client2"),
                     bookId = BookId("book"),
@@ -90,7 +89,7 @@ object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
                     eventId = EventId(2),
                     size = EntryQuantity(5)
                 )
-                val result = orderPlaced(event, books)
+                val result = orderPlacedEvent.play(books)
                 it("generates a Trade 4@10 and no more side-effect event") {
                     result.events.size() shouldBe 2
 
@@ -114,11 +113,11 @@ object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
 
                         assertEntry(
                             entry = entryAddedToBookEvent.entry,
-                            clientRequestId = event.requestId,
+                            clientRequestId = orderPlacedEvent.requestId,
                             availableSize = 1,
                             tradedSize = 4,
-                            price = event.price,
-                            client = event.whoRequested,
+                            price = orderPlacedEvent.price,
+                            client = orderPlacedEvent.whoRequested,
                             status = EntryStatus.PARTIAL_FILL
                         )
                     }
@@ -127,11 +126,11 @@ object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
 
                     assertEntry(
                         entry = result.aggregate.sellLimitBook.entries.values().get(0),
-                        clientRequestId = event.requestId,
+                        clientRequestId = orderPlacedEvent.requestId,
                         availableSize = 1,
                         tradedSize = 4,
-                        price = event.price,
-                        client = event.whoRequested,
+                        price = orderPlacedEvent.price,
+                        client = orderPlacedEvent.whoRequested,
                         status = EntryStatus.PARTIAL_FILL
                     )
                 }

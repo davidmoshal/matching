@@ -7,7 +7,6 @@ import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.order.event.OrderPlacedEvent
-import jasition.matching.domain.order.event.orderPlaced
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.given
@@ -20,7 +19,7 @@ object OrderPlacedOnEmptyBookScenariosTest : Spek({
         given("The book is empty") {
             val books = Books(BookId("book"))
             on("a BUY Limit GTC order placed") {
-                val event = OrderPlacedEvent(
+                val orderPlacedEvent = OrderPlacedEvent(
                     requestId = ClientRequestId("req1"),
                     whoRequested = Client(firmId = "firm1", firmClientId = "client1"),
                     bookId = BookId("book"),
@@ -32,27 +31,27 @@ object OrderPlacedOnEmptyBookScenariosTest : Spek({
                     eventId = EventId(1),
                     size = EntryQuantity(10)
                 )
-                val result = orderPlaced(event, books)
+                val result = orderPlacedEvent.play(books)
                 it("has no entry on the SELL side") {
                     result.aggregate.sellLimitBook.entries.size() shouldBe 0
                 }
                 it("places the entry on the BUY side with expected order data") {
                     result.events.size() shouldBe 1
-                    assertOrderPlacedAndEntryAddedToBookEquals(result.events.get(0), event)
+                    assertOrderPlacedAndEntryAddedToBookEquals(result.events.get(0), orderPlacedEvent)
 
                     result.aggregate.buyLimitBook.entries.size() shouldBe 1
 
                     assertEntry(
                         entry = result.aggregate.buyLimitBook.entries.values().get(0),
-                        clientRequestId = event.requestId,
-                        availableSize = event.size.availableSize,
-                        price = event.price,
-                        client = event.whoRequested
+                        clientRequestId = orderPlacedEvent.requestId,
+                        availableSize = orderPlacedEvent.size.availableSize,
+                        price = orderPlacedEvent.price,
+                        client = orderPlacedEvent.whoRequested
                     )
                 }
             }
             on("a SELL Limit GTC order placed") {
-                val event = OrderPlacedEvent(
+                val orderPlacedEvent = OrderPlacedEvent(
                     requestId = ClientRequestId("req1"),
                     whoRequested = Client(firmId = "firm1", firmClientId = "client1"),
                     bookId = BookId("book"),
@@ -64,22 +63,22 @@ object OrderPlacedOnEmptyBookScenariosTest : Spek({
                     eventId = EventId(1),
                     size = EntryQuantity(10)
                 )
-                val result = orderPlaced(event, books)
+                val result = orderPlacedEvent.play(books)
                 it("has no entry on the BUY side") {
                     result.aggregate.buyLimitBook.entries.size() shouldBe 0
                 }
                 it("places the entry on the SELL side with expected order data") {
                     result.events.size() shouldBe 1
-                    assertOrderPlacedAndEntryAddedToBookEquals(result.events.get(0), event)
+                    assertOrderPlacedAndEntryAddedToBookEquals(result.events.get(0), orderPlacedEvent)
 
                     result.aggregate.sellLimitBook.entries.size() shouldBe 1
 
                     assertEntry(
                         entry = result.aggregate.sellLimitBook.entries.values().get(0),
-                        clientRequestId = event.requestId,
-                        availableSize = event.size.availableSize,
-                        price = event.price,
-                        client = event.whoRequested
+                        clientRequestId = orderPlacedEvent.requestId,
+                        availableSize = orderPlacedEvent.size.availableSize,
+                        price = orderPlacedEvent.price,
+                        client = orderPlacedEvent.whoRequested
                     )
                 }
             }
