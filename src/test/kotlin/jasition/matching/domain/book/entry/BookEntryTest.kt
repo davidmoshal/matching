@@ -26,9 +26,8 @@ internal class BookEntryTest {
         )
 
         val bookId = BookId("bookId")
-        val actual = entry.toEntryAddedToBookEvent(bookId)
 
-        actual shouldBe EntryAddedToBookEvent(
+        entry.toEntryAddedToBookEvent(bookId) shouldBe EntryAddedToBookEvent(
             eventId = entry.key.eventId,
             bookId = bookId,
             entry = entry,
@@ -49,9 +48,7 @@ internal class BookEntryTest {
             status = EntryStatus.PARTIAL_FILL
         )
 
-        val actual = entry.toTradeSideEntry(8)
-
-        actual shouldBe TradeSideEntry(
+        entry.toTradeSideEntry(8) shouldBe TradeSideEntry(
             requestId = entry.clientRequestId,
             whoRequested = entry.client,
             entryType = entry.entryType,
@@ -63,6 +60,5 @@ internal class BookEntryTest {
             entryEventId = entry.key.eventId,
             entryStatus = EntryStatus.PARTIAL_FILL
         )
-
     }
 }

@@ -10,6 +10,8 @@ import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.book.event.EntryAddedToBookEvent
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
+import jasition.matching.domain.expectedBookEntry
+import jasition.matching.domain.expectedEntryAddedToBookEvent
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
@@ -39,38 +41,19 @@ internal object OrderPlacedEventTest : Spek({
                 result.aggregate.sellLimitBook.entries.size() shouldBe 0
             }
             it("adds the order to the book") {
-                val expectedBookEntry = BookEntry(
-                    key = BookEntryKey(
-                        price = orderPlacedEvent.price,
-                        whenSubmitted = orderPlacedEvent.whenHappened,
-                        eventId = orderPlacedEvent.eventId + 1
-                    ),
-                    clientRequestId = orderPlacedEvent.requestId,
-                    client = orderPlacedEvent.whoRequested,
-                    entryType = orderPlacedEvent.entryType,
-                    side = orderPlacedEvent.side,
-                    timeInForce = orderPlacedEvent.timeInForce,
-                    size = orderPlacedEvent.size,
-                    status = orderPlacedEvent.entryStatus
-                )
+                val expectedBookEntry = expectedBookEntry(orderPlacedEvent)
 
                 result.events.size() shouldBe 1
                 val entryAddedToBookEvent = result.events.get(0)
                 entryAddedToBookEvent should beOfType<EntryAddedToBookEvent>()
                 if (entryAddedToBookEvent is EntryAddedToBookEvent) {
-                    entryAddedToBookEvent shouldBe EntryAddedToBookEvent(
-                        eventId = orderPlacedEvent.eventId + 1,
-                        bookId = books.bookId,
-                        entry = expectedBookEntry,
-                        whenHappened = orderPlacedEvent.whenHappened
+                    entryAddedToBookEvent shouldBe expectedEntryAddedToBookEvent(
+                        orderPlacedEvent, books, expectedBookEntry
                     )
                 }
 
                 result.aggregate.buyLimitBook.entries.size() shouldBe 1
-
-                val actual = result.aggregate.buyLimitBook.entries.values().get(0)
-
-                actual shouldBe expectedBookEntry
+                result.aggregate.buyLimitBook.entries.values().get(0) shouldBe expectedBookEntry
             }
         }
     }

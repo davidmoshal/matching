@@ -53,28 +53,13 @@ internal object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
                 val result = orderPlacedEvent.play(books)
                 it("has the existing entry on the BUY side") {
                     result.aggregate.buyLimitBook.entries.size() shouldBe 1
-
-                    assertEntry(
-                        entry = result.aggregate.buyLimitBook.entries.values().get(0),
-                        clientRequestId = existingEntry.clientRequestId,
-                        availableSize = existingEntry.size.availableSize,
-                        price = existingEntry.key.price,
-                        client = existingEntry.client
-                    )
+                    result.aggregate.buyLimitBook.entries.values().get(0) shouldBe existingEntry
                 }
-                it("places the entry on the SELL side with expected order data") {
+                it("adds the entry on the SELL side with expected order data") {
                     result.events.size() shouldBe 1
-                    assertOrderPlacedAndEntryAddedToBookEquals(result.events.get(0), orderPlacedEvent)
-
+                    result.events.get(0) should beOfType<EntryAddedToBookEvent>()
                     result.aggregate.sellLimitBook.entries.size() shouldBe 1
-
-                    assertEntry(
-                        entry = result.aggregate.sellLimitBook.entries.values().get(0),
-                        clientRequestId = orderPlacedEvent.requestId,
-                        availableSize = orderPlacedEvent.size.availableSize,
-                        price = orderPlacedEvent.price,
-                        client = orderPlacedEvent.whoRequested
-                    )
+                    result.aggregate.sellLimitBook.entries.values().get(0) shouldBe expectedBookEntry(orderPlacedEvent)
                 }
             }
             on("a SELL Limit GTC Order 5@10 placed") {
@@ -95,7 +80,6 @@ internal object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
                     result.events.size() shouldBe 2
 
                     val sideEffectEvent = result.events.get(0)
-
                     sideEffectEvent should beOfType<TradeEvent>()
 
                     if (sideEffectEvent is TradeEvent) {
@@ -106,34 +90,23 @@ internal object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
                 it("remove the existing entry on the BUY side") {
                     result.aggregate.buyLimitBook.entries.size() shouldBe 0
                 }
-                it("places a Sell 1@10 on the SELL side") {
+                it("adds a Sell 1@10 on the SELL side") {
                     result.events.size() shouldBe 2
-                    val entryAddedToBookEvent = result.events.get(1)
-                    entryAddedToBookEvent should beOfType<EntryAddedToBookEvent>()
-                    if (entryAddedToBookEvent is EntryAddedToBookEvent) {
+                    result.events.get(1) should beOfType<EntryAddedToBookEvent>()
 
-                        assertEntry(
-                            entry = entryAddedToBookEvent.entry,
-                            clientRequestId = orderPlacedEvent.requestId,
-                            availableSize = 1,
-                            tradedSize = 4,
-                            price = orderPlacedEvent.price,
-                            client = orderPlacedEvent.whoRequested,
-                            status = EntryStatus.PARTIAL_FILL
+                    val entryAddedToBookEvent = result.events.get(1)
+                    if (entryAddedToBookEvent is EntryAddedToBookEvent) {
+                        result.aggregate.sellLimitBook.entries.size() shouldBe 1
+                        result.aggregate.sellLimitBook.entries.values().get(0) shouldBe expectedBookEntry(
+                            orderPlacedEvent
+                        ).withEventId(entryAddedToBookEvent.eventId).withStatus(EntryStatus.PARTIAL_FILL).withSize(
+                            EntryQuantity(
+                                availableSize = 1,
+                                tradedSize = 4,
+                                cancelledSize = 0
+                            )
                         )
                     }
-
-                    result.aggregate.sellLimitBook.entries.size() shouldBe 1
-
-                    assertEntry(
-                        entry = result.aggregate.sellLimitBook.entries.values().get(0),
-                        clientRequestId = orderPlacedEvent.requestId,
-                        availableSize = 1,
-                        tradedSize = 4,
-                        price = orderPlacedEvent.price,
-                        client = orderPlacedEvent.whoRequested,
-                        status = EntryStatus.PARTIAL_FILL
-                    )
                 }
             }
         }

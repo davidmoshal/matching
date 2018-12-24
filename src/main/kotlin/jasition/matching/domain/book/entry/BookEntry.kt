@@ -74,6 +74,32 @@ data class BookEntry(
             status = status
         )
     }
+
+    fun withSize(size: EntryQuantity): BookEntry {
+        return BookEntry(
+            key = key,
+            clientRequestId = clientRequestId,
+            client = client,
+            entryType = entryType,
+            size = size,
+            timeInForce = timeInForce,
+            side = side,
+            status = status
+        )
+    }
+
+    fun withStatus(status: EntryStatus): BookEntry {
+        return BookEntry(
+            key = key,
+            clientRequestId = clientRequestId,
+            client = client,
+            entryType = entryType,
+            size = size,
+            timeInForce = timeInForce,
+            side = side,
+            status = status
+        )
+    }
 }
 
 data class BookEntryKey(

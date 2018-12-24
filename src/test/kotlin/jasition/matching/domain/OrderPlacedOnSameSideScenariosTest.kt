@@ -1,9 +1,12 @@
 package jasition.matching.domain
 
+import io.kotlintest.matchers.beOfType
+import io.kotlintest.should
 import io.kotlintest.shouldBe
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.*
+import jasition.matching.domain.book.event.EntryAddedToBookEvent
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.order.event.OrderPlacedEvent
@@ -15,8 +18,8 @@ import org.jetbrains.spek.api.dsl.on
 import java.time.Instant
 
 internal object OrderPlacedOnSameSideScenariosTest : Spek({
-    describe(": Book Entry Priority : Buy Price descending then submitted time ascending then Event ID ascending") {
-        given("The book has a Buy Limit GTC order 4@10") {
+    describe(": Book Entry Priority : BUY Price descending then submitted time ascending then Event ID ascending") {
+        given("The book has a BUY Limit GTC order 4@10") {
             val existingEntry = BookEntry(
                 key = BookEntryKey(
                     price = Price(10),
@@ -51,27 +54,13 @@ internal object OrderPlacedOnSameSideScenariosTest : Spek({
                 it("has no entry on the SELL side") {
                     result.aggregate.sellLimitBook.entries.size() shouldBe 0
                 }
-                it("places the entry on the BUY side with expected order data above the existing") {
+                it("adds the entry on the BUY side with expected order data above the existing") {
                     result.events.size() shouldBe 1
-                    val entryAddedToBookEvent = result.events.get(0)
-                    assertOrderPlacedAndEntryAddedToBookEquals(entryAddedToBookEvent, orderPlacedEvent)
-
+                    result.events.get(0) should beOfType<EntryAddedToBookEvent>()
                     result.aggregate.buyLimitBook.entries.size() shouldBe 2
+                    result.aggregate.buyLimitBook.entries.values().get(0) shouldBe expectedBookEntry(orderPlacedEvent)
+                    result.aggregate.buyLimitBook.entries.values().get(1) shouldBe existingEntry
 
-                    assertEntry(
-                        entry = result.aggregate.buyLimitBook.entries.values().get(0),
-                        clientRequestId = orderPlacedEvent.requestId,
-                        availableSize = orderPlacedEvent.size.availableSize,
-                        price = orderPlacedEvent.price,
-                        client = orderPlacedEvent.whoRequested
-                    )
-                    assertEntry(
-                        entry = result.aggregate.buyLimitBook.entries.values().get(1),
-                        clientRequestId = existingEntry.clientRequestId,
-                        availableSize = existingEntry.size.availableSize,
-                        price = existingEntry.key.price,
-                        client = existingEntry.client
-                    )
                 }
             }
             on("a BUY Limit GTC order 5@10 is placed at a later time") {
@@ -91,27 +80,12 @@ internal object OrderPlacedOnSameSideScenariosTest : Spek({
                 it("has no entry on the SELL side") {
                     result.aggregate.sellLimitBook.entries.size() shouldBe 0
                 }
-                it("places the entry on the BUY side with expected order data below the existing") {
+                it("adds the entry on the BUY side with expected order data below the existing") {
                     result.events.size() shouldBe 1
-                    val entryAddedToBookEvent = result.events.get(0)
-                    assertOrderPlacedAndEntryAddedToBookEquals(entryAddedToBookEvent, orderPlacedEvent)
-
+                    result.events.get(0) should beOfType<EntryAddedToBookEvent>()
                     result.aggregate.buyLimitBook.entries.size() shouldBe 2
-
-                    assertEntry(
-                        entry = result.aggregate.buyLimitBook.entries.values().get(0),
-                        clientRequestId = existingEntry.clientRequestId,
-                        availableSize = existingEntry.size.availableSize,
-                        price = existingEntry.key.price,
-                        client = existingEntry.client
-                    )
-                    assertEntry(
-                        entry = result.aggregate.buyLimitBook.entries.values().get(1),
-                        clientRequestId = orderPlacedEvent.requestId,
-                        availableSize = orderPlacedEvent.size.availableSize,
-                        price = orderPlacedEvent.price,
-                        client = orderPlacedEvent.whoRequested
-                    )
+                    result.aggregate.buyLimitBook.entries.values().get(0) shouldBe existingEntry
+                    result.aggregate.buyLimitBook.entries.values().get(1) shouldBe expectedBookEntry(orderPlacedEvent)
                 }
             }
             on("a BUY Limit GTC order 5@10 is placed at the same instant") {
@@ -131,27 +105,12 @@ internal object OrderPlacedOnSameSideScenariosTest : Spek({
                 it("has no entry on the SELL side") {
                     result.aggregate.sellLimitBook.entries.size() shouldBe 0
                 }
-                it("places the entry on the BUY side with expected order data below the existing") {
+                it("adds the entry on the BUY side with expected order data below the existing") {
                     result.events.size() shouldBe 1
-                    val entryAddedToBookEvent = result.events.get(0)
-                    assertOrderPlacedAndEntryAddedToBookEquals(entryAddedToBookEvent, orderPlacedEvent)
-
+                    result.events.get(0) should beOfType<EntryAddedToBookEvent>()
                     result.aggregate.buyLimitBook.entries.size() shouldBe 2
-
-                    assertEntry(
-                        entry = result.aggregate.buyLimitBook.entries.values().get(0),
-                        clientRequestId = existingEntry.clientRequestId,
-                        availableSize = existingEntry.size.availableSize,
-                        price = existingEntry.key.price,
-                        client = existingEntry.client
-                    )
-                    assertEntry(
-                        entry = result.aggregate.buyLimitBook.entries.values().get(1),
-                        clientRequestId = orderPlacedEvent.requestId,
-                        availableSize = orderPlacedEvent.size.availableSize,
-                        price = orderPlacedEvent.price,
-                        client = orderPlacedEvent.whoRequested
-                    )
+                    result.aggregate.buyLimitBook.entries.values().get(0) shouldBe existingEntry
+                    result.aggregate.buyLimitBook.entries.values().get(1) shouldBe expectedBookEntry(orderPlacedEvent)
                 }
             }
             on("a BUY Limit GTC order 5@9 is placed") {
@@ -171,35 +130,19 @@ internal object OrderPlacedOnSameSideScenariosTest : Spek({
                 it("has no entry on the SELL side") {
                     result.aggregate.sellLimitBook.entries.size() shouldBe 0
                 }
-                it("places the entry on the BUY side with expected order data below the existing") {
+                it("adds the entry on the BUY side with expected order data below the existing") {
                     result.events.size() shouldBe 1
-                    val entryAddedToBookEvent = result.events.get(0)
-                    assertOrderPlacedAndEntryAddedToBookEquals(entryAddedToBookEvent, orderPlacedEvent)
-
+                    result.events.get(0) should beOfType<EntryAddedToBookEvent>()
                     result.aggregate.buyLimitBook.entries.size() shouldBe 2
-
-                    assertEntry(
-                        entry = result.aggregate.buyLimitBook.entries.values().get(0),
-                        clientRequestId = existingEntry.clientRequestId,
-                        availableSize = existingEntry.size.availableSize,
-                        price = existingEntry.key.price,
-                        client = existingEntry.client
-                    )
-                    assertEntry(
-                        entry = result.aggregate.buyLimitBook.entries.values().get(1),
-                        clientRequestId = orderPlacedEvent.requestId,
-                        availableSize = orderPlacedEvent.size.availableSize,
-                        price = orderPlacedEvent.price,
-                        client = orderPlacedEvent.whoRequested
-                    )
-
+                    result.aggregate.buyLimitBook.entries.values().get(0) shouldBe existingEntry
+                    result.aggregate.buyLimitBook.entries.values().get(1) shouldBe expectedBookEntry(orderPlacedEvent)
                 }
             }
         }
     }
 
-    describe(": Book Entry Priority : Sell Price ascending then submitted time ascending then Event ID ascending") {
-        given("The book has a Sell Limit GTC order 4@10") {
+    describe(": Book Entry Priority : SELL Price ascending then submitted time ascending then Event ID ascending") {
+        given("The book has a SELL Limit GTC order 4@10") {
             val existingEntry = BookEntry(
                 key = BookEntryKey(
                     price = Price(10),
@@ -233,27 +176,12 @@ internal object OrderPlacedOnSameSideScenariosTest : Spek({
                 it("has no entry on the BUY side") {
                     result.aggregate.buyLimitBook.entries.size() shouldBe 0
                 }
-                it("places the entry on the BUY side with expected order data below the existing") {
+                it("adds the entry on the SELL side with expected order data below the existing") {
                     result.events.size() shouldBe 1
-                    val entryAddedToBookEvent = result.events.get(0)
-                    assertOrderPlacedAndEntryAddedToBookEquals(entryAddedToBookEvent, orderPlacedEvent)
-
+                    result.events.get(0) should beOfType<EntryAddedToBookEvent>()
                     result.aggregate.sellLimitBook.entries.size() shouldBe 2
-
-                    assertEntry(
-                        entry = result.aggregate.sellLimitBook.entries.values().get(0),
-                        clientRequestId = existingEntry.clientRequestId,
-                        availableSize = existingEntry.size.availableSize,
-                        price = existingEntry.key.price,
-                        client = existingEntry.client
-                    )
-                    assertEntry(
-                        entry = result.aggregate.sellLimitBook.entries.values().get(1),
-                        clientRequestId = orderPlacedEvent.requestId,
-                        availableSize = orderPlacedEvent.size.availableSize,
-                        price = orderPlacedEvent.price,
-                        client = orderPlacedEvent.whoRequested
-                    )
+                    result.aggregate.sellLimitBook.entries.values().get(0) shouldBe existingEntry
+                    result.aggregate.sellLimitBook.entries.values().get(1) shouldBe expectedBookEntry(orderPlacedEvent)
                 }
             }
             on("a SELL Limit GTC order 5@10 is placed at a later time") {
@@ -273,27 +201,12 @@ internal object OrderPlacedOnSameSideScenariosTest : Spek({
                 it("has no entry on the BUY side") {
                     result.aggregate.buyLimitBook.entries.size() shouldBe 0
                 }
-                it("places the entry on the BUY side with expected order data below the existing") {
+                it("adds the entry on the SELL side with expected order data below the existing") {
                     result.events.size() shouldBe 1
-                    val entryAddedToBookEvent = result.events.get(0)
-                    assertOrderPlacedAndEntryAddedToBookEquals(entryAddedToBookEvent, orderPlacedEvent)
-
+                    result.events.get(0) should beOfType<EntryAddedToBookEvent>()
                     result.aggregate.sellLimitBook.entries.size() shouldBe 2
-
-                    assertEntry(
-                        entry = result.aggregate.sellLimitBook.entries.values().get(0),
-                        clientRequestId = existingEntry.clientRequestId,
-                        availableSize = existingEntry.size.availableSize,
-                        price = existingEntry.key.price,
-                        client = existingEntry.client
-                    )
-                    assertEntry(
-                        entry = result.aggregate.sellLimitBook.entries.values().get(1),
-                        clientRequestId = orderPlacedEvent.requestId,
-                        availableSize = orderPlacedEvent.size.availableSize,
-                        price = orderPlacedEvent.price,
-                        client = orderPlacedEvent.whoRequested
-                    )
+                    result.aggregate.sellLimitBook.entries.values().get(0) shouldBe existingEntry
+                    result.aggregate.sellLimitBook.entries.values().get(1) shouldBe expectedBookEntry(orderPlacedEvent)
                 }
             }
             on("a SELL Limit GTC order 5@10 is placed at the same instant") {
@@ -313,27 +226,12 @@ internal object OrderPlacedOnSameSideScenariosTest : Spek({
                 it("has no entry on the BUY side") {
                     result.aggregate.buyLimitBook.entries.size() shouldBe 0
                 }
-                it("places the entry on the BUY side with expected order data below the existing") {
+                it("adds the entry on the BUY side with expected order data below the existing") {
                     result.events.size() shouldBe 1
-                    val entryAddedToBookEvent = result.events.get(0)
-                    assertOrderPlacedAndEntryAddedToBookEquals(entryAddedToBookEvent, orderPlacedEvent)
-
+                    result.events.get(0) should beOfType<EntryAddedToBookEvent>()
                     result.aggregate.sellLimitBook.entries.size() shouldBe 2
-
-                    assertEntry(
-                        entry = result.aggregate.sellLimitBook.entries.values().get(0),
-                        clientRequestId = existingEntry.clientRequestId,
-                        availableSize = existingEntry.size.availableSize,
-                        price = existingEntry.key.price,
-                        client = existingEntry.client
-                    )
-                    assertEntry(
-                        entry = result.aggregate.sellLimitBook.entries.values().get(1),
-                        clientRequestId = orderPlacedEvent.requestId,
-                        availableSize = orderPlacedEvent.size.availableSize,
-                        price = orderPlacedEvent.price,
-                        client = orderPlacedEvent.whoRequested
-                    )
+                    result.aggregate.sellLimitBook.entries.values().get(0) shouldBe existingEntry
+                    result.aggregate.sellLimitBook.entries.values().get(1) shouldBe expectedBookEntry(orderPlacedEvent)
                 }
             }
             on("a SELL Limit GTC order 5@9 is placed") {
@@ -353,26 +251,12 @@ internal object OrderPlacedOnSameSideScenariosTest : Spek({
                 it("has no entry on the BUY side") {
                     result.aggregate.buyLimitBook.entries.size() shouldBe 0
                 }
-                it("places the entry on the BUY side with expected order data above the existing") {
+                it("adds the entry on the BUY side with expected order data above the existing") {
                     result.events.size() shouldBe 1
-                    assertOrderPlacedAndEntryAddedToBookEquals(result.events.get(0), orderPlacedEvent)
-
+                    result.events.get(0) should beOfType<EntryAddedToBookEvent>()
                     result.aggregate.sellLimitBook.entries.size() shouldBe 2
-
-                    assertEntry(
-                        entry = result.aggregate.sellLimitBook.entries.values().get(0),
-                        clientRequestId = orderPlacedEvent.requestId,
-                        availableSize = orderPlacedEvent.size.availableSize,
-                        price = orderPlacedEvent.price,
-                        client = orderPlacedEvent.whoRequested
-                    )
-                    assertEntry(
-                        entry = result.aggregate.sellLimitBook.entries.values().get(1),
-                        clientRequestId = existingEntry.clientRequestId,
-                        availableSize = existingEntry.size.availableSize,
-                        price = existingEntry.key.price,
-                        client = existingEntry.client
-                    )
+                    result.aggregate.sellLimitBook.entries.values().get(0) shouldBe expectedBookEntry(orderPlacedEvent)
+                    result.aggregate.sellLimitBook.entries.values().get(1) shouldBe existingEntry
                 }
             }
         }
