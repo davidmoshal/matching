@@ -31,7 +31,9 @@ object OrderPlacedOnSameSideScenariosTest : Spek({
                 size = EntryQuantity(4),
                 status = EntryStatus.NEW
             )
-            val books = Books(BookId("book")).addBookEntry(existingEntry).withEventId(existingEntry.key.eventId)
+            val bookId = BookId("book")
+            val books = existingEntry.toEntryAddedToBookEvent(bookId).play(Books(BookId("book"))).aggregate
+
             on("a BUY Limit GTC order 5@11 placed") {
                 val orderPlacedEvent = OrderPlacedEvent(
                     requestId = ClientRequestId("req1"),
@@ -212,7 +214,8 @@ object OrderPlacedOnSameSideScenariosTest : Spek({
                 size = EntryQuantity(4),
                 status = EntryStatus.NEW
             )
-            val books = Books(BookId("book")).addBookEntry(existingEntry).withEventId(existingEntry.key.eventId)
+            val bookId = BookId("book")
+            val books = existingEntry.toEntryAddedToBookEvent(bookId).play(Books(BookId("book"))).aggregate
             on("a SELL Limit GTC order 5@11 is placed") {
                 val orderPlacedEvent = OrderPlacedEvent(
                     requestId = ClientRequestId("req1"),

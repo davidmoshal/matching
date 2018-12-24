@@ -1,6 +1,8 @@
 package jasition.matching.domain.book.entry
 
 import jasition.matching.domain.EventId
+import jasition.matching.domain.book.BookId
+import jasition.matching.domain.book.event.EntryAddedToBookEvent
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.trade.event.TradeSideEntry
@@ -16,7 +18,15 @@ data class BookEntry(
     val size: EntryQuantity,
     val status: EntryStatus = EntryStatus.NEW
 ) {
-    fun toTradeSideEntry(tradeSize: Int) : TradeSideEntry {
+    fun toEntryAddedToBookEvent(bookId: BookId): EntryAddedToBookEvent =
+        EntryAddedToBookEvent(
+            eventId = key.eventId,
+            bookId = bookId,
+            entry = this,
+            whenHappened = key.whenSubmitted
+        )
+
+    fun toTradeSideEntry(tradeSize: Int): TradeSideEntry {
         val newQuantity = size.traded(tradeSize)
 
         return TradeSideEntry(
@@ -48,11 +58,13 @@ data class BookEntry(
         )
     }
 
-    fun withEventId(eventId: EventId) : BookEntry {
+    fun withEventId(eventId: EventId): BookEntry {
         return BookEntry(
-            key = BookEntryKey(price = key.price,
+            key = BookEntryKey(
+                price = key.price,
                 whenSubmitted = key.whenSubmitted,
-                eventId = eventId),
+                eventId = eventId
+            ),
             clientRequestId = clientRequestId,
             client = client,
             side = side,
