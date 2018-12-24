@@ -18,7 +18,7 @@ import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import java.time.Instant
 
-object ValidatePlaceOrderCommandTest : Spek({
+object PlaceOrderCommandTest : Spek({
     given("The book is empty") {
         val books = Books(BookId(bookId = "book"))
         on("an order submitted") {
@@ -34,7 +34,7 @@ object ValidatePlaceOrderCommandTest : Spek({
                 whenRequested = Instant.now()
             )
 
-            val result = validate(command = command, books = books)
+            val result = command.validate(books)
 
             it("places the order on the book") {
                 result.isRight() shouldBe true

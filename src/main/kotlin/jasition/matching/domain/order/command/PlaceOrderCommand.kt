@@ -24,6 +24,36 @@ data class PlaceOrderCommand(
     val whenRequested: Instant
 ) : Command {
 
+    fun validate(
+        books: Books,
+        currentTime: Instant = Instant.now()
+    ): Either<OrderRejectedEvent, OrderPlacedEvent> {
+
+        if (size <= 0) {
+            return Either.left(
+                toRejectedEvent(
+                    books = books,
+                    currentTime = currentTime,
+                    rejectReason = OrderRejectReason.INCORRECT_QUANTITY,
+                    rejectText = "Order size must be positive : ${size}"
+                )
+            )
+        }
+
+        if (!books.tradingStatuses.effectiveStatus().allows(this)) {
+            return Either.left(
+                toRejectedEvent(
+                    books = books,
+                    currentTime = currentTime,
+                    rejectReason = OrderRejectReason.EXCHANGE_CLOSED,
+                    rejectText = "The Book is current not open for trading : ${books.tradingStatuses.effectiveStatus()}"
+                )
+            )
+        }
+
+        return Either.right(toPlacedEvent(books = books, currentTime = currentTime))
+    }
+
     fun toPlacedEvent(
         books: Books,
         currentTime: Instant = Instant.now()
@@ -67,35 +97,4 @@ data class PlaceOrderCommand(
         rejectReason = rejectReason,
         rejectText = rejectText
     )
-}
-
-fun validate(
-    command: PlaceOrderCommand,
-    books: Books,
-    currentTime: Instant = Instant.now()
-): Either<OrderRejectedEvent, OrderPlacedEvent> {
-
-    if (command.size <= 0) {
-        return Either.left(
-            command.toRejectedEvent(
-                books = books,
-                currentTime = currentTime,
-                rejectReason = OrderRejectReason.INCORRECT_QUANTITY,
-                rejectText = "Order size must be positive : ${command.size}"
-            )
-        )
-    }
-
-    if (!books.tradingStatuses.effectiveStatus().allows(command)) {
-        return Either.left(
-            command.toRejectedEvent(
-                books = books,
-                currentTime = currentTime,
-                rejectReason = OrderRejectReason.EXCHANGE_CLOSED,
-                rejectText = "The Book is current not open for trading : ${books.tradingStatuses.effectiveStatus()}"
-            )
-        )
-    }
-
-    return Either.right(command.toPlacedEvent(books = books, currentTime = currentTime))
 }

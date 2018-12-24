@@ -17,7 +17,7 @@ import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import java.time.Instant
 
-object PlayOrderPlacedEventTest : Spek({
+object OrderPlacedEventTest : Spek({
     given("The book is empty") {
         val books = Books(BookId("book"))
         on("an order placed") {
