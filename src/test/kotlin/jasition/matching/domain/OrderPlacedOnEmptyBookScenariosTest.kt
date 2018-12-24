@@ -1,12 +1,9 @@
 package jasition.matching.domain
 
-import io.kotlintest.matchers.beOfType
-import io.kotlintest.should
 import io.kotlintest.shouldBe
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.*
-import jasition.matching.domain.book.event.EntryAddedToBookEvent
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.order.event.OrderPlacedEvent
@@ -41,18 +38,7 @@ object OrderPlacedOnEmptyBookScenariosTest : Spek({
                 }
                 it("places the entry on the BUY side with expected order data") {
                     result.events.size() shouldBe 1
-                    val entryAddedToBookEvent = result.events.get(0)
-                    entryAddedToBookEvent should beOfType<EntryAddedToBookEvent>()
-                    if (entryAddedToBookEvent is EntryAddedToBookEvent) {
-
-                        assertEntry(
-                            entry = entryAddedToBookEvent.entry,
-                            clientRequestId = event.requestId,
-                            availableSize = event.size.availableSize,
-                            price = event.price,
-                            client = event.whoRequested
-                        )
-                    }
+                    assertOrderPlacedAndEntryAddedToBookEquals(result.events.get(0), event)
 
                     result.aggregate.buyLimitBook.entries.size() shouldBe 1
 
@@ -84,18 +70,7 @@ object OrderPlacedOnEmptyBookScenariosTest : Spek({
                 }
                 it("places the entry on the SELL side with expected order data") {
                     result.events.size() shouldBe 1
-                    val entryAddedToBookEvent = result.events.get(0)
-                    entryAddedToBookEvent should beOfType<EntryAddedToBookEvent>()
-                    if (entryAddedToBookEvent is EntryAddedToBookEvent) {
-
-                        assertEntry(
-                            entry = entryAddedToBookEvent.entry,
-                            clientRequestId = event.requestId,
-                            availableSize = event.size.availableSize,
-                            price = event.price,
-                            client = event.whoRequested
-                        )
-                    }
+                    assertOrderPlacedAndEntryAddedToBookEquals(result.events.get(0), event)
 
                     result.aggregate.sellLimitBook.entries.size() shouldBe 1
 

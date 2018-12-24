@@ -64,18 +64,7 @@ object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
                 }
                 it("places the entry on the SELL side with expected order data") {
                     result.events.size() shouldBe 1
-                    val entryAddedToBookEvent = result.events.get(0)
-                    entryAddedToBookEvent should beOfType<EntryAddedToBookEvent>()
-                    if (entryAddedToBookEvent is EntryAddedToBookEvent) {
-
-                        assertEntry(
-                            entry = entryAddedToBookEvent.entry,
-                            clientRequestId = event.requestId,
-                            availableSize = event.size.availableSize,
-                            price = event.price,
-                            client = event.whoRequested
-                        )
-                    }
+                    assertOrderPlacedAndEntryAddedToBookEquals(result.events.get(0), event)
 
                     result.aggregate.sellLimitBook.entries.size() shouldBe 1
 
