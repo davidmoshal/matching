@@ -25,15 +25,14 @@ data class PlaceOrderCommand(
 ) : Command {
 
     fun validate(
-        books: Books,
-        currentTime: Instant = Instant.now()
+        books: Books
     ): Either<OrderRejectedEvent, OrderPlacedEvent> {
 
         if (size <= 0) {
             return Either.left(
                 toRejectedEvent(
                     books = books,
-                    currentTime = currentTime,
+                    currentTime = whenRequested,
                     rejectReason = OrderRejectReason.INCORRECT_QUANTITY,
                     rejectText = "Order size must be positive : ${size}"
                 )
@@ -44,14 +43,14 @@ data class PlaceOrderCommand(
             return Either.left(
                 toRejectedEvent(
                     books = books,
-                    currentTime = currentTime,
+                    currentTime = whenRequested,
                     rejectReason = OrderRejectReason.EXCHANGE_CLOSED,
                     rejectText = "The Book is current not open for trading : ${books.tradingStatuses.effectiveStatus()}"
                 )
             )
         }
 
-        return Either.right(toPlacedEvent(books = books, currentTime = currentTime))
+        return Either.right(toPlacedEvent(books = books, currentTime = whenRequested))
     }
 
     fun toPlacedEvent(

@@ -14,7 +14,7 @@ import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import java.time.Instant
 
-object OrderPlacedOnEmptyBookScenariosTest : Spek({
+internal object OrderPlacedOnEmptyBookScenariosTest : Spek({
     describe(": Behaviour : Able to place an order on an empty book") {
         given("The book is empty") {
             val books = Books(BookId("book"))

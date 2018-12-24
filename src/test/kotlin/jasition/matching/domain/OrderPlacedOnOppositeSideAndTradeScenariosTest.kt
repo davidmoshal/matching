@@ -18,7 +18,7 @@ import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import java.time.Instant
 
-object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
+internal object OrderPlacedOnOppositeSideAndTradeScenariosTest : Spek({
     context(": Matching Rule : Match if aggressor price is same or better than passive") {
         given("The book has a Buy Limit GTC Order 4@10") {
             val existingEntry = BookEntry(

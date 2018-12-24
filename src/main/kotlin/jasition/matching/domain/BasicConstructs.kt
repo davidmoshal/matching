@@ -40,6 +40,10 @@ data class EventId(val value: Long) : Comparable<EventId> {
 
     override fun compareTo(other: EventId): Int =
         if (value == Long.MAX_VALUE && other.value == 0L) -1 else value.compareTo(other.value)
+
+    operator fun plus(delta: Long) :EventId = EventId(value + delta)
+
+    operator fun minus(delta: Long) :EventId = EventId(value - delta)
 }
 
 data class Transaction<A : Aggregate>(val aggregate: A, val events: List<Event<A>> = List.empty()) {
