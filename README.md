@@ -106,3 +106,11 @@ Machine-time and randomisation are strictly prohibited in the domain, because
 
 Machine-time is stateful and randomisation is indeterministic. They are supplied outside of the domain.
 
+## Dependencies
+Production 
+* Arrow - Monads
+* Vavr - Persistent collections minus its Monads
+
+Testing
+* Spek - Specifications framework
+* Kotlintest - Fluent DSL assertions
