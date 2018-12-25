@@ -15,7 +15,9 @@ dependencies {
 
     // Arrow
     implementation "io.arrow-kt:arrow-core:0.8.1"
-    testCompile 'io.arrow-kt:arrow-test:0.8.1'
+    testCompile ('io.arrow-kt:arrow-test:0.8.1') {
+        exclude group: 'io.kotlintest'
+    }
 
     // Vavr (for persistent collections)
     compile 'io.vavr:vavr:0.9.2'
