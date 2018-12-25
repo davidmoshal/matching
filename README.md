@@ -105,7 +105,7 @@ Each aggregate can be recovered in isolation, given the fact that each aggregate
 ### Transaction
 During to the recursive nature of playing events, aggregates are also computed recursively. The transaction will collect the generated events and merge the aggregates during the recursion. At the end of the transaction, there should be one final aggregate and a list of events in chronological order. 
 
-If the events were to be transported externally, it is recommended to group all events in one transaction into one transport message. In this way, the transaction either has happened or not at all from the external's perspectives, and therefore ensure state integrity and consistency. It would be extremely difficult to reason or to recover the state if only half of the events of a transaction is played.   
+If the events were to be transported externally, it is recommended to group all events in one transaction into one transport message. In this way, the transaction either has happened or not at all from the external's perspectives, and therefore it ensures state integrity and consistency. It would be extremely difficult to reason or to recover the state if only half of the events of a transaction is played.   
 
 ### Machine-time and randomisation
 **Machine-time and randomisation are strictly prohibited in the domain**, because functions involving them are no longer deterministic, and therefore states recovered from re-playing events will be different from the previous.
