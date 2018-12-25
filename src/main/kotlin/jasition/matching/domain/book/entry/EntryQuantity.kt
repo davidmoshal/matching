@@ -7,7 +7,7 @@ data class EntryQuantity(
 ) {
     init {
         if (availableSize < 0 || tradedSize < 0 || cancelledSize < 0) {
-            throw IllegalStateException("Order sizes cannot be negative: available=$availableSize, traded=$tradedSize, cancelled=$cancelledSize")
+            throw IllegalArgumentException("Order sizes cannot be negative: available=$availableSize, traded=$tradedSize, cancelled=$cancelledSize")
         }
     }
 

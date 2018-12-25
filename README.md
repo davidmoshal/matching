@@ -107,15 +107,13 @@ During to the recursive nature of playing events, aggregates are also computed r
 
 Machine-time is stateful and randomisation is indeterministic. They are supplied outside of the domain.
 
-
 ## Dependencies
 Production 
 * [Arrow](https://arrow-kt.io/) - Monads
 * [Vavr](http://www.vavr.io/) - Persistent collections minus its Monads
 
 Testing
-* [Spek](https://spekframework.org/) - Specifications framework
-* [Kotlintest](https://github.com/kotlintest/kotlintest) - Fluent DSL assertions
+* [Kotlintest](https://github.com/kotlintest/kotlintest) - Test Framework, fluent DSL assertions
 
 ## References
 [My technical blog](https://jasition.github.io)
