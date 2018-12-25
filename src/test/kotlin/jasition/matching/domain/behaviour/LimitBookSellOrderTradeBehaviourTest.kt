@@ -1,15 +1,17 @@
-package jasition.matching.domain
+package jasition.matching.domain.behaviour
 
 import io.kotlintest.matchers.beOfType
 import io.kotlintest.should
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.BehaviorSpec
+import jasition.matching.domain.EventId
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.book.event.EntryAddedToBookEvent
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
+import jasition.matching.domain.expectedBookEntry
 import jasition.matching.domain.order.event.OrderPlacedEvent
 import jasition.matching.domain.trade.event.TradeEvent
 import java.time.Instant
@@ -56,7 +58,9 @@ internal class `Sell aggressor order trades with buy passive order if sell price
                     result.events.size() shouldBe 1
                     result.events.get(0) should beOfType<EntryAddedToBookEvent>()
                     result.aggregate.sellLimitBook.entries.size() shouldBe 1
-                    result.aggregate.sellLimitBook.entries.values().get(0) shouldBe expectedBookEntry(orderPlacedEvent)
+                    result.aggregate.sellLimitBook.entries.values().get(0) shouldBe expectedBookEntry(
+                        orderPlacedEvent
+                    )
                 }
             }
             `when`("a SELL Limit GTC Order 5@10 placed") {
