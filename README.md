@@ -6,7 +6,7 @@ This is a lightweight matching engine written in Kotlin.
 ## The farmer's market
 If you are not familiar with matching engine, read this example. You are an apple farmers and you have 100 apples ripe to be sold. You can sell them in three ways. You can either let the customers knock your door, or you travel around in the town and knock each potential customer's door, or you could bring them to the farmer's market. You are not the only apple farmers in the town. Waiting to have customers turning up to your door and asking to buy your apples, you either are an apple farmer celebrity, or you are insane, or just plain lazy. You may be super hardworking that you would knock everyone's door to sell your apples, but I presume you would be arrested for the crime of disturbing the peace very soon. Statistically you have a better chance to sell your apples in the farmer's market, where the farmers and customers both have strong intentions to trade, and they are more committed to settle trades (exchange of goods and services). So assume you go to the farmer's market. There are tens of apple farmers, and thousands of customers. You could set up your booth and wait for the customers, which is better than waiting at home, but you are still passively selling. Or you could active go around and ask every stranger to buy your apples, probably with desperation on your face.
 
-The farmer's market owner does not want farmers and customers running in the market like headless chickens, because it is simply dangerous and chaotic. The market owner announces that farmers and customers can now put their intention to either buying or selling in a centralised book anonymously, and the market will match the buying and selling in a fair and orderly manner. However, the market owner requires both buyers and sellers to commit to honouring the trades, that is, if you said you wanted to sell 50 apples for 1 pound each, you need to be ready to hand over 50 apples and get 50 pounds back in your pocket, and pay transaction fees to the market owner for helping you out. So selling and buying are more than intentions, they are obligations. So we call them Orders. The centralised book is called the Order Book. 
+The farmer's market owner does not like farmers and customers running in the market like headless chickens, because it is simply dangerous and chaotic. The market owner announces that farmers and customers can now put their intention to either buying or selling in a centralised book anonymously, and the market will match the buying and selling in a fair and orderly manner. However, the market owner requires both buyers and sellers to commit to honouring the trades, that is, if you said you wanted to sell 50 apples for 1 pound each, you need to be ready to hand over 50 apples and get 50 pounds back in your pocket, and pay transaction fees to the market owner for helping you out. So selling and buying are more than intentions, they are obligations. So we call them Orders. The centralised book is called the Order Book. 
 
 Then some genius businessmen come and say, "I can buy the apples for my customers on their behalf, and I could deliver the apples to their doors, and of course, with a fee". So customers no longer need to even spend time out in the market. Brokers are the names of these businessmen. Fair enough, so customers can wait just sit home and enjoy the apples, knowing they have paid a fee to the Brokers for each apple they purchased. 
 
@@ -100,7 +100,7 @@ The transaction is completed when all Events are played and the final new State 
 During recovery, only Primary events need to be re-played as the Side-effect events will be re-generated.
 
 ### Transaction
-During to the recursive nature of playing events, aggregates are also computed recursively. The transaction will collect the generated events and merge the aggregates during the recursion. At the end of the transaction, there should be one final aggregate and a list of events.  
+During to the recursive nature of playing events, aggregates are also computed recursively. The transaction will collect the generated events and merge the aggregates during the recursion. At the end of the transaction, there should be one final aggregate and a list of events in chronological order.  
 
 ### Machine-time and randomisation
 **Machine-time and randomisation are strictly prohibited in the domain**, because functions involving them are no longer deterministic, and therefore states recovered from re-playing Events will be different from the previous.
@@ -110,10 +110,10 @@ Machine-time is stateful and randomisation is indeterministic. They are supplied
 ## Dependencies
 Production 
 * [Arrow](https://arrow-kt.io/) - Monads
-* [Vavr](http://www.vavr.io/) - Persistent collections minus its Monads
+* [Vavr](http://www.vavr.io/) - Persistent collections minus its monads
 
 Testing
-* [Kotlintest](https://github.com/kotlintest/kotlintest) - Test Framework, fluent DSL assertions
+* [Kotlintest](https://github.com/kotlintest/kotlintest) - Test framework, fluent DSL assertions
 
 ## References
 [My technical blog](https://jasition.github.io)
