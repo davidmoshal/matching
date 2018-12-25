@@ -43,16 +43,10 @@ data class BookEntry(
         )
     }
 
-    fun traded(tradeSize: Int, tradePrice: Price): BookEntry {
+    fun traded(tradeSize: Int): BookEntry {
         val newQuantity = size.traded(tradeSize)
 
-        return BookEntry(
-            key = key,
-            clientRequestId = clientRequestId,
-            client = client,
-            side = side,
-            timeInForce = timeInForce,
-            entryType = entryType,
+        return copy(
             size = newQuantity,
             status = status.traded(newQuantity)
         )
@@ -76,27 +70,12 @@ data class BookEntry(
     }
 
     fun withSize(size: EntryQuantity): BookEntry {
-        return BookEntry(
-            key = key,
-            clientRequestId = clientRequestId,
-            client = client,
-            entryType = entryType,
-            size = size,
-            timeInForce = timeInForce,
-            side = side,
-            status = status
-        )
+        return copy(
+            size = size)
     }
 
     fun withStatus(status: EntryStatus): BookEntry {
-        return BookEntry(
-            key = key,
-            clientRequestId = clientRequestId,
-            client = client,
-            entryType = entryType,
-            size = size,
-            timeInForce = timeInForce,
-            side = side,
+        return copy(
             status = status
         )
     }

@@ -1,7 +1,7 @@
 package jasition.matching.domain.book.entry
 
 import io.kotlintest.shouldBe
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 internal class EntryQuantityTest {
 

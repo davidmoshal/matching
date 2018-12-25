@@ -7,7 +7,7 @@ import jasition.matching.domain.book.event.EntryAddedToBookEvent
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.trade.event.TradeSideEntry
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import java.time.Instant
 
 internal class BookEntryTest {

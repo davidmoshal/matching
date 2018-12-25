@@ -11,21 +11,17 @@ data class EntryQuantity(
         }
     }
 
-    fun traded(size: Int): EntryQuantity = EntryQuantity(
+    fun traded(size: Int): EntryQuantity = copy(
         availableSize = availableSize - size,
-        tradedSize = tradedSize + size,
-        cancelledSize = cancelledSize
+        tradedSize = tradedSize + size
     )
 
-    fun amended(newOrderSize: Int): EntryQuantity = EntryQuantity(
-        availableSize = newOrderSize - tradedSize - cancelledSize,
-        tradedSize = tradedSize,
-        cancelledSize = cancelledSize
+    fun amended(newOrderSize: Int): EntryQuantity = copy(
+        availableSize = newOrderSize - tradedSize - cancelledSize
     )
 
-    fun cancelled(): EntryQuantity = EntryQuantity(
+    fun cancelled(): EntryQuantity = copy(
         availableSize = 0,
-        tradedSize = tradedSize,
         cancelledSize = cancelledSize + availableSize
     )
 

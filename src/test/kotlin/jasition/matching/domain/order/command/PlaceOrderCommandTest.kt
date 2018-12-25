@@ -35,7 +35,7 @@ internal object PlaceOrderCommandTest : Spek({
             it("places the order on the book") {
                 result.isRight() shouldBe true
 
-                result.getOrHandle { (d) -> throw IllegalArgumentException() } shouldBe OrderPlacedEvent(
+                result.getOrHandle { throw IllegalArgumentException() } shouldBe OrderPlacedEvent(
                     eventId = books.lastEventId + 1,
                     requestId = command.requestId,
                     whoRequested = command.whoRequested,

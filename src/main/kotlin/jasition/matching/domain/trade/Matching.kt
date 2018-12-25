@@ -41,7 +41,7 @@ fun match(
     val result = tradeEvent.play(books)
 
     return match(
-        aggressor = aggressor.traded(tradeSize, tradePrice),
+        aggressor = aggressor.traded(tradeSize),
         books = result.aggregate,
         events = events.append(tradeEvent).appendAll(result.events)
     )

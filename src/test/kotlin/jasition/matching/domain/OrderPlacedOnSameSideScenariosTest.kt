@@ -17,7 +17,7 @@ import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import java.time.Instant
 
-internal object OrderPlacedOnSameSideScenariosTest : Spek({
+object OrderPlacedOnSameSideScenariosTest : Spek({
     describe(": Book Entry Priority : BUY Price descending then submitted time ascending then Event ID ascending") {
         given("The book has a BUY Limit GTC order 4@10") {
             val existingEntry = BookEntry(
