@@ -25,11 +25,12 @@ data class OrderPlacedEvent(
     val timeInForce: TimeInForce,
     val whenHappened: Instant,
     val entryStatus: EntryStatus = EntryStatus.NEW
-) : Event<Books> {
+) : Event<BookId, Books> {
+    override fun aggregateId(): BookId = bookId
     override fun eventId(): EventId = eventId
-    override fun type(): EventType = EventType.PRIMARY
+    override fun eventType(): EventType = EventType.PRIMARY
 
-    override fun play(aggregate: Books): Transaction<Books> {
+    override fun play(aggregate: Books): Transaction<BookId, Books> {
         val result = match(aggressor = toBookEntry(), books = aggregate.copy(lastEventId = aggregate.verifyEventId(eventId)))
         val entry = result.a
         val matchTransaction = result.b

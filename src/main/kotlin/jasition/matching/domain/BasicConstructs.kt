@@ -9,10 +9,11 @@ interface Command
 
 interface Query
 
-interface Event<A : Aggregate> {
+interface Event<K, A : Aggregate> {
+    fun aggregateId(): K
     fun eventId(): EventId
-    fun type(): EventType
-    fun play(aggregate: A): Transaction<A>
+    fun eventType(): EventType
+    fun play(aggregate: A): Transaction<K, A>
 }
 
 enum class EventType {
@@ -46,17 +47,17 @@ data class EventId(val value: Long) : Comparable<EventId> {
     operator fun minus(delta: Long) :EventId = EventId(value - delta)
 }
 
-data class Transaction<A : Aggregate>(val aggregate: A, val events: List<Event<A>> = List.empty()) {
+data class Transaction<K, A : Aggregate>(val aggregate: A, val events: List<Event<K, A>> = List.empty()) {
     fun append(
-        other: Transaction<A>,
+        other: Transaction<K, A>,
         mergeFunction: BiFunction<A, A, A> = BiFunction { _, right -> right }
-    ): Transaction<A> =
+    ): Transaction<K, A> =
         Transaction(
             aggregate = mergeFunction.apply(aggregate, other.aggregate),
             events = events.appendAll(other.events)
         )
 
-    fun append(event: Event<A>): Transaction<A> = Transaction(
+    fun append(event: Event<K, A>): Transaction<K, A> = Transaction(
         aggregate = aggregate,
         events = events.append(event)
     )

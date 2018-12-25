@@ -24,11 +24,12 @@ data class OrderRejectedEvent(
     val whenHappened: Instant,
     val rejectReason: OrderRejectReason,
     val rejectText: String?
-) : Event<Books> {
+) : Event<BookId, Books> {
+    override fun aggregateId(): BookId = bookId
     override fun eventId(): EventId = eventId
-    override fun type(): EventType = EventType.PRIMARY
+    override fun eventType(): EventType = EventType.PRIMARY
 
-    override fun play(aggregate: Books): Transaction<Books> =
+    override fun play(aggregate: Books): Transaction<BookId, Books> =
         Transaction(aggregate.copy(lastEventId = aggregate.verifyEventId(eventId)))
 
 }

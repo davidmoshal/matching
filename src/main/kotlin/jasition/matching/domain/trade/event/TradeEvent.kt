@@ -19,11 +19,12 @@ data class TradeEvent(
     val whenHappened: Instant,
     val aggressor: TradeSideEntry,
     val passive: TradeSideEntry
-) : Event<Books> {
+) : Event<BookId, Books> {
+    override fun aggregateId(): BookId = bookId
     override fun eventId(): EventId = eventId
-    override fun type(): EventType = EventType.SIDE_EFFECT
+    override fun eventType(): EventType = EventType.SIDE_EFFECT
 
-    override fun play(aggregate: Books): Transaction<Books> = Transaction(
+    override fun play(aggregate: Books): Transaction<BookId, Books> = Transaction(
         aggregate.copy(lastEventId = aggregate.verifyEventId(eventId))
             .traded(aggressor)
             .traded(passive)

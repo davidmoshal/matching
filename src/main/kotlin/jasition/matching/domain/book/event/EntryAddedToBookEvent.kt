@@ -14,15 +14,16 @@ data class EntryAddedToBookEvent(
     val bookId: BookId,
     val entry: BookEntry,
     val whenHappened: Instant
-) : Event<Books> {
+) : Event<BookId, Books> {
     init {
         if (eventId != entry.key.eventId) throw IllegalArgumentException("Event ID must match the Event ID in the Book Entry: eventId=$eventId, entry.eventId=${entry.key.eventId}")
     }
 
+    override fun aggregateId(): BookId = bookId
     override fun eventId(): EventId = eventId
-    override fun type(): EventType = EventType.SIDE_EFFECT
+    override fun eventType(): EventType = EventType.SIDE_EFFECT
 
-    override fun play(aggregate: Books): Transaction<Books> {
+    override fun play(aggregate: Books): Transaction<BookId, Books> {
         aggregate.verifyEventId(eventId)
         aggregate.verifyEventId(entry.key.eventId)
 

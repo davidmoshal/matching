@@ -5,6 +5,7 @@ import io.vavr.collection.List
 import io.vavr.collection.Seq
 import jasition.matching.domain.Event
 import jasition.matching.domain.Transaction
+import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.BookEntry
 import jasition.matching.domain.trade.event.TradeEvent
@@ -12,8 +13,8 @@ import jasition.matching.domain.trade.event.TradeEvent
 fun match(
     aggressor: BookEntry,
     books: Books,
-    events: List<Event<Books>> = List.empty()
-): Tuple2<BookEntry, Transaction<Books>> {
+    events: List<Event<BookId, Books>> = List.empty()
+): Tuple2<BookEntry, Transaction<BookId, Books>> {
     val limitBook = aggressor.side.oppositeSideBook(books)
 
     if (notAvailableForTrade(aggressor)

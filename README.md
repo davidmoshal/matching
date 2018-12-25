@@ -76,7 +76,7 @@ The simplest way to interpret [Event-sourcing](https://martinfowler.com/eaaDev/E
 
 *"New State" = func (Event, State)*
 
-So each state transition is the consequence of an Event. Events are played sequentially and therefore single-threaded. Each event has a monotonic increasing sequence number as the ID per aggregate.
+So each state transition is the consequence of an event. Events are played sequentially and therefore single-threaded. Each event has a monotonic increasing sequence number as the ID per aggregate.
 
 ### CQRS
 [Command Query Responsibility Segregation (CQRS)](https://martinfowler.com/bliki/CQRS.html), literally re-categorises the traditional [CRUD](https://www.codecademy.com/articles/what-is-crud) into the followings
@@ -87,7 +87,7 @@ So each state transition is the consequence of an Event. Events are played seque
 
 Events in this domain is categorised into the followings:
 * Primary event - a direct response as a result of Command validation 
-* Side-effect event - an Event generated as a side effect of playing a Primary event 
+* Side-effect event - an event generated as a side effect of playing a Primary event 
 
 Combined with Event-sourcing, the application semantics can be as the following recursion:
 
@@ -95,15 +95,18 @@ Combined with Event-sourcing, the application semantics can be as the following 
 
 *"New State", "Side-effect events" = play (Event, State)*
 
-The transaction is completed when all Events are played and the final new State is computed.
+The transaction is completed when all events are played and the final new state is computed.
 
+### Recovery
 During recovery, only Primary events need to be re-played as the Side-effect events will be re-generated.
+
+Each aggregate can be recovered in isolation, given the fact that each aggregate has its own sequence of events. Events can be compacted as a snapshot to reduce the ever-growing number of events to be re-played and hence the recovery time. However, the snapshot is not planned to be implemented in this project, at least currently.
 
 ### Transaction
 During to the recursive nature of playing events, aggregates are also computed recursively. The transaction will collect the generated events and merge the aggregates during the recursion. At the end of the transaction, there should be one final aggregate and a list of events in chronological order.  
 
 ### Machine-time and randomisation
-**Machine-time and randomisation are strictly prohibited in the domain**, because functions involving them are no longer deterministic, and therefore states recovered from re-playing Events will be different from the previous.
+**Machine-time and randomisation are strictly prohibited in the domain**, because functions involving them are no longer deterministic, and therefore states recovered from re-playing events will be different from the previous.
 
 Machine-time is stateful and randomisation is indeterministic. They are supplied outside of the domain.
 
