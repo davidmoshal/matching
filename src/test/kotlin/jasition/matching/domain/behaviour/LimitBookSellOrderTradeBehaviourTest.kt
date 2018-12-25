@@ -100,8 +100,14 @@ internal class `Sell aggressor order trades with buy passive order if sell price
                         result.aggregate.sellLimitBook.entries.size() shouldBe 1
                         result.aggregate.sellLimitBook.entries.values().get(0) shouldBe expectedBookEntry(
                             orderPlacedEvent
-                        ).withEventId(entryAddedToBookEvent.eventId).withStatus(EntryStatus.PARTIAL_FILL).withSize(
-                            EntryQuantity(
+                        ).copy(
+                            key = BookEntryKey(
+                                price = orderPlacedEvent.price,
+                                whenSubmitted = orderPlacedEvent.whenHappened,
+                                eventId = entryAddedToBookEvent.eventId
+                            ),
+                            status = EntryStatus.PARTIAL_FILL,
+                            size = EntryQuantity(
                                 availableSize = 1,
                                 tradedSize = 4,
                                 cancelledSize = 0

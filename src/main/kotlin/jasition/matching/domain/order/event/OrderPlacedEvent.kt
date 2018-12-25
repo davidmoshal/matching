@@ -30,7 +30,7 @@ data class OrderPlacedEvent(
     override fun type(): EventType = EventType.PRIMARY
 
     override fun play(aggregate: Books): Transaction<Books> {
-        val result = match(aggressor = toBookEntry(), books = aggregate.withEventId(aggregate.verifyEventId(eventId)))
+        val result = match(aggressor = toBookEntry(), books = aggregate.copy(lastEventId = aggregate.verifyEventId(eventId)))
         val entry = result.a
         val matchTransaction = result.b
 
@@ -40,7 +40,7 @@ data class OrderPlacedEvent(
             val entryAddedToBookEvent = EntryAddedToBookEvent(
                 eventId = nextEventId,
                 bookId = aggregate.bookId,
-                entry = entry.withEventId(nextEventId),
+                entry = entry.copy(key = entry.key.copy(eventId = nextEventId)),
                 whenHappened = whenHappened
             )
 

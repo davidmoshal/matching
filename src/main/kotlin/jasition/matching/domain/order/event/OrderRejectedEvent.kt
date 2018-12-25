@@ -29,7 +29,7 @@ data class OrderRejectedEvent(
     override fun type(): EventType = EventType.PRIMARY
 
     override fun play(aggregate: Books): Transaction<Books> =
-        Transaction(aggregate.withEventId(aggregate.verifyEventId(eventId)))
+        Transaction(aggregate.copy(lastEventId = aggregate.verifyEventId(eventId)))
 
 }
 

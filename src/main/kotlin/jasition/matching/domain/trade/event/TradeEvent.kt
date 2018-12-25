@@ -24,7 +24,7 @@ data class TradeEvent(
     override fun type(): EventType = EventType.SIDE_EFFECT
 
     override fun play(aggregate: Books): Transaction<Books> = Transaction(
-        aggregate.withEventId(aggregate.verifyEventId(eventId))
+        aggregate.copy(lastEventId = aggregate.verifyEventId(eventId))
             .traded(aggressor)
             .traded(passive)
 

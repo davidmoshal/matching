@@ -24,5 +24,4 @@ data class EntryQuantity(
         availableSize = 0,
         cancelledSize = cancelledSize + availableSize
     )
-
 }
