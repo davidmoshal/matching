@@ -99,10 +99,14 @@ The transaction is completed when all Events are played and the final new State 
 
 During recovery, only Primary events need to be re-played as the Side-effect events will be re-generated.
 
+### Transaction
+During to the recursive nature of playing events, aggregates are also computed recursively. The transaction will collect the generated events and merge the aggregates during the recursion. At the end of the transaction, there should be one final aggregate and a list of events.  
+
 ### Machine-time and randomisation
 **Machine-time and randomisation are strictly prohibited in the domain**, because functions involving them are no longer deterministic, and therefore states recovered from re-playing Events will be different from the previous.
 
 Machine-time is stateful and randomisation is indeterministic. They are supplied outside of the domain.
+
 
 ## Dependencies
 Production 
