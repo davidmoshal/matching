@@ -9,6 +9,6 @@ data class Price(val value: Long) : Comparable<Price> {
     override fun compareTo(other: Price): Int = value.compareTo(other.value)
 }
 
-class PriceComparator : Comparator<Price> {
-    override fun compare(o1: Price, o2: Price): Int = o1.value.compareTo(o2.value)
+class PriceComparator(val multipler: Int = 1) : Comparator<Price> {
+    override fun compare(o1: Price, o2: Price): Int = multipler * o1.value.compareTo(o2.value)
 }

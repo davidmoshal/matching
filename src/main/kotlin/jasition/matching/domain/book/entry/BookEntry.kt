@@ -68,12 +68,9 @@ class SmallestEventIdFirst : Comparator<BookEntryKey> {
 }
 
 class HighestBuyOrLowestSellPriceFirst(val side: Side) : Comparator<BookEntryKey> {
-    private val priceComparator = nullsFirst(PriceComparator())
+    private val priceComparator = nullsFirst(PriceComparator(side.comparatorMultipler()))
 
     override fun compare(o1: BookEntryKey, o2: BookEntryKey): Int =
-        side.comparatorMultipler() * priceComparator.compare(o1.price, o2.price)
+        priceComparator.compare(o1.price, o2.price)
 }
 
-fun entryComparator(side: Side): Comparator<BookEntryKey> {
-    return HighestBuyOrLowestSellPriceFirst(side) then EarliestSubmittedTimeFirst() then SmallestEventIdFirst()
-}
