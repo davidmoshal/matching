@@ -104,7 +104,6 @@ internal class HighestBuyOrLowestSellPriceFirstTest : StringSpec({
         whenSubmitted = Instant.now(),
         eventId = EventId(9)
     )
-
     "Evaluates null BUY price as before non-null" {
         HighestBuyOrLowestSellPriceFirst(Side.BUY).compare(
             entryKey, entryKey.copy(price = null)

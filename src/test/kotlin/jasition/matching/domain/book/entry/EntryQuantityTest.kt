@@ -1,8 +1,10 @@
 package jasition.matching.domain.book.entry
 
+import io.kotlintest.data.forall
 import io.kotlintest.shouldBe
 import io.kotlintest.shouldThrow
 import io.kotlintest.specs.StringSpec
+import io.kotlintest.tables.row
 
 internal class EntryQuantityTest : StringSpec({
     "Moves available size to traded by trade size"{
@@ -19,46 +21,45 @@ internal class EntryQuantityTest : StringSpec({
             availableSize = 0, tradedSize = 25, cancelledSize = 133
         )
     }
-    "Reduces available size when amended down"{
-        EntryQuantity(
-            availableSize = 100, tradedSize = 25, cancelledSize = 33
-        ).amended(70) shouldBe EntryQuantity(
-            availableSize = 12, tradedSize = 25, cancelledSize = 33
-        )
-    }
-    "Adds available size when amended up"{
-        EntryQuantity(
-            availableSize = 100, tradedSize = 25, cancelledSize = 33
-        ).amended(200) shouldBe EntryQuantity(
-            availableSize = 142, tradedSize = 25, cancelledSize = 33
-        )
-    }
-    "Disallows amending down below traded plus cancelled"{
-        shouldThrow<IllegalArgumentException> {
+    "Adjusts available size when amended"{
+        forall(
+            row(100, 25, 33, 200, 142, 25, 33),
+            row(100, 25, 33, 70, 12, 25, 33)
+        ) { available, traded, cancelled, newOrderSize, newAvailable, newTraded, newCancelled ->
             EntryQuantity(
-                availableSize = 100, tradedSize = 25, cancelledSize = 33
-            ).amended(50)
-        }
-    }
-    "Disallows negative available size"{
-        shouldThrow<IllegalArgumentException> {
-            EntryQuantity(
-                availableSize = -100, tradedSize = 25, cancelledSize = 33
+                availableSize = available, tradedSize = traded, cancelledSize = cancelled
+            ).amended(newOrderSize) shouldBe EntryQuantity(
+                availableSize = newAvailable, tradedSize = newTraded, cancelledSize = newCancelled
             )
         }
     }
-    "Disallows negative traded size"{
-        shouldThrow<IllegalArgumentException> {
-            EntryQuantity(
-                availableSize = 100, tradedSize = -25, cancelledSize = 33
-            )
+    "Disallows amending down to equal to or lower than traded plus cancelled"{
+        forall(
+            row(100, 25, 33, 58),
+            row(100, 25, 33, 57)
+        ) { available, traded, cancelled, newOrderSize ->
+            shouldThrow<IllegalArgumentException> {
+                EntryQuantity(
+                    availableSize = available, tradedSize = traded, cancelledSize = cancelled
+                ).amended(newOrderSize)
+            }
         }
     }
-    "Disallows negative cancelled size"{
-        shouldThrow<IllegalArgumentException> {
-            EntryQuantity(
-                availableSize = 100, tradedSize = 25, cancelledSize = -33
-            )
+    "Disallows negative available, traded, and/or cancelled size(s)"{
+        forall(
+            row(-100, 25, 33),
+            row(100, -25, 33),
+            row(100, 25, -33),
+            row(-100, -25, 33),
+            row(100, -25, -33),
+            row(-100, 25, -33),
+            row(-100, -25, -33)
+        ) { available, traded, cancelled ->
+            shouldThrow<IllegalArgumentException> {
+                EntryQuantity(
+                    availableSize = available, tradedSize = traded, cancelledSize = cancelled
+                )
+            }
         }
     }
 })

@@ -1,2 +1,0 @@
-package jasition.matching.domain
-
