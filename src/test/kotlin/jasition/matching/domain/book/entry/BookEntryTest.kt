@@ -6,24 +6,16 @@ import io.kotlintest.should
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.DescribeSpec
 import jasition.matching.domain.EventId
+import jasition.matching.domain.aBookEntry
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.event.EntryAddedToBookEvent
-import jasition.matching.domain.client.Client
-import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.trade.event.TradeSideEntry
 import java.time.Instant
 
 internal class BookEntryTest : DescribeSpec() {
     init {
-        val entry = BookEntry(
-            key = BookEntryKey(price = Price(10), whenSubmitted = Instant.now(), eventId = EventId(1)),
-            clientRequestId = ClientRequestId("req"),
-            client = Client(firmId = "firm", firmClientId = "firmClientId"),
-            entryType = EntryType.LIMIT,
-            side = Side.SELL,
-            timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-            size = EntryQuantity(availableSize = 23, tradedSize = 2, cancelledSize = 0),
-            status = EntryStatus.PARTIAL_FILL
+        val entry = aBookEntry(
+            size = EntryQuantity(availableSize = 23, tradedSize = 2, cancelledSize = 0)
         )
         val bookId = BookId("bookId")
         describe("Book Entry") {

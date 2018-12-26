@@ -24,12 +24,9 @@ internal class EntryAddedToBookEventPropertyTest : DescribeSpec() {
             whenHappened = Instant.now(),
             eventId = eventId,
             entry = BookEntry(
-                key = BookEntryKey(
-                    price = Price(15),
-                    whenSubmitted = Instant.now(),
-                    eventId = EventId(1)
-                ),
-
+                price = Price(15),
+                whenSubmitted = Instant.now(),
+                eventId = EventId(1),
                 clientRequestId = ClientRequestId("req1"),
                 client = Client(firmId = "firm1", firmClientId = "client1"),
                 entryType = EntryType.LIMIT,
@@ -59,12 +56,9 @@ internal class EntryAddedToBookEventBehaviourTest : BehaviorSpec() {
             val bookId = BookId(bookId = "book")
             val entryEventId = EventId(1)
             val entry = BookEntry(
-                key = BookEntryKey(
-                    price = Price(15),
-                    whenSubmitted = Instant.now(),
-                    eventId = entryEventId
-                ),
-
+                price = Price(15),
+                whenSubmitted = Instant.now(),
+                eventId = entryEventId,
                 clientRequestId = ClientRequestId("req1"),
                 client = Client(firmId = "firm1", firmClientId = "client1"),
                 entryType = EntryType.LIMIT,

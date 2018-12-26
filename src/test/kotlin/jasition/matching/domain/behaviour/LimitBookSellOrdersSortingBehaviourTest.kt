@@ -19,11 +19,9 @@ internal class `Sell orders in limit book are sorted in ascending order then eve
     init {
         given("the book has a SELL Limit GTC order 4@10") {
             val existingEntry = BookEntry(
-                key = BookEntryKey(
-                    price = Price(10),
-                    whenSubmitted = Instant.now(),
-                    eventId = EventId(1)
-                ),
+                price = Price(10),
+                whenSubmitted = Instant.now(),
+                eventId = EventId(1),
                 clientRequestId = ClientRequestId("oldReq1"),
                 client = Client(firmId = "firm1", firmClientId = "client1"),
                 entryType = EntryType.LIMIT,

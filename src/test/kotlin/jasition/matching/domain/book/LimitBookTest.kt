@@ -1,6 +1,8 @@
 package jasition.matching.domain.book
 
 import io.kotlintest.specs.DescribeSpec
+import jasition.matching.domain.aBookEntry
+import jasition.matching.domain.book.entry.Price
 import jasition.matching.domain.book.entry.Side
 
 internal class LimitBookTest : DescribeSpec() {
@@ -8,7 +10,7 @@ internal class LimitBookTest : DescribeSpec() {
         describe("BUY LimitBook") {
             val limitBook = LimitBook(Side.BUY)
             it("prioritises higher prices over lower prices") {
-                // TODO
+                limitBook.add(aBookEntry(side = Side.BUY, price = Price(10)))
             }
         }
     }

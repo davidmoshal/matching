@@ -82,8 +82,9 @@ So each state transition is the consequence of an event. Events are played seque
 [Command Query Responsibility Segregation (CQRS)](https://martinfowler.com/bliki/CQRS.html), literally re-categorises the traditional [CRUD](https://www.codecademy.com/articles/what-is-crud) into the followings
 
 * Command - the intention
-* Event - the validated Command that result in state change
+* Event - the validated command that result in state change
 * Query - the request for information only
+* Report - the result of a query
 
 Events in this domain is categorised into the followings:
 * Primary event - a direct response as a result of Command validation 
@@ -114,6 +115,13 @@ Machine-time is stateful and randomisation is indeterministic. They are supplied
 
 ### Warnings
 As all instruction manuals warn their readers in the very last pages, I strongly warn anyone [**NOT TO USE CQRS AND EVENT-SOURCING AT THE SYSTEM LEVEL**](https://www.infoq.com/news/2016/04/event-sourcing-anti-pattern). They are meant to be used within the [Bounded-context](https://martinfowler.com/bliki/BoundedContext.html) and the applications in your system need to be well divided by domains. Check out [Domain-driven development](https://medium.com/the-coding-matrix/ddd-101-the-5-minute-tour-7a3037cf53b8) if you want to explore more.
+
+### Domain boundary
+Boundary needs to be set up around the domain in order to ensure the domain integrity and the success application of CQRS and Event-sourcing. Here are the rules:
+* Commands, events, queries, reports and aggregates are dedicated to one and only one domain. In other words, the domain owns them and does not share with other domains. 
+* Domain A's commands and queries are strictly used to enter Domain A only. Other domains use commands and queries to send requests to Domain A.  
+* Domain A's events and reports are strictly used to leave Domain A only. The only exception is when recovering Domain A, events from Domain A are re-played. Other domains listen and react to Domain A's events and reports.
+* Domain A's aggregates are not shared with nor visible to other domains. External representations need to be used for inter-domain communication.
 
 ## Performance
 I plan on benchmarking of each command and potentially resolving any performance deficiency. My initial choice of tool is [JMH](https://openjdk.java.net/projects/code-tools/jmh/) as JetBrains also used it in [Kotlin Benchmarking](https://github.com/JetBrains/kotlin-benchmarks). 

@@ -16,8 +16,30 @@ data class BookEntry(
     val side: Side,
     val timeInForce: TimeInForce,
     val size: EntryQuantity,
-    val status: EntryStatus = EntryStatus.NEW
+    val status: EntryStatus
 ) {
+    constructor(
+        price: Price?,
+        whenSubmitted: Instant,
+        eventId: EventId,
+        clientRequestId: ClientRequestId,
+        client: Client,
+        entryType: EntryType,
+        side: Side,
+        timeInForce: TimeInForce,
+        size: EntryQuantity,
+        status: EntryStatus
+    ) : this(
+        key = BookEntryKey(price = price, whenSubmitted = whenSubmitted, eventId = eventId),
+        clientRequestId = clientRequestId,
+        client = client,
+        entryType = entryType,
+        side = side,
+        timeInForce = timeInForce,
+        size = size,
+        status = status
+    )
+
     fun toEntryAddedToBookEvent(bookId: BookId): EntryAddedToBookEvent =
         EntryAddedToBookEvent(
             eventId = key.eventId,
