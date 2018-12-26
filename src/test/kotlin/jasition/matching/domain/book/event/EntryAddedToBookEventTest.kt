@@ -1,8 +1,11 @@
 package jasition.matching.domain.book.event
 
 import io.kotlintest.shouldBe
+import io.kotlintest.shouldThrow
 import io.kotlintest.specs.BehaviorSpec
 import io.kotlintest.specs.DescribeSpec
+import io.mockk.every
+import io.mockk.spyk
 import jasition.matching.domain.EventId
 import jasition.matching.domain.EventType
 import jasition.matching.domain.book.BookId
@@ -53,33 +56,68 @@ internal class EntryAddedToBookEventPropertyTest : DescribeSpec() {
 internal class EntryAddedToBookEventBehaviourTest : BehaviorSpec() {
     init {
         given("the book is empty") {
-            val books = Books(BookId(bookId = "book"))
+            val bookId = BookId(bookId = "book")
+            val entryEventId = EventId(1)
+            val entry = BookEntry(
+                key = BookEntryKey(
+                    price = Price(15),
+                    whenSubmitted = Instant.now(),
+                    eventId = entryEventId
+                ),
+
+                clientRequestId = ClientRequestId("req1"),
+                client = Client(firmId = "firm1", firmClientId = "client1"),
+                entryType = EntryType.LIMIT,
+                side = Side.BUY,
+                timeInForce = TimeInForce.GOOD_TILL_CANCEL,
+                size = EntryQuantity(10),
+                status = EntryStatus.NEW
+            )
+            val originalBooks = spyk(Books(bookId))
+            val newBooks = spyk(Books(bookId))
+            every { originalBooks.addBookEntry(entry) } returns newBooks
 
             `when`("an entry is added to the book") {
-                val eventId = EventId(1)
-                val event = EntryAddedToBookEvent(
-                    bookId = books.bookId,
+                val result = EntryAddedToBookEvent(
+                    bookId = bookId,
                     whenHappened = Instant.now(),
-                    eventId = eventId,
-                    entry = BookEntry(
-                        key = BookEntryKey(
-                            price = Price(15),
-                            whenSubmitted = Instant.now(),
-                            eventId = EventId(1)
-                        ),
+                    eventId = entryEventId,
+                    entry = entry
+                ).play(originalBooks)
 
-                        clientRequestId = ClientRequestId("req1"),
-                        client = Client(firmId = "firm1", firmClientId = "client1"),
-                        entryType = EntryType.LIMIT,
-                        side = Side.BUY,
-                        timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-                        size = EntryQuantity(10),
-                        status = EntryStatus.NEW
-                    )
-                )
-                then("the entry is added to the aggregate") {
-                    val result = event.play(books)
-                    // TODO finish this test case
+                then("a new book is created with the entry added") {
+                    result.aggregate shouldBe newBooks
+                    result.events.size() shouldBe 0
+                }
+            }
+            `when`("an entry is added to the book with the wrong Event ID in the event") {
+                val wrongEventId = entryEventId.next()
+                every { originalBooks.verifyEventId(wrongEventId) } throws IllegalArgumentException()
+
+                then("an IllegalArgumentException is thrown") {
+                    shouldThrow<IllegalArgumentException> {
+                        EntryAddedToBookEvent(
+                            bookId = bookId,
+                            whenHappened = Instant.now(),
+                            eventId = wrongEventId,
+                            entry = entry
+                        ).play(originalBooks)
+                    }
+                }
+            }
+            `when`("an entry is added to the book with the wrong Event ID in the entry") {
+                val wrongEventId = entry.key.eventId
+                every { originalBooks.verifyEventId(wrongEventId) } throws IllegalArgumentException()
+
+                then("an IllegalArgumentException is thrown") {
+                    shouldThrow<IllegalArgumentException> {
+                        EntryAddedToBookEvent(
+                            bookId = bookId,
+                            whenHappened = Instant.now(),
+                            eventId = entryEventId.next(),
+                            entry = entry
+                        ).play(originalBooks)
+                    }
                 }
             }
         }
