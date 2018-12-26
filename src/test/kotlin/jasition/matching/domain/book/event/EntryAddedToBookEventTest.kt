@@ -3,7 +3,7 @@ package jasition.matching.domain.book.event
 import io.kotlintest.shouldBe
 import io.kotlintest.shouldThrow
 import io.kotlintest.specs.BehaviorSpec
-import io.kotlintest.specs.DescribeSpec
+import io.kotlintest.specs.StringSpec
 import io.mockk.every
 import io.mockk.spyk
 import jasition.matching.domain.EventId
@@ -15,40 +15,36 @@ import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
 import java.time.Instant
 
-internal class EntryAddedToBookEventPropertyTest : DescribeSpec() {
-    init {
-        val eventId = EventId(1)
-        val bookId = BookId("book")
-        val event = EntryAddedToBookEvent(
-            bookId = bookId,
-            whenHappened = Instant.now(),
-            eventId = eventId,
-            entry = BookEntry(
-                price = Price(15),
-                whenSubmitted = Instant.now(),
-                eventId = EventId(1),
-                clientRequestId = ClientRequestId("req1"),
-                client = Client(firmId = "firm1", firmClientId = "client1"),
-                entryType = EntryType.LIMIT,
-                side = Side.BUY,
-                timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-                size = EntryQuantity(10),
-                status = EntryStatus.NEW
-            )
+internal class EntryAddedToBookEventPropertyTest : StringSpec({
+    val eventId = EventId(1)
+    val bookId = BookId("book")
+    val event = EntryAddedToBookEvent(
+        bookId = bookId,
+        whenHappened = Instant.now(),
+        eventId = eventId,
+        entry = BookEntry(
+            price = Price(15),
+            whenSubmitted = Instant.now(),
+            eventId = EventId(1),
+            clientRequestId = ClientRequestId("req1"),
+            client = Client(firmId = "firm1", firmClientId = "client1"),
+            entryType = EntryType.LIMIT,
+            side = Side.BUY,
+            timeInForce = TimeInForce.GOOD_TILL_CANCEL,
+            size = EntryQuantity(10),
+            status = EntryStatus.NEW
         )
-        describe("EntryAddedToBookEvent") {
-            it("has Book ID as Aggregate ID") {
-                event.aggregateId() shouldBe bookId
-            }
-            it("has Event ID as Event ID") {
-                event.eventId() shouldBe eventId
-            }
-            it("is a Side-effect event") {
-                event.eventType() shouldBe EventType.SIDE_EFFECT
-            }
-        }
+    )
+    "Has Book ID as Aggregate ID" {
+        event.aggregateId() shouldBe bookId
     }
-}
+    "Has Event ID as Event ID" {
+        event.eventId() shouldBe eventId
+    }
+    "Is a Side-effect event" {
+        event.eventType() shouldBe EventType.SIDE_EFFECT
+    }
+})
 
 internal class EntryAddedToBookEventBehaviourTest : BehaviorSpec() {
     init {
