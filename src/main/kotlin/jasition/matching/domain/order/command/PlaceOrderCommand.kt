@@ -44,8 +44,8 @@ data class PlaceOrderCommand(
                 toRejectedEvent(
                     books = books,
                     currentTime = whenRequested,
-                    rejectReason = OrderRejectReason.EXCHANGE_CLOSED,
-                    rejectText = "The Book is current not open for trading : ${books.tradingStatuses.effectiveStatus()}"
+                    rejectReason = OrderRejectReason.BROKER_EXCHANGE_OPTION,
+                    rejectText = "Placing orders is currently not allowed : ${books.tradingStatuses.effectiveStatus()}"
                 )
             )
         }
@@ -53,7 +53,7 @@ data class PlaceOrderCommand(
         return Either.right(toPlacedEvent(books = books, currentTime = whenRequested))
     }
 
-    fun toPlacedEvent(
+    private fun toPlacedEvent(
         books: Books,
         currentTime: Instant = Instant.now()
     ): OrderPlacedEvent = OrderPlacedEvent(
@@ -73,7 +73,7 @@ data class PlaceOrderCommand(
         whenHappened = currentTime
     )
 
-    fun toRejectedEvent(
+    private fun toRejectedEvent(
         books: Books,
         currentTime: Instant = Instant.now(),
         rejectReason: OrderRejectReason = OrderRejectReason.OTHER,
@@ -85,11 +85,7 @@ data class PlaceOrderCommand(
         bookId = bookId,
         entryType = entryType,
         side = side,
-        size = EntryQuantity(
-            availableSize = size,
-            tradedSize = 0,
-            cancelledSize = 0
-        ),
+        size = size,
         price = price,
         timeInForce = timeInForce,
         whenHappened = currentTime,

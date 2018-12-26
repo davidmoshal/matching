@@ -5,7 +5,10 @@ import io.kotlintest.specs.StringSpec
 import jasition.matching.domain.EventId
 import jasition.matching.domain.EventType
 import jasition.matching.domain.book.BookId
-import jasition.matching.domain.book.entry.*
+import jasition.matching.domain.book.entry.EntryType
+import jasition.matching.domain.book.entry.Price
+import jasition.matching.domain.book.entry.Side
+import jasition.matching.domain.book.entry.TimeInForce
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
 import java.time.Instant
@@ -23,7 +26,7 @@ internal class OrderRejectedEventPropertyTest : StringSpec({
         timeInForce = TimeInForce.GOOD_TILL_CANCEL,
         whenHappened = Instant.now(),
         eventId = eventId,
-        size = EntryQuantity(10),
+        size = 10,
         rejectReason = OrderRejectReason.BROKER_EXCHANGE_OPTION,
         rejectText = "Not allowed"
     )

@@ -6,7 +6,10 @@ import jasition.matching.domain.EventType
 import jasition.matching.domain.Transaction
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
-import jasition.matching.domain.book.entry.*
+import jasition.matching.domain.book.entry.EntryType
+import jasition.matching.domain.book.entry.Price
+import jasition.matching.domain.book.entry.Side
+import jasition.matching.domain.book.entry.TimeInForce
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
 import java.time.Instant
@@ -18,7 +21,7 @@ data class OrderRejectedEvent(
     val bookId: BookId,
     val entryType: EntryType,
     val side: Side,
-    val size: EntryQuantity,
+    val size: Int,
     val price: Price?,
     val timeInForce: TimeInForce,
     val whenHappened: Instant,
