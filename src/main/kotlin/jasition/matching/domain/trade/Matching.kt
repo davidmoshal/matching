@@ -18,7 +18,7 @@ fun match(
     val limitBook = aggressor.side.oppositeSideBook(books)
 
     if (notAvailableForTrade(aggressor)
-        || limitBook.isEmpty()
+        || limitBook.entries.isEmpty
     ) {
         return Tuple2(aggressor, Transaction(books, events))
     }

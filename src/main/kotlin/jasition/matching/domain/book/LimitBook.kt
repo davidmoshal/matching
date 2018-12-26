@@ -13,10 +13,6 @@ data class LimitBook(val entries: TreeMap<BookEntryKey, BookEntry>) {
         )
     )
 
-    fun isEmpty(): Boolean {
-        return entries.isEmpty
-    }
-
     fun add(entry: BookEntry): LimitBook =
         LimitBook(entries.put(entry.key, entry))
 
