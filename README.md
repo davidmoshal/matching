@@ -112,6 +112,9 @@ If the events were to be transported externally, it is recommended to group all 
 
 Machine-time is stateful and randomisation is indeterministic. They are supplied outside of the domain.
 
+## Performance
+I plan on benchmarking of each command and potentially resolving any performance deficiency. My initial choice of tool is [JMH](https://openjdk.java.net/projects/code-tools/jmh/) as JetBrains also used it in [Kotlin Benchmarking](https://github.com/JetBrains/kotlin-benchmarks).
+
 ## Dependencies
 I intend to use as few dependencies as possible. However, I need support for Functional Programming and a fluent assertion framework as a minimum.
 
