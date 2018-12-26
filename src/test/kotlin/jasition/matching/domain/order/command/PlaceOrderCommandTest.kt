@@ -34,7 +34,7 @@ internal class PlaceOrderCommandTest : BehaviorSpec(){
                     result.isRight() shouldBe true
 
                     result.getOrHandle { throw IllegalArgumentException() } shouldBe OrderPlacedEvent(
-                        eventId = books.lastEventId + 1,
+                        eventId = books.lastEventId.next(),
                         requestId = command.requestId,
                         whoRequested = command.whoRequested,
                         bookId = command.bookId,

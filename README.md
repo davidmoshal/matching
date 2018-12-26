@@ -123,7 +123,8 @@ Production
 * [Vavr](http://www.vavr.io/) - Persistent collections minus its monads. The monads in Vavr is more suitable for Java in my opinion. However its persistent collections are amazing.
 
 Testing
-* [Kotlintest](https://github.com/kotlintest/kotlintest) - Test framework, fluent DSL assertions. I have tried [Spek](https://spekframework.org/), [Strikt](https://strikt.io/) and [JUnit 5](https://junit.org/junit5/), but Kotlintest is far more superior in terms of flexibility, fluency and test case structure. I used to be a fan of [AssertJ](http://joel-costigliola.github.io/assertj/) but I feel it should belong to the Java world as Kotlin-specific frameworks offer better readability. 
+* [Kotlintest](https://github.com/kotlintest/kotlintest) - Test framework, fluent DSL assertions. I have tried [Spek](https://spekframework.org/), [Strikt](https://strikt.io/) and [JUnit 5](https://junit.org/junit5/), but Kotlintest is far more superior in terms of flexibility, fluency and test case structure. I used to be a fan of [AssertJ](http://joel-costigliola.github.io/assertj/) but I feel it should belong to the Java world as Kotlin-specific frameworks offer better readability.
+* [MockK](https://github.com/mockk/mockk) - Mocking framework for Kotlin. 
 
 ## References
 [Strictly Programming](https://jasition.github.io) - My technical blog 

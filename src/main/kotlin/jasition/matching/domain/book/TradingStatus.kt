@@ -15,7 +15,13 @@ enum class TradingStatus {
     OPEN_FOR_TRADING {
         override fun allows(command: PlaceOrderCommand): Boolean = true
     },
-    CLOSED {
+    HALTED {
+        override fun allows(command: PlaceOrderCommand): Boolean = false
+    },
+    NOT_AVAILABLE_FOR_TRADING {
+        override fun allows(command: PlaceOrderCommand): Boolean = false
+    },
+    PRE_OPEN {
         override fun allows(command: PlaceOrderCommand): Boolean = false
     };
 

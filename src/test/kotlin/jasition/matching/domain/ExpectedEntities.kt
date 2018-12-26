@@ -11,7 +11,7 @@ fun expectedEntryAddedToBookEvent(
     books: Books,
     expectedBookEntry: BookEntry
 ): EntryAddedToBookEvent = EntryAddedToBookEvent(
-    eventId = orderPlacedEvent.eventId + 1,
+    eventId = orderPlacedEvent.eventId.next(),
     bookId = books.bookId,
     entry = expectedBookEntry,
     whenHappened = orderPlacedEvent.whenHappened
@@ -21,7 +21,7 @@ fun expectedBookEntry(orderPlacedEvent: OrderPlacedEvent): BookEntry = BookEntry
     key = BookEntryKey(
         price = orderPlacedEvent.price,
         whenSubmitted = orderPlacedEvent.whenHappened,
-        eventId = orderPlacedEvent.eventId + 1
+        eventId = orderPlacedEvent.eventId.next()
     ),
     clientRequestId = orderPlacedEvent.requestId,
     client = orderPlacedEvent.whoRequested,

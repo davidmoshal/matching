@@ -79,6 +79,7 @@ internal class EntryAddedToBookEventBehaviourTest : BehaviorSpec() {
                 )
                 then("the entry is added to the aggregate") {
                     val result = event.play(books)
+                    // TODO finish this test case
                 }
             }
         }
