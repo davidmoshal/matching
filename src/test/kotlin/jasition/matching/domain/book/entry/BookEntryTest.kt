@@ -88,17 +88,17 @@ internal class SmallestEventIdFirstTest : DescribeSpec() {
         )
         val comparator = SmallestEventIdFirst()
         describe("Smallest Event ID First") {
-            it("evaluate smaller Event ID as before bigger") {
+            it("evaluates smaller Event ID as before bigger") {
                 comparator.compare(
                     entryKey, entryKey.copy(eventId = EventId(8))
                 ) should beGreaterThan(0)
             }
-            it("evaluate bigger Event ID as after smaller") {
+            it("evaluates bigger Event ID as after smaller") {
                 comparator.compare(
                     entryKey, entryKey.copy(eventId = EventId(10))
                 ) should beLessThan(0)
             }
-            it("evaluate same Event ID as the same") {
+            it("evaluates same Event ID as the same") {
                 comparator.compare(
                     entryKey, entryKey.copy(price = Price(15), whenSubmitted = entryKey.whenSubmitted.plusMillis(3))
                 ) shouldBe 0
@@ -117,22 +117,22 @@ internal class HighestBuyOrLowestSellPriceFirstTest : DescribeSpec() {
 
         describe("Higher BUY First") {
             val comparator = HighestBuyOrLowestSellPriceFirst(Side.BUY)
-            it("evaluate null BUY price as before non-null") {
+            it("evaluates null BUY price as before non-null") {
                 comparator.compare(
                     entryKey, entryKey.copy(price = null)
                 ) should beGreaterThan(0)
             }
-            it("evaluate higher BUY price as before lower") {
+            it("evaluates higher BUY price as before lower") {
                 comparator.compare(
                     entryKey, entryKey.copy(price = Price(11))
                 ) should beGreaterThan(0)
             }
-            it("evaluate lower BUY price as after higher") {
+            it("evaluates lower BUY price as after higher") {
                 comparator.compare(
                     entryKey, entryKey.copy(price = Price(9))
                 ) should beLessThan(0)
             }
-            it("evaluate same BUY prices as the same") {
+            it("evaluates same BUY prices as the same") {
                 comparator.compare(
                     entryKey, entryKey.copy(eventId = EventId(8), whenSubmitted = entryKey.whenSubmitted.plusMillis(3))
                 ) shouldBe 0
@@ -140,22 +140,22 @@ internal class HighestBuyOrLowestSellPriceFirstTest : DescribeSpec() {
         }
         describe("Lower SELL First") {
             val comparator = HighestBuyOrLowestSellPriceFirst(Side.SELL)
-            it("evaluate null SELL price as before non-null") {
+            it("evaluates null SELL price as before non-null") {
                 comparator.compare(
                     entryKey, entryKey.copy(price = null)
                 ) should beGreaterThan(0)
             }
-            it("evaluate lower SELL price as before higher") {
+            it("evaluates lower SELL price as before higher") {
                 comparator.compare(
                     entryKey, entryKey.copy(price = Price(9))
                 ) should beGreaterThan(0)
             }
-            it("evaluate higher SELL price as after lower") {
+            it("evaluates higher SELL price as after lower") {
                 comparator.compare(
                     entryKey, entryKey.copy(price = Price(11))
                 ) should beLessThan(0)
             }
-            it("evaluate same SELL prices as the same") {
+            it("evaluates same SELL prices as the same") {
                 comparator.compare(
                     entryKey, entryKey.copy(eventId = EventId(8), whenSubmitted = entryKey.whenSubmitted.plusMillis(3))
                 ) shouldBe 0
