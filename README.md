@@ -100,7 +100,7 @@ The transaction is completed when all events are played and the final new state 
 ### Recovery
 During recovery, only Primary events need to be re-played as the Side-effect events will be re-generated.
 
-Each aggregate can be recovered in isolation, given the fact that each aggregate has its own sequence of events. Events can be compacted as a snapshot to reduce the ever-growing number of events to be re-played and hence the recovery time. However, the snapshot is not planned to be implemented in this project, at least currently.
+Each aggregate can be recovered in isolation, given the fact that each aggregate has its own sequence of events. Events can be compacted as a snapshot to reduce the ever-growing number of events to be re-played and hence the recovery time. However, the snapshot is not planned to be implemented in this project, at least currently. This is namely the [Memento](https://refactoring.guru/design-patterns/memento) pattern.
 
 ### Transaction
 During to the recursive nature of playing events, aggregates are also computed recursively. The transaction will collect the generated events and merge the aggregates during the recursion. At the end of the transaction, there should be one final aggregate and a list of events in chronological order. 
@@ -112,8 +112,11 @@ If the events were to be transported externally, it is recommended to group all 
 
 Machine-time is stateful and randomisation is indeterministic. They are supplied outside of the domain.
 
+### Warnings
+As all instruction manuals warn their readers in the very last pages, I strongly warn anyone [**NOT TO USE CQRS AND EVENT-SOURCING AT THE SYSTEM LEVEL**](https://www.infoq.com/news/2016/04/event-sourcing-anti-pattern). They are meant to be used within the [Bounded-context](https://martinfowler.com/bliki/BoundedContext.html) and the applications in your system need to be well divided by domains. Check out [Domain-driven development](https://medium.com/the-coding-matrix/ddd-101-the-5-minute-tour-7a3037cf53b8) if you want to explore more.
+
 ## Performance
-I plan on benchmarking of each command and potentially resolving any performance deficiency. My initial choice of tool is [JMH](https://openjdk.java.net/projects/code-tools/jmh/) as JetBrains also used it in [Kotlin Benchmarking](https://github.com/JetBrains/kotlin-benchmarks).
+I plan on benchmarking of each command and potentially resolving any performance deficiency. My initial choice of tool is [JMH](https://openjdk.java.net/projects/code-tools/jmh/) as JetBrains also used it in [Kotlin Benchmarking](https://github.com/JetBrains/kotlin-benchmarks). 
 
 ## Dependencies
 I intend to use as few dependencies as possible. However, I need support for Functional Programming and a fluent assertion framework as a minimum.
