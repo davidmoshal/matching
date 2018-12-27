@@ -2,6 +2,8 @@ package jasition.matching.domain
 
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
+import jasition.matching.domain.book.TradingStatus
+import jasition.matching.domain.book.TradingStatuses
 import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.book.event.EntryAddedToBookEvent
 import jasition.matching.domain.client.Client
@@ -94,3 +96,14 @@ fun aClientRequestId(
     listId: String? = null
 ) = ClientRequestId(current, original, listId)
 
+fun aTradingStatuses(
+    manual: TradingStatus? = null,
+    fastMarket: TradingStatus? = null,
+    scheduled: TradingStatus? = null,
+    default: TradingStatus = TradingStatus.OPEN_FOR_TRADING
+): TradingStatuses = TradingStatuses(
+    manual = manual,
+    fastMarket = fastMarket,
+    scheduled = scheduled,
+    default = default
+)

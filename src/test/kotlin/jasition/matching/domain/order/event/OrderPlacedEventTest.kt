@@ -4,7 +4,6 @@ import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import io.vavr.collection.List
 import jasition.matching.domain.*
-import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.BookEntry
 import jasition.matching.domain.book.entry.EntryType
@@ -53,7 +52,7 @@ internal class OrderPlacedEventPropertyTest : StringSpec({
 })
 
 internal class `Given an order is placed on an empty book` : StringSpec({
-    val books = Books(BookId("book"))
+    val books = Books(aBookId())
     val orderPlacedEvent = OrderPlacedEvent(
         requestId = aClientRequestId(),
         whoRequested = aFirmWithClient(),

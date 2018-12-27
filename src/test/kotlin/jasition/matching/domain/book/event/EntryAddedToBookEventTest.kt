@@ -9,7 +9,6 @@ import io.vavr.collection.List
 import jasition.matching.domain.*
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
-import jasition.matching.domain.book.entry.*
 import java.time.Instant
 
 internal class EntryAddedToBookEventPropertyTest : StringSpec({
@@ -19,18 +18,7 @@ internal class EntryAddedToBookEventPropertyTest : StringSpec({
         bookId = bookId,
         whenHappened = Instant.now(),
         eventId = eventId,
-        entry = BookEntry(
-            price = aPrice(),
-            whenSubmitted = Instant.now(),
-            eventId = anEventId(),
-            clientRequestId = aClientRequestId(),
-            client = aFirmWithClient(),
-            entryType = EntryType.LIMIT,
-            side = Side.BUY,
-            timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-            size = anEntryQuantity(),
-            status = EntryStatus.NEW
-        )
+        entry = aBookEntry(eventId = eventId)
     )
     "Has Book ID as Aggregate ID" {
         event.aggregateId() shouldBe bookId
@@ -46,18 +34,7 @@ internal class EntryAddedToBookEventPropertyTest : StringSpec({
 internal class `Given an entry is added to an empty book` : StringSpec({
     val bookId = aBookId()
     val entryEventId = anEventId()
-    val entry = BookEntry(
-        price = aPrice(),
-        whenSubmitted = Instant.now(),
-        eventId = entryEventId,
-        clientRequestId = aClientRequestId(),
-        client = aFirmWithClient(),
-        entryType = EntryType.LIMIT,
-        side = Side.BUY,
-        timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-        size = anEntryQuantity(),
-        status = EntryStatus.NEW
-    )
+    val entry = aBookEntry(eventId = entryEventId)
     val originalBooks = spyk(Books(bookId))
     val newBooks = spyk(Books(bookId))
     every { originalBooks.addBookEntry(entry) } returns newBooks
