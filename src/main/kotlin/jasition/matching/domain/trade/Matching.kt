@@ -17,7 +17,7 @@ fun match(
 ): Tuple2<BookEntry, Transaction<BookId, Books>> {
     val limitBook = aggressor.side.oppositeSideBook(books)
 
-    if (notAvailableForTrade(aggressor)
+    if (notAvailableForTrade(aggressor.size)
         || limitBook.entries.isEmpty
     ) {
         return Tuple2(aggressor, Transaction(books, events))
@@ -25,8 +25,8 @@ fun match(
 
     val passive =
         findNextMatch(aggressor, limitBook.entries.values()) ?: return Tuple2(aggressor, Transaction(books, events))
-    val tradeSize = getTradeSize(aggressor, passive)
-    val tradePrice = findTradePrice(aggressor, passive)
+    val tradeSize = getTradeSize(aggressor.size, passive.size)
+    val tradePrice = findTradePrice(aggressor.key.price, passive.key.price)
         ?: throw IllegalArgumentException("Cannot match two entries without price")
 
     val tradeEvent = TradeEvent(
@@ -59,9 +59,9 @@ fun findNextMatch(
 
     val passive = passives.get(offset)
 
-    if (sameFirmAndSameFirmClient(aggressor, passive)
-        || sameFirmButPossibleFirmAgainstClient(aggressor, passive)
-        || findTradePrice(aggressor, passive) == null
+    if (sameFirmAndSameFirmClient(aggressor.client, passive.client)
+        || sameFirmButPossibleFirmAgainstClient(aggressor.client, passive.client)
+        || findTradePrice(aggressor.key.price, passive.key.price) == null
     ) {
         return findNextMatch(aggressor, passives, offset + 1)
     }

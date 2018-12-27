@@ -34,7 +34,7 @@ Determines when the Order is in effect.
 * Immediate or cancel - Immediately match Book entries and cancel the unmatched quantities
 * Fill or kill - Fill the full quantity of the Order or kill the Order
 
-#### Trade rules
+#### Trading rules
 * Aggressors take the better execution price. For example, if a Sell @ 15 is passive, and a Buy @ 20 is aggressor, then the Trade is executed @ 15 so the aggressor gets a better execution price.
 * The Order Book is prioritised by price and then time. Firstly, better prices come first, i.e. higher buy prices and lower buy prices. For the same price, the earlier Orders or Quotes come first.
 * No customer can match its own Orders.

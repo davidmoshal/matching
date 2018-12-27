@@ -28,7 +28,6 @@ data class TradeEvent(
         aggregate.copy(lastEventId = aggregate.verifyEventId(eventId))
             .traded(aggressor)
             .traded(passive)
-
     )
 }
 
