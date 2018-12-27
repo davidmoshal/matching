@@ -2,6 +2,7 @@ package jasition.matching.domain.book
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
+import io.vavr.collection.List
 import jasition.matching.domain.EventId
 import jasition.matching.domain.aBookEntry
 import jasition.matching.domain.book.entry.EntryQuantity
@@ -17,9 +18,7 @@ internal class LimitBookTest : StringSpec({
 
         val newBook = LimitBook(Side.BUY).add(lowerPrice).add(higherPrice)
 
-        newBook.entries.size() shouldBe 2
-        newBook.entries.values().get(0) shouldBe higherPrice
-        newBook.entries.values().get(1) shouldBe lowerPrice
+        newBook.entries.values() shouldBe List.of(higherPrice, lowerPrice)
     }
     "Prioritises BUY entry of earlier submission over later given the same price"{
         val now = Instant.now()
@@ -28,9 +27,7 @@ internal class LimitBookTest : StringSpec({
 
         val newBook = LimitBook(Side.BUY).add(later).add(earlier)
 
-        newBook.entries.size() shouldBe 2
-        newBook.entries.values().get(0) shouldBe earlier
-        newBook.entries.values().get(1) shouldBe later
+        newBook.entries.values() shouldBe List.of(earlier, later)
     }
     "Prioritises BUY entry of smaller Event ID over bigger given the same price and same submission time"{
         val now = Instant.now()
@@ -39,9 +36,7 @@ internal class LimitBookTest : StringSpec({
 
         val newBook = LimitBook(Side.BUY).add(bigger).add(smaller)
 
-        newBook.entries.size() shouldBe 2
-        newBook.entries.values().get(0) shouldBe smaller
-        newBook.entries.values().get(1) shouldBe bigger
+        newBook.entries.values() shouldBe List.of(smaller, bigger)
     }
     "Replaces BUY entry of same price, same submission time, and same Event ID"{
         val now = Instant.now()
@@ -50,8 +45,7 @@ internal class LimitBookTest : StringSpec({
 
         val newBook = LimitBook(Side.BUY).add(entry1).add(entry2)
 
-        newBook.entries.size() shouldBe 1
-        newBook.entries.values().get(0) shouldBe entry2
+        newBook.entries.values() shouldBe List.of(entry2)
     }
     "Prioritises SELL entry of lower prices over higher prices"{
         val lowerPrice = aBookEntry(side = Side.SELL, price = Price(10))
@@ -59,9 +53,7 @@ internal class LimitBookTest : StringSpec({
 
         val newBook = LimitBook(Side.SELL).add(lowerPrice).add(higherPrice)
 
-        newBook.entries.size() shouldBe 2
-        newBook.entries.values().get(0) shouldBe lowerPrice
-        newBook.entries.values().get(1) shouldBe higherPrice
+        newBook.entries.values() shouldBe List.of(lowerPrice, higherPrice)
     }
     "Prioritises SELL entry of earlier submission over later given the same price"{
         val now = Instant.now()
@@ -70,9 +62,7 @@ internal class LimitBookTest : StringSpec({
 
         val newBook = LimitBook(Side.SELL).add(later).add(earlier)
 
-        newBook.entries.size() shouldBe 2
-        newBook.entries.values().get(0) shouldBe earlier
-        newBook.entries.values().get(1) shouldBe later
+        newBook.entries.values() shouldBe List.of(earlier, later)
     }
     "Prioritises SELL entry of smaller Event ID over bigger given the same price and same submission time"{
         val now = Instant.now()
@@ -81,9 +71,7 @@ internal class LimitBookTest : StringSpec({
 
         val newBook = LimitBook(Side.SELL).add(bigger).add(smaller)
 
-        newBook.entries.size() shouldBe 2
-        newBook.entries.values().get(0) shouldBe smaller
-        newBook.entries.values().get(1) shouldBe bigger
+        newBook.entries.values() shouldBe List.of(smaller, bigger)
     }
     "Replaces SELL entry of same price, same submission time, and same Event ID"{
         val now = Instant.now()
@@ -92,8 +80,7 @@ internal class LimitBookTest : StringSpec({
 
         val newBook = LimitBook(Side.SELL).add(entry1).add(entry2)
 
-        newBook.entries.size() shouldBe 1
-        newBook.entries.values().get(0) shouldBe entry2
+        newBook.entries.values() shouldBe List.of(entry2)
     }
     "Updates partial fill entry on the book"{
         val original = aBookEntry(side = Side.SELL,
@@ -103,11 +90,10 @@ internal class LimitBookTest : StringSpec({
         val updated = original.toTradeSideEntry(7)
         val newBook = LimitBook(Side.SELL).add(original).update(updated)
 
-        newBook.entries.size() shouldBe 1
-        newBook.entries.values().get(0) shouldBe original.copy(
+        newBook.entries.values() shouldBe List.of(original.copy(
             size = EntryQuantity(availableSize = 3, tradedSize = 12, cancelledSize = 0),
             status = EntryStatus.PARTIAL_FILL
-        )
+        ))
     }
     "Removes filled entry from the book"{
         val original = aBookEntry(side = Side.SELL,

@@ -6,33 +6,29 @@ import io.kotlintest.specs.StringSpec
 import io.mockk.every
 import io.mockk.spyk
 import io.vavr.collection.List
-import jasition.matching.domain.EventId
-import jasition.matching.domain.EventType
-import jasition.matching.domain.Transaction
+import jasition.matching.domain.*
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.*
-import jasition.matching.domain.client.Client
-import jasition.matching.domain.client.ClientRequestId
 import java.time.Instant
 
 internal class EntryAddedToBookEventPropertyTest : StringSpec({
-    val eventId = EventId(1)
-    val bookId = BookId("book")
+    val eventId = anEventId()
+    val bookId = aBookId()
     val event = EntryAddedToBookEvent(
         bookId = bookId,
         whenHappened = Instant.now(),
         eventId = eventId,
         entry = BookEntry(
-            price = Price(15),
+            price = aPrice(),
             whenSubmitted = Instant.now(),
-            eventId = EventId(1),
-            clientRequestId = ClientRequestId("req1"),
-            client = Client(firmId = "firm1", firmClientId = "client1"),
+            eventId = anEventId(),
+            clientRequestId = aClientRequestId(),
+            client = aFirmWithClient(),
             entryType = EntryType.LIMIT,
             side = Side.BUY,
             timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-            size = EntryQuantity(10),
+            size = anEntryQuantity(),
             status = EntryStatus.NEW
         )
     )
@@ -48,18 +44,18 @@ internal class EntryAddedToBookEventPropertyTest : StringSpec({
 })
 
 internal class `Given an entry is added to an empty book` : StringSpec({
-    val bookId = BookId(bookId = "book")
-    val entryEventId = EventId(1)
+    val bookId = aBookId()
+    val entryEventId = anEventId()
     val entry = BookEntry(
-        price = Price(15),
+        price = aPrice(),
         whenSubmitted = Instant.now(),
         eventId = entryEventId,
-        clientRequestId = ClientRequestId("req1"),
-        client = Client(firmId = "firm1", firmClientId = "client1"),
+        clientRequestId = aClientRequestId(),
+        client = aFirmWithClient(),
         entryType = EntryType.LIMIT,
         side = Side.BUY,
         timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-        size = EntryQuantity(10),
+        size = anEntryQuantity(),
         status = EntryStatus.NEW
     )
     val originalBooks = spyk(Books(bookId))

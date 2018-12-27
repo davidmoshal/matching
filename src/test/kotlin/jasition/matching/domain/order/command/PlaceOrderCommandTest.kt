@@ -5,6 +5,7 @@ import io.kotlintest.specs.StringSpec
 import jasition.matching.domain.aBookId
 import jasition.matching.domain.aClientRequestId
 import jasition.matching.domain.aFirmWithClient
+import jasition.matching.domain.aPrice
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.TradingStatus
@@ -23,7 +24,7 @@ internal class `Given there is a request to place an order` : StringSpec({
         bookId = aBookId(),
         entryType = EntryType.LIMIT,
         side = Side.BUY,
-        price = Price(15),
+        price = aPrice(),
         size = 10,
         timeInForce = TimeInForce.GOOD_TILL_CANCEL,
         whenRequested = Instant.now()

@@ -4,14 +4,10 @@ import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import io.vavr.collection.List
 import jasition.matching.domain.*
-import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.EntryType
-import jasition.matching.domain.book.entry.Price
 import jasition.matching.domain.book.entry.Side
 import jasition.matching.domain.book.entry.TimeInForce
-import jasition.matching.domain.client.Client
-import jasition.matching.domain.client.ClientRequestId
 import java.time.Instant
 
 internal class OrderRejectedEventPropertyTest : StringSpec({
@@ -44,15 +40,15 @@ internal class OrderRejectedEventPropertyTest : StringSpec({
 
 internal class `Given an order is rejected` : StringSpec({
     val eventId = EventId(1)
-    val bookId = BookId("book")
+    val bookId = aBookId()
     val books = Books(bookId)
     val event = OrderRejectedEvent(
-        requestId = ClientRequestId("req1"),
-        whoRequested = Client(firmId = "firm1", firmClientId = "client1"),
+        requestId = aClientRequestId(),
+        whoRequested = aFirmWithClient(),
         bookId = bookId,
         entryType = EntryType.LIMIT,
         side = Side.BUY,
-        price = Price(15),
+        price = aPrice(),
         timeInForce = TimeInForce.GOOD_TILL_CANCEL,
         whenHappened = Instant.now(),
         eventId = eventId,
