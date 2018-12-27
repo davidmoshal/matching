@@ -114,7 +114,7 @@ If the events were to be transported externally, it is recommended to group all 
 Machine-time is stateful and randomisation is indeterministic. They are supplied outside of the domain.
 
 ### Warnings
-As all instruction manuals warn their readers in the very last pages, I strongly warn anyone [**NOT TO USE CQRS AND EVENT-SOURCING AT THE SYSTEM LEVEL**](https://www.infoq.com/news/2016/04/event-sourcing-anti-pattern). They are meant to be used within the [Bounded-context](https://martinfowler.com/bliki/BoundedContext.html) and the applications in your system need to be well divided by domains. Check out [Domain-driven development](https://medium.com/the-coding-matrix/ddd-101-the-5-minute-tour-7a3037cf53b8) if you want to explore more.
+As all instruction manuals warn their readers in the very last pages, I strongly warn anyone [**NOT TO USE CQRS AND EVENT-SOURCING AT THE SYSTEM LEVEL**](https://www.infoq.com/news/2016/04/event-sourcing-anti-pattern). They are meant to be used within the [bounded-context](https://martinfowler.com/bliki/BoundedContext.html) and the applications in your system need to be well divided by domains. Check out [Domain-driven development](https://medium.com/the-coding-matrix/ddd-101-the-5-minute-tour-7a3037cf53b8) if you want to explore more.
 
 ### Domain boundary
 Boundary needs to be set up around the domain in order to ensure the domain integrity and the success application of CQRS and Event-sourcing. Here are the rules:
