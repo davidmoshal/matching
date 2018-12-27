@@ -8,13 +8,13 @@ If you are not familiar with matching engine, read this example. You are an appl
 
 The farmer's market owner does not like farmers and customers running in the market like headless chickens, because it is simply dangerous and chaotic. The market owner announces that farmers and customers can now put their intention to either buying or selling in a centralised book anonymously, and the market will match the buying and selling in a fair and orderly manner. However, the market owner requires both buyers and sellers to commit to honouring the trades, that is, if you said you wanted to sell 50 apples for 1 pound each, you need to be ready to hand over 50 apples and get 50 pounds back in your pocket, and pay transaction fees to the market owner for helping you out. So selling and buying are more than intentions, they are obligations. So we call them Orders. The centralised book is called the Order Book. 
 
-Then some genius businessmen come and say, "I can buy the apples for my customers on their behalf, and I could deliver the apples to their doors, and of course, with a fee". So customers no longer need to even spend time out in the market. Brokers are the names of these businessmen. Fair enough, so customers can wait just sit home and enjoy the apples, knowing they have paid a fee to the Brokers for each apple they purchased. 
+Then some genius businessmen come and say, "I can buy the apples for my customers on their behalf, and I could deliver the apples to their doors, and of course, for a fee". So customers no longer need to even spend time out in the market. Brokers are the names of these businessmen. Fair enough, so customers can wait just sit home and enjoy the apples, knowing they have paid a fee to the Brokers for each apple they purchased. 
 
 There are also opportunists that watch the market and are willing to buy and sell at the same time, and aim to gain profit by arbitraging (Buy low, sell high). The market owner is very happy with these activities because it makes the market looks very busy and active, even when there are no real customers and farmers around, so the market owner called these opportunists "Market Makers". Market Makers provide Quotes that are usually in pairs (Buy and Sell). Some Market Makers prefer quoting in multiple levels (multiple pairs) at the same time, and this aggregation is called a Mass Quote. 
 
 The operation of the Order Book is the Matching Engine. And the farmer's market is the Exchange.
 
-The Orders and Quotes sitting in the Order Book are passively waiting to match, so they are passive entries. While the new coming Orders and Quotes are called the aggressors.
+The Orders and Quotes sitting in the Order Book are passively waiting to be traded, so they are passive entries. While the new coming Orders and Quotes are called the aggressors.
 
 ## The Domain
 The domain borrows a lot of languages and terms from the [FIX Protocol](http://fiximate.fixtrading.org/latestEP/), meanwhile abstract away from the verbose and vintage style of naming.  
