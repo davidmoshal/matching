@@ -61,10 +61,12 @@ internal class `Given an order is rejected` : StringSpec({
         rejectText = "Not allowed"
     )
 
-    "The books only have the last event ID updated and no other side effects" {
-        event.play(books) shouldBe Transaction<BookId, Books>(
-            aggregate = books.copy(lastEventId = eventId),
-            events = List.empty()
-        )
+    val actual = event.play(books)
+
+    "The books only have the last event ID updated" {
+        actual.aggregate shouldBe  books.copy(lastEventId = eventId)
+    }
+    "There is no side effect" {
+        actual.events shouldBe List.empty()
     }
 })
