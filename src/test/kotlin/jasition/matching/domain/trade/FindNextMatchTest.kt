@@ -54,7 +54,7 @@ internal class FindNextMatchTest : StringSpec({
                 passive,
                 passive.copy(key = entryKey.copy(price = Price(9)))
             )
-        ) shouldBe passive
+        ) shouldBe Match(passive, Price(10))
     }
     "Skipped the first passive entry due to same firm client and found the second as the next matched" {
         val passive = entry.copy(
@@ -71,7 +71,7 @@ internal class FindNextMatchTest : StringSpec({
                 passive.copy(client = entry.client),
                 passive
             )
-        ) shouldBe passive
+        ) shouldBe Match(passive, Price(10))
     }
     "Skipped the first passive entry due to same firm (firm against client) and found the second as the next matched" {
         val passive = entry.copy(
@@ -88,7 +88,7 @@ internal class FindNextMatchTest : StringSpec({
                 passive.copy(client = entry.client.copy(firmClientId = null)),
                 passive
             )
-        ) shouldBe passive
+        ) shouldBe Match(passive, Price(10))
     }
     "Skipped the first passive entry due to same firm (no client) and found the second as the next matched" {
         val passive = entry.copy(
@@ -106,7 +106,7 @@ internal class FindNextMatchTest : StringSpec({
                 passive.copy(client = entry.client.copy(firmClientId = null)),
                 passive
             )
-        ) shouldBe passive
+        ) shouldBe Match(passive, Price(10))
     }
     "Skipped the first passive entry due to no trade price found and found the second as the next matched" {
         val passive = entry.copy(
@@ -123,6 +123,6 @@ internal class FindNextMatchTest : StringSpec({
                 passive.copy(key = entryKey.copy(price = null)),
                 passive
             )
-        ) shouldBe passive
+        ) shouldBe Match(passive, Price(10))
     }
 })
