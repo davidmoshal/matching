@@ -123,6 +123,9 @@ Boundary needs to be set up around the domain in order to ensure the domain inte
 * Domain A's events and reports are strictly used to leave Domain A only. The only exception is when recovering Domain A, events from Domain A are re-played. Other domains listen and react to Domain A's events and reports.
 * Domain A's aggregates are not shared with nor visible to other domains. External representations need to be used for inter-domain communication.
 
+### Floating-point numbers or BigDecimal
+I purposefully do not use floating-point numbers or `BigDecimal` as prices. Long is used to represent a price throughout the project and it is not going to change. The reason is that floating-point numbers are not accurate and `BigDecimal` is very slow. Moreover, there is no real need for matching engine to work with either of them. As long as the incoming orders or quotes have their prices normalised to a fixed decimal place and keep the precision somewhere else, the actual price can always be translated from the price as long in this domain. There is an alternative of `BigDecimal` (The [Money](http://java-performance.info/high-performance-money-class/) class) which is so much faster. But still Long will be used as the data type of price values in this project.
+
 ## Performance
 I plan on benchmarking of each command and potentially resolving any performance deficiency. My initial choice of tool is [JMH](https://openjdk.java.net/projects/code-tools/jmh/) as JetBrains also used it in [Kotlin Benchmarking](https://github.com/JetBrains/kotlin-benchmarks). 
 
