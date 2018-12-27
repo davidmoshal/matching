@@ -34,8 +34,8 @@ data class OrderPlacedEvent(
             aggressor = toBookEntry(),
             books = aggregate.copy(lastEventId = aggregate.verifyEventId(eventId))
         )
-        val entry = result.a
-        val matchTransaction = result.b
+        val entry = result.aggressor
+        val matchTransaction = result.transaction
 
         if (entry.timeInForce.canStayOnBook(entry.size)) {
             val newBooks = matchTransaction.aggregate

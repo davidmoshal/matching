@@ -1,6 +1,5 @@
 package jasition.matching.domain.trade
 
-import arrow.core.Tuple2
 import io.vavr.collection.List
 import io.vavr.collection.Seq
 import jasition.matching.domain.Event
@@ -15,17 +14,17 @@ fun match(
     aggressor: BookEntry,
     books: Books,
     events: List<Event<BookId, Books>> = List.empty()
-): Tuple2<BookEntry, Transaction<BookId, Books>> {
+): MatchResult {
     val limitBook = aggressor.side.oppositeSideBook(books)
 
     if (notAvailableForTrade(aggressor.size)
         || limitBook.entries.isEmpty
     ) {
-        return Tuple2(aggressor, Transaction(books, events))
+        return MatchResult(aggressor, Transaction(books, events))
     }
 
     val nextMatch = findNextMatch(aggressor, limitBook.entries.values())
-        ?: return Tuple2(aggressor, Transaction(books, events))
+        ?: return MatchResult(aggressor, Transaction(books, events))
 
     val passive = nextMatch.passive
     val tradeSize = getTradeSize(aggressor.size, passive.size)
@@ -71,3 +70,5 @@ fun findNextMatch(
 }
 
 data class Match(val passive: BookEntry, val tradePrice: Price)
+
+data class MatchResult(val aggressor: BookEntry, val transaction: Transaction<BookId, Books>)
