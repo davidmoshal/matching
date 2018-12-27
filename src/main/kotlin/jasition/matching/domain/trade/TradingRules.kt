@@ -3,6 +3,7 @@ package jasition.matching.domain.trade
 import jasition.matching.domain.book.entry.BookEntry
 import jasition.matching.domain.book.entry.EntryQuantity
 import jasition.matching.domain.book.entry.Price
+import jasition.matching.domain.book.entry.Side
 import jasition.matching.domain.client.Client
 
 fun sameFirmButPossibleFirmAgainstClient(client: Client, other: Client): Boolean =
@@ -21,9 +22,14 @@ fun priceHasCrossed(aggressor: BookEntry, passive: BookEntry): Boolean {
     else findTradePrice(aggressorPrice, passivePrice) != null
 }
 
+fun findTradePrice(aggressorSide: Side, aggressor: Price?, passive: Price?): Price? =
+    if (aggressor != null && passive != null)
+        if (aggressorSide.comparatorMultipler() * aggressor.compareTo(passive) <= 0) passive
+        else null
+    else passive ?: aggressor
+
 fun findTradePrice(aggressor: Price?, passive: Price?): Price? = passive ?: aggressor
 
-fun getTradeSize(aggressor: EntryQuantity, passive: EntryQuantity) : Int =
+fun getTradeSize(aggressor: EntryQuantity, passive: EntryQuantity): Int =
     Integer.min(aggressor.availableSize, passive.availableSize)
 
-fun notAvailableForTrade(aggressor: EntryQuantity) : Boolean = aggressor.availableSize <= 0

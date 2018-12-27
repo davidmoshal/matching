@@ -56,22 +56,18 @@ data class BookEntry(
             whenHappened = key.whenSubmitted
         )
 
-    fun toTradeSideEntry(tradeSize: Int): TradeSideEntry {
-        val newQuantity = size.traded(tradeSize)
-
-        return TradeSideEntry(
-            requestId = clientRequestId,
-            whoRequested = client,
-            entryType = entryType,
-            side = side,
-            size = newQuantity,
-            price = key.price,
-            timeInForce = timeInForce,
-            whenSubmitted = key.whenSubmitted,
-            entryEventId = key.eventId,
-            entryStatus = status.traded(newQuantity)
-        )
-    }
+    fun toTradeSideEntry(): TradeSideEntry = TradeSideEntry(
+        requestId = clientRequestId,
+        whoRequested = client,
+        entryType = entryType,
+        side = side,
+        size = size,
+        price = key.price,
+        timeInForce = timeInForce,
+        whenSubmitted = key.whenSubmitted,
+        entryEventId = key.eventId,
+        entryStatus = status.traded(size)
+    )
 
     fun traded(tradeSize: Int): BookEntry {
         val newQuantity = size.traded(tradeSize)

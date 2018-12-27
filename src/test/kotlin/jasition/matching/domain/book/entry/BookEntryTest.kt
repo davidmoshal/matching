@@ -36,12 +36,12 @@ internal class BookEntryTest : StringSpec({
         )
     }
     "Converts to TradeSideEntry" {
-        entry.toTradeSideEntry(8) shouldBe TradeSideEntry(
+        entry.toTradeSideEntry() shouldBe TradeSideEntry(
             requestId = entry.clientRequestId,
             whoRequested = entry.client,
             entryType = entry.entryType,
             side = entry.side,
-            size = EntryQuantity(availableSize = 15, tradedSize = 10, cancelledSize = 0),
+            size = EntryQuantity(availableSize = 23, tradedSize = 2, cancelledSize = 0),
             price = entry.key.price,
             timeInForce = entry.timeInForce,
             whenSubmitted = entry.key.whenSubmitted,

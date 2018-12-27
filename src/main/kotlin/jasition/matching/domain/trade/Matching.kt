@@ -6,8 +6,10 @@ import jasition.matching.domain.Event
 import jasition.matching.domain.Transaction
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
+import jasition.matching.domain.book.LimitBook
 import jasition.matching.domain.book.entry.BookEntry
 import jasition.matching.domain.book.entry.Price
+import jasition.matching.domain.client.Client
 import jasition.matching.domain.trade.event.TradeEvent
 
 fun match(
@@ -17,32 +19,29 @@ fun match(
 ): MatchResult {
     val limitBook = aggressor.side.oppositeSideBook(books)
 
-    if (notAvailableForTrade(aggressor.size)
-        || limitBook.entries.isEmpty
-    ) {
+    if (cannotMatchAnyFurther(aggressor, limitBook)) {
         return MatchResult(aggressor, Transaction(books, events))
     }
 
     val nextMatch = findNextMatch(aggressor, limitBook.entries.values())
         ?: return MatchResult(aggressor, Transaction(books, events))
 
-    val passive = nextMatch.passive
-    val tradeSize = getTradeSize(aggressor.size, passive.size)
-
+    val tradeSize = getTradeSize(aggressor.size, nextMatch.passive.size)
+    val tradedAggressor = aggressor.traded(tradeSize)
+    val tradedPassive = nextMatch.passive.traded(tradeSize)
     val tradeEvent = TradeEvent(
         bookId = books.bookId,
         eventId = books.lastEventId.next(),
         size = tradeSize,
         price = nextMatch.tradePrice,
         whenHappened = aggressor.key.whenSubmitted,
-        aggressor = aggressor.toTradeSideEntry(tradeSize),
-        passive = passive.toTradeSideEntry(tradeSize)
+        aggressor = tradedAggressor.toTradeSideEntry(),
+        passive = tradedPassive.toTradeSideEntry()
     )
-
     val result = tradeEvent.play(books)
 
     return match(
-        aggressor = aggressor.traded(tradeSize),
+        aggressor = tradedAggressor,
         books = result.aggregate,
         events = events.append(tradeEvent).appendAll(result.events)
     )
@@ -53,21 +52,31 @@ fun findNextMatch(
     passives: Seq<BookEntry>,
     offset: Int = 0
 ): Match? {
-    if (offset >= passives.size()) {
-        return null
-    }
-
-    val passive = passives.get(offset)
-    val tradePrice = findTradePrice(aggressor.key.price, passive.key.price)
+    val passive = findPassive(passives, offset) ?: return null
+    val tradePrice = findTradePrice(
+        aggressorSide = aggressor.side,
+        aggressor = aggressor.key.price,
+        passive = passive.key.price
+    )
 
     return if (
         tradePrice == null ||
-        sameFirmAndSameFirmClient(aggressor.client, passive.client) ||
-        sameFirmButPossibleFirmAgainstClient(aggressor.client, passive.client)
-    ) findNextMatch(aggressor, passives, offset + 1)
-    else if (priceHasCrossed(aggressor, passive)) Match(passive, tradePrice)
+        cannotMatchTheseTwoClients(aggressor.client, passive.client)
+    )
+        findNextMatch(aggressor, passives, offset + 1)
+    else if (priceHasCrossed(aggressor, passive))
+        Match(passive, tradePrice)
     else null
 }
+
+private fun cannotMatchAnyFurther(aggressor: BookEntry, limitBook: LimitBook) =
+    aggressor.size.availableSize <= 0 || limitBook.entries.isEmpty
+
+private fun cannotMatchTheseTwoClients(aggressor: Client, passive: Client): Boolean =
+    sameFirmAndSameFirmClient(aggressor, passive) || sameFirmButPossibleFirmAgainstClient(aggressor, passive)
+
+private fun findPassive(passives: Seq<BookEntry>, offset: Int = 0): BookEntry? =
+    if (offset < passives.size()) passives.get(offset) else null
 
 data class Match(val passive: BookEntry, val tradePrice: Price)
 

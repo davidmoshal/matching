@@ -83,24 +83,30 @@ internal class LimitBookTest : StringSpec({
         newBook.entries.values() shouldBe List.of(entry2)
     }
     "Updates partial fill entry on the book"{
-        val original = aBookEntry(side = Side.SELL,
+        val original = aBookEntry(
+            side = Side.SELL,
             price = Price(10),
-            size = EntryQuantity(availableSize = 10, tradedSize = 5, cancelledSize = 0)
+            size = EntryQuantity(availableSize = 15, tradedSize = 0, cancelledSize = 0),
+            status = EntryStatus.NEW
         )
-        val updated = original.toTradeSideEntry(7)
+        val updatedSize = EntryQuantity(availableSize = 3, tradedSize = 12, cancelledSize = 0)
+        val updated = original.copy(size = updatedSize).toTradeSideEntry()
         val newBook = LimitBook(Side.SELL).add(original).update(updated)
 
-        newBook.entries.values() shouldBe List.of(original.copy(
-            size = EntryQuantity(availableSize = 3, tradedSize = 12, cancelledSize = 0),
-            status = EntryStatus.PARTIAL_FILL
-        ))
+        newBook.entries.values() shouldBe List.of(
+            original.copy(
+                size = updatedSize,
+                status = EntryStatus.PARTIAL_FILL
+            )
+        )
     }
     "Removes filled entry from the book"{
-        val original = aBookEntry(side = Side.SELL,
+        val original = aBookEntry(
+            side = Side.SELL,
             price = Price(10),
-            size = EntryQuantity(availableSize = 10, tradedSize = 5, cancelledSize = 0)
+            size = EntryQuantity(availableSize = 0, tradedSize = 15, cancelledSize = 0)
         )
-        val updated = original.toTradeSideEntry(10)
+        val updated = original.toTradeSideEntry()
         val newBook = LimitBook(Side.SELL).add(original).update(updated)
 
         newBook.entries.size() shouldBe 0
