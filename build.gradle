@@ -47,11 +47,11 @@ test {
     }
     afterSuite { desc, result ->
         if (!desc.parent) {
-            println "\nTest result: ${result.resultType}"
-            println "Test summary: ${result.testCount} tests completed, " +
+            println "\nTest results: ${result.resultType} " +
+                    "(${result.testCount} tests completed, " +
                     "${result.successfulTestCount} succeeded, " +
                     "${result.failedTestCount} failed, " +
-                    "${result.skippedTestCount} skipped"
+                    "${result.skippedTestCount} skipped)"
         }
     }
 }

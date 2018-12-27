@@ -7,7 +7,6 @@ import jasition.matching.domain.Transaction
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.*
-import jasition.matching.domain.book.event.EntryAddedToBookEvent
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.trade.match
@@ -41,14 +40,13 @@ data class OrderPlacedEvent(
         if (entry.timeInForce.canStayOnBook(entry.size)) {
             val newBooks = matchTransaction.aggregate
             val nextEventId = newBooks.lastEventId.next()
-            val entryAddedToBookEvent = EntryAddedToBookEvent(
+            val entryAddedToBookEvent = entry.toEntryAddedToBookEvent(
                 eventId = nextEventId,
-                bookId = aggregate.bookId,
-                entry = entry.copy(key = entry.key.copy(eventId = nextEventId)),
-                whenHappened = whenHappened
+                bookId = aggregate.bookId
             )
 
-            return matchTransaction.append(entryAddedToBookEvent)
+            return matchTransaction
+                .append(entryAddedToBookEvent)
                 .append(entryAddedToBookEvent.play(newBooks))
         }
         return matchTransaction

@@ -26,6 +26,15 @@ internal class BookEntryTest : StringSpec({
             whenHappened = entry.key.whenSubmitted
         )
     }
+    "Converts to EntryAddedToBookEvent with given Event ID" {
+        val eventId = EventId(4)
+        entry.toEntryAddedToBookEvent(bookId, eventId) shouldBe EntryAddedToBookEvent(
+            eventId = eventId,
+            bookId = bookId,
+            entry = entry.copy(key = entry.key.copy(eventId = eventId)),
+            whenHappened = entry.key.whenSubmitted
+        )
+    }
     "Converts to TradeSideEntry" {
         entry.toTradeSideEntry(8) shouldBe TradeSideEntry(
             requestId = entry.clientRequestId,

@@ -1,4 +1,4 @@
-package jasition.matching.domain.behaviour
+package jasition.matching.domain.trade
 
 import io.kotlintest.matchers.beOfType
 import io.kotlintest.should

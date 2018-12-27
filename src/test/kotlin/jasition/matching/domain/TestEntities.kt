@@ -1,5 +1,6 @@
 package jasition.matching.domain
 
+import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.book.event.EntryAddedToBookEvent
@@ -32,6 +33,8 @@ fun expectedBookEntry(orderPlacedEvent: OrderPlacedEvent): BookEntry = BookEntry
     status = orderPlacedEvent.entryStatus
 )
 
+fun aBookId(bookId: String = "book"): BookId = BookId(bookId = bookId)
+
 fun aFirmWithClient(
     firmId: String = "firm1",
     firmClientId: String = "firm1Client1"
@@ -48,9 +51,9 @@ fun aFirmWithoutClient(
 )
 
 fun aBookEntryKey(
-    price: Price? = Price(10),
+    price: Price? = aPrice(),
     whenSubmitted: Instant = Instant.now(),
-    eventId: EventId = EventId(1)
+    eventId: EventId = anEventId()
 ): BookEntryKey = BookEntryKey(
     price = price,
     whenSubmitted = whenSubmitted,
@@ -58,15 +61,15 @@ fun aBookEntryKey(
 )
 
 fun aBookEntry(
-    price: Price? = Price(10),
+    price: Price? = aPrice(),
     whenSubmitted: Instant = Instant.now(),
-    eventId: EventId = EventId(1),
-    clientRequestId: ClientRequestId = ClientRequestId("req1"),
+    eventId: EventId = anEventId(),
+    clientRequestId: ClientRequestId = aClientRequestId(),
     client: Client = aFirmWithClient(),
     entryType: EntryType = EntryType.LIMIT,
     side: Side = Side.BUY,
     timeInForce: TimeInForce = TimeInForce.GOOD_TILL_CANCEL,
-    size: EntryQuantity = EntryQuantity(20),
+    size: EntryQuantity = anEntryQuantity(),
     status: EntryStatus = EntryStatus.NEW
 ) = BookEntry(
     key = aBookEntryKey(price, whenSubmitted, eventId),
@@ -78,4 +81,16 @@ fun aBookEntry(
     size = size,
     status = status
 )
+
+fun anEntryQuantity(i: Int = 20) = EntryQuantity(i)
+
+fun anEventId(value: Long = 1) = EventId(value)
+
+fun aPrice(value: Long = 10) = Price(value = value)
+
+fun aClientRequestId(
+    current: String = "req1",
+    original: String? = null,
+    listId: String? = null
+) = ClientRequestId(current, original, listId)
 

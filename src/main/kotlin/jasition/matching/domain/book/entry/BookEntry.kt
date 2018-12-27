@@ -48,6 +48,14 @@ data class BookEntry(
             whenHappened = key.whenSubmitted
         )
 
+    fun toEntryAddedToBookEvent(bookId: BookId, eventId: EventId): EntryAddedToBookEvent =
+        EntryAddedToBookEvent(
+            eventId = eventId,
+            bookId = bookId,
+            entry = copy(key = key.copy(eventId = eventId)),
+            whenHappened = key.whenSubmitted
+        )
+
     fun toTradeSideEntry(tradeSize: Int): TradeSideEntry {
         val newQuantity = size.traded(tradeSize)
 
