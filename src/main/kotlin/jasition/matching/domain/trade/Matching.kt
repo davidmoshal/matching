@@ -53,20 +53,22 @@ fun findNextMatch(
     offset: Int = 0
 ): Match? {
     val passive = findPassive(passives, offset) ?: return null
+
+    if (cannotMatchTheseTwoPrices(aggressor.key.price, passive.key.price)
+        || cannotMatchTheseTwoClients(aggressor.client, passive.client)
+    ) return findNextMatch(
+        aggressor = aggressor,
+        passives = passives,
+        offset = offset + 1
+    )
+
     val tradePrice = findTradePrice(
         aggressorSide = aggressor.side,
         aggressor = aggressor.key.price,
         passive = passive.key.price
-    )
+    ) ?: return null
 
-    return if (
-        tradePrice == null ||
-        cannotMatchTheseTwoClients(aggressor.client, passive.client)
-    )
-        findNextMatch(aggressor, passives, offset + 1)
-    else if (priceHasCrossed(aggressor, passive))
-        Match(passive, tradePrice)
-    else null
+    return Match(passive, tradePrice)
 }
 
 private fun cannotMatchAnyFurther(aggressor: BookEntry, limitBook: LimitBook) =
@@ -74,6 +76,9 @@ private fun cannotMatchAnyFurther(aggressor: BookEntry, limitBook: LimitBook) =
 
 private fun cannotMatchTheseTwoClients(aggressor: Client, passive: Client): Boolean =
     sameFirmAndSameFirmClient(aggressor, passive) || sameFirmButPossibleFirmAgainstClient(aggressor, passive)
+
+private fun cannotMatchTheseTwoPrices(aggressor: Price?, passive: Price?): Boolean =
+    aggressor == null && passive == null
 
 private fun findPassive(passives: Seq<BookEntry>, offset: Int = 0): BookEntry? =
     if (offset < passives.size()) passives.get(offset) else null
