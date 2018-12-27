@@ -2,12 +2,13 @@ package jasition.matching.domain.book.event
 
 import io.kotlintest.shouldBe
 import io.kotlintest.shouldThrow
-import io.kotlintest.specs.BehaviorSpec
 import io.kotlintest.specs.StringSpec
 import io.mockk.every
 import io.mockk.spyk
+import io.vavr.collection.List
 import jasition.matching.domain.EventId
 import jasition.matching.domain.EventType
+import jasition.matching.domain.Transaction
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.*
@@ -46,70 +47,60 @@ internal class EntryAddedToBookEventPropertyTest : StringSpec({
     }
 })
 
-internal class EntryAddedToBookEventBehaviourTest : BehaviorSpec() {
-    init {
-        given("the book is empty") {
-            val bookId = BookId(bookId = "book")
-            val entryEventId = EventId(1)
-            val entry = BookEntry(
-                price = Price(15),
-                whenSubmitted = Instant.now(),
-                eventId = entryEventId,
-                clientRequestId = ClientRequestId("req1"),
-                client = Client(firmId = "firm1", firmClientId = "client1"),
-                entryType = EntryType.LIMIT,
-                side = Side.BUY,
-                timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-                size = EntryQuantity(10),
-                status = EntryStatus.NEW
-            )
-            val originalBooks = spyk(Books(bookId))
-            val newBooks = spyk(Books(bookId))
-            every { originalBooks.addBookEntry(entry) } returns newBooks
+internal class `Given an entry is added to an empty book` : StringSpec({
+    val bookId = BookId(bookId = "book")
+    val entryEventId = EventId(1)
+    val entry = BookEntry(
+        price = Price(15),
+        whenSubmitted = Instant.now(),
+        eventId = entryEventId,
+        clientRequestId = ClientRequestId("req1"),
+        client = Client(firmId = "firm1", firmClientId = "client1"),
+        entryType = EntryType.LIMIT,
+        side = Side.BUY,
+        timeInForce = TimeInForce.GOOD_TILL_CANCEL,
+        size = EntryQuantity(10),
+        status = EntryStatus.NEW
+    )
+    val originalBooks = spyk(Books(bookId))
+    val newBooks = spyk(Books(bookId))
+    every { originalBooks.addBookEntry(entry) } returns newBooks
 
-            `when`("an entry is added to the book") {
-                val result = EntryAddedToBookEvent(
-                    bookId = bookId,
-                    whenHappened = Instant.now(),
-                    eventId = entryEventId,
-                    entry = entry
-                ).play(originalBooks)
+    "When the event ID is the next event ID of the book, then the entry exists in the book" {
+        EntryAddedToBookEvent(
+            bookId = bookId,
+            whenHappened = Instant.now(),
+            eventId = entryEventId,
+            entry = entry
+        ).play(originalBooks) shouldBe Transaction<BookId, Books>(
+            aggregate = newBooks,
+            events = List.empty()
+        )
+    }
+    "When a wrong event ID is used in the event, then an exception is thrown" {
+        val wrongEventId = entryEventId.next()
+        every { originalBooks.verifyEventId(wrongEventId) } throws IllegalArgumentException()
 
-                then("a new book is created with the entry added") {
-                    result.aggregate shouldBe newBooks
-                    result.events.size() shouldBe 0
-                }
-            }
-            `when`("an entry is added to the book with the wrong Event ID in the event") {
-                val wrongEventId = entryEventId.next()
-                every { originalBooks.verifyEventId(wrongEventId) } throws IllegalArgumentException()
-
-                then("an IllegalArgumentException is thrown") {
-                    shouldThrow<IllegalArgumentException> {
-                        EntryAddedToBookEvent(
-                            bookId = bookId,
-                            whenHappened = Instant.now(),
-                            eventId = wrongEventId,
-                            entry = entry
-                        ).play(originalBooks)
-                    }
-                }
-            }
-            `when`("an entry is added to the book with the wrong Event ID in the entry") {
-                val wrongEventId = entry.key.eventId
-                every { originalBooks.verifyEventId(wrongEventId) } throws IllegalArgumentException()
-
-                then("an IllegalArgumentException is thrown") {
-                    shouldThrow<IllegalArgumentException> {
-                        EntryAddedToBookEvent(
-                            bookId = bookId,
-                            whenHappened = Instant.now(),
-                            eventId = entryEventId.next(),
-                            entry = entry
-                        ).play(originalBooks)
-                    }
-                }
-            }
+        shouldThrow<IllegalArgumentException> {
+            EntryAddedToBookEvent(
+                bookId = bookId,
+                whenHappened = Instant.now(),
+                eventId = wrongEventId,
+                entry = entry
+            ).play(originalBooks)
         }
     }
-}
+    "When a wrong event ID is used in the entry, then an exception is thrown" {
+        val wrongEventId = entry.key.eventId
+        every { originalBooks.verifyEventId(wrongEventId) } throws IllegalArgumentException()
+
+        shouldThrow<IllegalArgumentException> {
+            EntryAddedToBookEvent(
+                bookId = bookId,
+                whenHappened = Instant.now(),
+                eventId = entryEventId.next(),
+                entry = entry
+            ).play(originalBooks)
+        }
+    }
+})
