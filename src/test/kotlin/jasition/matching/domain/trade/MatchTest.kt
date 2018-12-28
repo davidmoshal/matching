@@ -64,92 +64,150 @@ internal class MatchTest : StringSpec({
         )
     }
     "First match filled the aggressor and the passive entry in the opposite-side book" {
-        val passive = aBookEntry(side = Side.SELL, client = client, price = Price(35))
+        val tradeSize = 15
+        val tradePrice = Price(35)
+        val passive = aBookEntry(
+            side = Side.SELL,
+            client = client,
+            size = EntryQuantity(tradeSize),
+            price = tradePrice
+        )
         val books = passive
             .toEntryAddedToBookEvent(bookId)
             .play(Books(bookId))
             .aggregate
-        val aggressor = aBookEntry(side = Side.BUY, client = otherClient, price = Price(35))
-        val tradeSize = aggressor.size.availableSize
+        val aggressor = aBookEntry(
+            side = Side.BUY,
+            client = otherClient,
+            size = EntryQuantity(tradeSize),
+            price = tradePrice
+        )
+        val tradedAggressor = aggressor.traded(tradeSize)
+        val tradedPassive = passive.traded(tradeSize)
         match(
             aggressor = aggressor,
             books = books,
             events = existingEvents
         ) shouldBe MatchResult(
-            aggressor = aggressor.traded(tradeSize),
+            aggressor = tradedAggressor,
             transaction = Transaction(
                 aggregate = Books(bookId).copy(lastEventId = EventId(2)),
                 events = existingEvents.append(
                     TradeEvent(
-                        eventId = books.lastEventId.next(),
+                        eventId = EventId(2),
                         bookId = bookId,
                         size = tradeSize,
-                        price = Price(35),
+                        price = tradePrice,
                         whenHappened = aggressor.key.whenSubmitted,
-                        aggressor = aggressor.traded(tradeSize).toTradeSideEntry(),
-                        passive = passive.traded(passive.size.availableSize).toTradeSideEntry()
+                        aggressor = tradedAggressor.toTradeSideEntry(),
+                        passive = tradedPassive.toTradeSideEntry()
                     )
                 )
             )
         )
     }
     "First match filled the aggressor and partially-filled the passive entry in the opposite-side book" {
-        // TODO
-        val passive = aBookEntry(side = Side.SELL, client = client, price = Price(35))
+        val tradeSize = 15
+        val tradePrice = Price(35)
+        val passive = aBookEntry(
+            side = Side.SELL,
+            client = client,
+            size = EntryQuantity(tradeSize + 5),
+            price = tradePrice
+        )
         val books = passive
             .toEntryAddedToBookEvent(bookId)
             .play(Books(bookId))
             .aggregate
-        val aggressor = aBookEntry(side = Side.BUY, client = otherClient, price = Price(35))
-        val tradeSize = aggressor.size.availableSize
+        val aggressor = aBookEntry(
+            side = Side.BUY,
+            client = otherClient,
+            size = EntryQuantity(tradeSize),
+            price = tradePrice
+        )
+        val tradedPassive = passive.traded(tradeSize)
+        val tradedAggressor = aggressor.traded(tradeSize)
         match(
             aggressor = aggressor,
             books = books,
             events = existingEvents
         ) shouldBe MatchResult(
-            aggressor = aggressor.traded(tradeSize),
+            aggressor = tradedAggressor,
             transaction = Transaction(
-                aggregate = Books(bookId).copy(lastEventId = EventId(2)),
+                aggregate = Books(bookId)
+                    .addBookEntry(tradedPassive)
+                    .copy(lastEventId = EventId(2)),
                 events = existingEvents.append(
                     TradeEvent(
-                        eventId = books.lastEventId.next(),
+                        eventId = EventId(2),
                         bookId = bookId,
                         size = tradeSize,
                         price = Price(35),
                         whenHappened = aggressor.key.whenSubmitted,
-                        aggressor = aggressor.traded(tradeSize).toTradeSideEntry(),
-                        passive = passive.traded(passive.size.availableSize).toTradeSideEntry()
+                        aggressor = tradedAggressor.toTradeSideEntry(),
+                        passive = tradedPassive.toTradeSideEntry()
                     )
                 )
             )
         )
     }
     "First match partially-filled the aggressor and filled the first passive entry in the opposite-side book; Second match filled the aggressor and partially-filled the second passive entry" {
-        // TODO
-        val passive = aBookEntry(side = Side.SELL, client = client, price = Price(35))
-        val books = passive
-            .toEntryAddedToBookEvent(bookId)
-            .play(Books(bookId))
-            .aggregate
-        val aggressor = aBookEntry(side = Side.BUY, client = otherClient, price = Price(35))
-        val tradeSize = aggressor.size.availableSize
+        val tradeSize = 15
+        val tradeSize2 = 5
+        val tradePrice = Price(35)
+        val passive = aBookEntry(
+            side = Side.SELL,
+            client = client,
+            size = EntryQuantity(tradeSize),
+            price = tradePrice
+        )
+        val passive2 = passive.copy(
+            size = EntryQuantity(tradeSize2 + 10),
+            key = passive.key.copy(eventId = passive.key.eventId.next())
+        )
+        val books = passive2.toEntryAddedToBookEvent(bookId).play(
+            passive.toEntryAddedToBookEvent(bookId).play(Books(bookId)).aggregate
+        ).aggregate
+        val aggressor = aBookEntry(
+            side = Side.BUY,
+            client = otherClient,
+            size = EntryQuantity(tradeSize + tradeSize2),
+            price = tradePrice
+        )
+        val tradedPassive = passive.traded(tradeSize)
+        val tradedPassive2 = passive2.traded(tradeSize2)
+        val tradedAggressor = aggressor.traded(tradeSize)
+        val tradedAggressor2 = tradedAggressor.traded(tradeSize2)
         match(
             aggressor = aggressor,
             books = books,
             events = existingEvents
         ) shouldBe MatchResult(
-            aggressor = aggressor.traded(tradeSize),
+            aggressor = tradedAggressor2,
             transaction = Transaction(
-                aggregate = Books(bookId).copy(lastEventId = EventId(2)),
-                events = existingEvents.append(
-                    TradeEvent(
-                        eventId = books.lastEventId.next(),
-                        bookId = bookId,
-                        size = tradeSize,
-                        price = Price(35),
-                        whenHappened = aggressor.key.whenSubmitted,
-                        aggressor = aggressor.traded(tradeSize).toTradeSideEntry(),
-                        passive = passive.traded(passive.size.availableSize).toTradeSideEntry()
+                aggregate = Books(bookId)
+                    .addBookEntry(tradedPassive2)
+                    .copy(lastEventId = EventId(4)),
+                events = existingEvents.appendAll(
+                    List.of(
+                        TradeEvent(
+                            eventId = EventId(3),
+                            bookId = bookId,
+                            size = tradeSize,
+                            price = Price(35),
+                            whenHappened = aggressor.key.whenSubmitted,
+                            aggressor = tradedAggressor.toTradeSideEntry(),
+                            passive = tradedPassive.toTradeSideEntry()
+                        ),
+                        TradeEvent(
+                            eventId = EventId(4),
+                            bookId = bookId,
+                            size = tradeSize2,
+                            price = Price(35),
+                            whenHappened = aggressor.key.whenSubmitted,
+                            aggressor = tradedAggressor2.toTradeSideEntry(),
+                            passive = tradedPassive2.toTradeSideEntry()
+                        )
                     )
                 )
             )
