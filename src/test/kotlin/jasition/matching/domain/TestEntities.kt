@@ -35,6 +35,30 @@ fun expectedBookEntry(orderPlacedEvent: OrderPlacedEvent): BookEntry = BookEntry
     status = orderPlacedEvent.entryStatus
 )
 
+fun anOrderPlacedEvent(
+    requestId: ClientRequestId = aClientRequestId(),
+    whoRequested: Client = aFirmWithClient(),
+    bookId: BookId = aBookId(),
+    entryType: EntryType = EntryType.LIMIT,
+    side: Side = Side.BUY,
+    price: Price = aPrice(),
+    timeInForce: TimeInForce = TimeInForce.GOOD_TILL_CANCEL,
+    whenHappened: Instant = Instant.now(),
+    eventId: EventId = anEventId(),
+    size: EntryQuantity = anEntryQuantity()
+): OrderPlacedEvent = OrderPlacedEvent(
+    requestId = requestId,
+    whoRequested = whoRequested,
+    bookId = bookId,
+    entryType = entryType,
+    side = side,
+    price = price,
+    timeInForce = timeInForce,
+    whenHappened = whenHappened,
+    eventId = eventId,
+    size = size
+)
+
 fun aBookId(bookId: String = "book"): BookId = BookId(bookId = bookId)
 
 fun aFirmWithClient(
