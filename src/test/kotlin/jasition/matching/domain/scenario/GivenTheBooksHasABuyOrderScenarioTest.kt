@@ -1,7 +1,9 @@
 package jasition.matching.domain.scenario
 
+import io.kotlintest.data.forall
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.FeatureSpec
+import io.kotlintest.tables.row
 import io.vavr.collection.List
 import jasition.matching.domain.*
 import jasition.matching.domain.book.Books
@@ -139,45 +141,31 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : FeatureSpec(
     }
 
     feature(noWashTradeFeature) {
-        scenario(noWashTradeFeature + "When a SELL Limit GTC Order 4 at 10 is placed by the same firm and same firm client, then the new entry is added to the SELL side") {
-            val orderPlacedEvent = anOrderPlacedEvent(
-                requestId = anotherClientRequestId(),
-                whoRequested = anotherFirmWithClient(),
-                bookId = bookId,
-                entryType = EntryType.LIMIT,
-                side = Side.SELL,
-                price = Price(10),
-                timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-                whenHappened = now,
-                eventId = EventId(2),
-                sizes = EntrySizes(4)
-            )
-            val result = orderPlacedEvent.play(books)
+        forall(
+            row(anotherFirmWithClient(), "the same firm and same firm client"),
+            row(anotherFirmWithoutClient(), "the same firm, one with but another without firm client")
+        ) { client, details ->
 
-            val expectedBookEntry = expectedBookEntry(orderPlacedEvent)
-            result.events shouldBe List.of(expectedBookEntry.toEntryAddedToBookEvent(bookId))
-            result.aggregate.buyLimitBook.entries.values() shouldBe List.of(existingEntry)
-            result.aggregate.sellLimitBook.entries.values() shouldBe List.of(expectedBookEntry)
-        }
-        scenario(noWashTradeFeature + "When a SELL Limit GTC Order 4 at 10 is placed by the same firm, one with but another without firm client, then the new entry is added to the SELL side") {
-            val orderPlacedEvent = anOrderPlacedEvent(
-                requestId = anotherClientRequestId(),
-                whoRequested = anotherFirmWithoutClient(),
-                bookId = bookId,
-                entryType = EntryType.LIMIT,
-                side = Side.SELL,
-                price = Price(10),
-                timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-                whenHappened = now,
-                eventId = EventId(2),
-                sizes = EntrySizes(4)
-            )
-            val result = orderPlacedEvent.play(books)
+            scenario(noWashTradeFeature + "When a SELL Limit GTC Order 4 at 10 is placed by $details, then the new entry is added to the SELL side") {
+                val orderPlacedEvent = anOrderPlacedEvent(
+                    requestId = anotherClientRequestId(),
+                    whoRequested = client,
+                    bookId = bookId,
+                    entryType = EntryType.LIMIT,
+                    side = Side.SELL,
+                    price = Price(10),
+                    timeInForce = TimeInForce.GOOD_TILL_CANCEL,
+                    whenHappened = now,
+                    eventId = EventId(2),
+                    sizes = EntrySizes(4)
+                )
+                val result = orderPlacedEvent.play(books)
 
-            val expectedBookEntry = expectedBookEntry(orderPlacedEvent)
-            result.events shouldBe List.of(expectedBookEntry.toEntryAddedToBookEvent(bookId))
-            result.aggregate.buyLimitBook.entries.values() shouldBe List.of(existingEntry)
-            result.aggregate.sellLimitBook.entries.values() shouldBe List.of(expectedBookEntry)
+                val expectedBookEntry = expectedBookEntry(orderPlacedEvent)
+                result.events shouldBe List.of(expectedBookEntry.toEntryAddedToBookEvent(bookId))
+                result.aggregate.buyLimitBook.entries.values() shouldBe List.of(existingEntry)
+                result.aggregate.sellLimitBook.entries.values() shouldBe List.of(expectedBookEntry)
+            }
         }
         scenario(noWashTradeFeature + "When a SELL Limit GTC Order 4 at 10 is placed by the same firm, both without firm client, then the new entry is added to the SELL side") {
             val orderPlacedEvent = anOrderPlacedEvent(
