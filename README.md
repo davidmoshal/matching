@@ -28,11 +28,11 @@ The domain borrows a lot of languages and terms from the [FIX Protocol](http://f
 
 #### Time in Force
 Determines when the Order is in effect.
-* Good till cancel - Effective until cancelled (by request or by the Exchange) 
+* Good till cancel (GTC) - Effective until cancelled (by request or by the Exchange) 
 * Day - Effective until the current Business Date is over
-* Good till day - Effective until the given Business Date is over
-* Immediate or cancel - Immediately match Book entries and cancel the unmatched quantities
-* Fill or kill - Fill the full quantity of the Order or kill the Order
+* Good till day (GTD) - Effective until the given Business Date is over
+* Immediate or cancel (IOC) - Immediately match Book entries and cancel the unmatched quantities
+* Fill or kill (FOK) - Fill the full quantity of the Order or kill the Order
 
 #### Trading rules
 * Aggressors take the better execution price. For example, if a Sell @ 15 is passive, and a Buy @ 20 is aggressor, then the Trade is executed @ 15 so the aggressor gets a better execution price.
