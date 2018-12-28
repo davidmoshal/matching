@@ -13,6 +13,8 @@ import java.time.Instant
 internal class `Given the book has a BUY Limit GTC Order 4 at 10` : StringSpec({
     val now = Instant.now()
     val existingEntry = aBookEntry(
+        clientRequestId = anotherClientRequestId(),
+        client = anotherFirmWithClient(),
         price = Price(10),
         whenSubmitted = now,
         eventId = EventId(1),
@@ -26,8 +28,6 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : StringSpec({
     val books = existingEntry.toEntryAddedToBookEvent(bookId).play(Books(BookId("book"))).aggregate
     "When a BUY Limit GTC Order 5 at 11 is placed, then the new entry is added above the existing" {
         val orderPlacedEvent = anOrderPlacedEvent(
-            requestId = anotherClientRequestId(),
-            whoRequested = anotherFirmWithClient(),
             bookId = bookId,
             entryType = EntryType.LIMIT,
             side = Side.BUY,
@@ -46,8 +46,6 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : StringSpec({
     }
     "When a BUY Limit GTC Order 5 at 10 is placed at a later time, then the new entry is added below the existing" {
         val orderPlacedEvent = anOrderPlacedEvent(
-            requestId = anotherClientRequestId(),
-            whoRequested = anotherFirmWithClient(),
             bookId = bookId,
             entryType = EntryType.LIMIT,
             side = Side.BUY,
@@ -66,8 +64,6 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : StringSpec({
 
     "When a BUY Limit GTC Order 5 at 10 is placed at the same instant, then the new entry is added below the existing" {
         val orderPlacedEvent = anOrderPlacedEvent(
-            requestId = anotherClientRequestId(),
-            whoRequested = anotherFirmWithClient(),
             bookId = bookId,
             entryType = EntryType.LIMIT,
             side = Side.BUY,
@@ -85,8 +81,6 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : StringSpec({
     }
     "When a BUY Limit GTC Order 5 at 9 is placed, then the new entry is added below the existing" {
         val orderPlacedEvent = anOrderPlacedEvent(
-            requestId = anotherClientRequestId(),
-            whoRequested = anotherFirmWithClient(),
             bookId = bookId,
             entryType = EntryType.LIMIT,
             side = Side.BUY,
@@ -104,8 +98,6 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : StringSpec({
     }
     "When a SELL Limit GTC Order 5 at 11 is placed, then the new entry is added to the SELL side" {
         val orderPlacedEvent = anOrderPlacedEvent(
-            requestId = anotherClientRequestId(),
-            whoRequested = anotherFirmWithClient(),
             bookId = bookId,
             entryType = EntryType.LIMIT,
             side = Side.SELL,
@@ -123,8 +115,6 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : StringSpec({
     }
     "When a SELL Limit GTC Order 5 at 10 is placed, then 4 at 10 traded and the BUY entry removed and a SELL entry 1 at 10 added" {
         val orderPlacedEvent = anOrderPlacedEvent(
-            requestId = anotherClientRequestId(),
-            whoRequested = anotherFirmWithClient(),
             bookId = bookId,
             entryType = EntryType.LIMIT,
             side = Side.SELL,

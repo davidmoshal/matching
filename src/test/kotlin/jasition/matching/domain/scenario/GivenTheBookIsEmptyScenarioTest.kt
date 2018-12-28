@@ -25,7 +25,7 @@ internal class `Given the book is empty` : StringSpec({
         val result = orderPlacedEvent.play(books)
 
         val expectedBookEntry = expectedBookEntry(orderPlacedEvent)
-        result.events shouldBe List.of(expectedBookEntry.toEntryAddedToBookEvent(books.bookId))
+        result.events shouldBe List.of(expectedBookEntry.toEntryAddedToBookEvent(bookId))
         result.aggregate.buyLimitBook.entries.values() shouldBe List.of(expectedBookEntry(orderPlacedEvent))
         result.aggregate.sellLimitBook.entries.size() shouldBe 0
     }
@@ -39,7 +39,7 @@ internal class `Given the book is empty` : StringSpec({
         val result = orderPlacedEvent.play(books)
 
         val expectedBookEntry = expectedBookEntry(orderPlacedEvent)
-        result.events shouldBe List.of(expectedBookEntry.toEntryAddedToBookEvent(books.bookId))
+        result.events shouldBe List.of(expectedBookEntry.toEntryAddedToBookEvent(bookId))
         result.aggregate.buyLimitBook.entries.size() shouldBe 0
         result.aggregate.sellLimitBook.entries.values() shouldBe List.of(expectedBookEntry)
     }
