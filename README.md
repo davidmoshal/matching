@@ -143,7 +143,7 @@ Testing
 ## Why am I doing this?
 This project was started as a pet project for myself to learn Kotlin only. 
 
-As I have been working on Exchange system for more or less 10 years, it was natural for me to pick the problem I am most familiar with. It is a summary or brain-dump of what I have learnt about the matching engine. I wrote new code in this project from scratch and purposefully did not even look at my old works, in order to ensure I have the knowledge in my head.
+I have been working on Exchange systems for more or less 10 years. It was natural for me to pick the problem I was most familiar with. It is a summary or brain-dump of what I have learnt about the matching engine. I wrote new code in this project from scratch and purposefully did not even look at my old works, in order to ensure I have the knowledge in my head.
 
 I am perfectly aware that this project may become something of commercial value. While I am sharing the source code of the matching algorithm here, I am also very happy to be consulted how to realise it as an enterprise system. Contact me if you are interested.
 
