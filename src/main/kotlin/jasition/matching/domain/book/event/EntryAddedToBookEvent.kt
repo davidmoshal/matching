@@ -16,7 +16,8 @@ data class EntryAddedToBookEvent(
     val whenHappened: Instant
 ) : Event<BookId, Books> {
     init {
-        if (eventId != entry.key.eventId) throw IllegalArgumentException("Event ID must match the Event ID in the Book Entry: eventId=$eventId, entry.eventId=${entry.key.eventId}")
+        if (eventId != entry.key.eventId)
+            throw IllegalArgumentException("Event ID must match the Event ID in the Book Entry: eventId=$eventId, entry.eventId=${entry.key.eventId}")
     }
 
     override fun aggregateId(): BookId = bookId

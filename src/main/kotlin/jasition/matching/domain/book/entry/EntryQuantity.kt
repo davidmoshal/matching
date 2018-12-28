@@ -17,7 +17,8 @@ data class EntryQuantity(
     )
 
     fun amended(newOrderSize: Int): EntryQuantity = copy(
-        availableSize = if (newOrderSize == tradedSize + cancelledSize)
+        availableSize =
+        if (newOrderSize == tradedSize + cancelledSize)
             throw IllegalArgumentException("Cannot amend to zero available size: $newOrderSize")
         else newOrderSize - tradedSize - cancelledSize
     )

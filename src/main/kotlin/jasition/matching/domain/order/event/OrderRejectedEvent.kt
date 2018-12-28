@@ -34,7 +34,6 @@ data class OrderRejectedEvent(
 
     override fun play(aggregate: Books): Transaction<BookId, Books> =
         Transaction(aggregate.copy(lastEventId = aggregate.verifyEventId(eventId)))
-
 }
 
 enum class OrderRejectReason {

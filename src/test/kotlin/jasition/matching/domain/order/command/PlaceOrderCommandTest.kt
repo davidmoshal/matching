@@ -34,7 +34,6 @@ internal class `Given there is a request to place an order` : StringSpec({
         val result = command.validate(books)
 
         result.isRight() shouldBe true
-
         result.map { orderPlacedEvent ->
             orderPlacedEvent shouldBe OrderPlacedEvent(
                 eventId = books.lastEventId.next(),

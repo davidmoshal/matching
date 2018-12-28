@@ -27,14 +27,13 @@ data class PlaceOrderCommand(
     fun validate(
         books: Books
     ): Either<OrderRejectedEvent, OrderPlacedEvent> {
-
         if (size <= 0) {
             return Either.left(
                 toRejectedEvent(
                     books = books,
                     currentTime = whenRequested,
                     rejectReason = OrderRejectReason.INCORRECT_QUANTITY,
-                    rejectText = "Order size must be positive : ${size}"
+                    rejectText = "Order size must be positive : $size"
                 )
             )
         }
@@ -49,7 +48,6 @@ data class PlaceOrderCommand(
                 )
             )
         }
-
         return Either.right(toPlacedEvent(books = books, currentTime = whenRequested))
     }
 

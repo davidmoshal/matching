@@ -20,8 +20,8 @@ internal class BooksTest : StringSpec({
         side = Side.BUY
     )
     val sellEntry = buyEntry.copy(side = Side.SELL)
-    var tradeBuySideEntry = buyEntry.toTradeSideEntry()
-    var tradeSellSideEntry = sellEntry.toTradeSideEntry()
+    val tradeBuySideEntry = buyEntry.toTradeSideEntry()
+    val tradeSellSideEntry = sellEntry.toTradeSideEntry()
 
     val buyLimitBook = spyk(LimitBook(Side.BUY))
     val sellLimitBook = spyk(LimitBook(Side.SELL))

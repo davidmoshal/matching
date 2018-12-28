@@ -45,7 +45,6 @@ data class TradeSideEntry(
 ) {
     fun toBookEntryKey(): BookEntryKey =
         BookEntryKey(price = price, whenSubmitted = whenSubmitted, eventId = entryEventId)
-
 }
 
 

@@ -14,7 +14,7 @@ fun sameFirmAndSameFirmClient(client: Client, other: Client): Boolean =
 
 fun findTradePrice(aggressorSide: Side, aggressor: Price?, passive: Price?): Price? =
     if (aggressor != null && passive != null)
-        if (aggressorSide.comparatorMultipler() * aggressor.compareTo(passive) <= 0) passive
+        if (aggressorSide.comparatorMultiplier() * aggressor.compareTo(passive) <= 0) passive
         else null
     else passive ?: aggressor
 

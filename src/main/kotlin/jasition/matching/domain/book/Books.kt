@@ -29,6 +29,7 @@ data class Books(
         sellLimitBook = if (Side.SELL == entry.side) sellLimitBook.update(entry) else sellLimitBook
     )
 
-    fun verifyEventId(eventId: EventId): EventId = if (eventId.isNextOf(lastEventId)) eventId
-    else throw IllegalArgumentException("Incoming Entry is not the next expected event ID. lastEventId=$lastEventId, incomingEventId=${eventId}")
+    fun verifyEventId(eventId: EventId): EventId =
+        if (eventId.isNextOf(lastEventId)) eventId
+        else throw IllegalArgumentException("Incoming Entry is not the next expected event ID. lastEventId=$lastEventId, incomingEventId=$eventId")
 }

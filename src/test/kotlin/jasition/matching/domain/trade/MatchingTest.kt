@@ -12,7 +12,7 @@ import jasition.matching.domain.book.entry.Side
 import jasition.matching.domain.order.event.OrderPlacedEvent
 import jasition.matching.domain.trade.event.TradeEvent
 
-internal class MatchTest : StringSpec({
+internal class MatchingTest : StringSpec({
     val bookId = aBookId()
     val client = aFirmWithClient(firmId = "firm1", firmClientId = "firmClient1")
     val otherClient = aFirmWithClient(firmId = "firm2", firmClientId = "firmClient2")
