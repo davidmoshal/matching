@@ -1,4 +1,4 @@
-package jasition.matching.domain.trade
+package jasition.matching.domain.scenario
 
 import io.kotlintest.matchers.beOfType
 import io.kotlintest.should
