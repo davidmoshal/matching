@@ -96,7 +96,7 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : StringSpec({
         result.aggregate.buyLimitBook.entries.values() shouldBe List.of(existingEntry, expectedBookEntry)
         result.aggregate.sellLimitBook.entries.size() shouldBe 0
     }
-    "[4 - Prices do not cross] When a SELL Limit GTC Order 2 at 11 is placed, then the new entry is added to the SELL side" {
+    "[4 - No trade if prices do not cross] When a SELL Limit GTC Order 2 at 11 is placed, then the new entry is added to the SELL side" {
         val orderPlacedEvent = anOrderPlacedEvent(
             bookId = bookId,
             entryType = EntryType.LIMIT,
@@ -132,7 +132,7 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : StringSpec({
         result.aggregate.buyLimitBook.entries.values() shouldBe List.of(existingEntry)
         result.aggregate.sellLimitBook.entries.values() shouldBe List.of(expectedBookEntry)
     }
-    "[5 - No wash trade] When a SELL Limit GTC Order 4 at 10 is placed by the same firm but without firm client, then the new entry is added to the SELL side" {
+    "[5 - No wash trade] When a SELL Limit GTC Order 4 at 10 is placed by the same firm, one with but another without firm client, then the new entry is added to the SELL side" {
         val orderPlacedEvent = anOrderPlacedEvent(
             requestId = anotherClientRequestId(),
             whoRequested = anotherFirmWithoutClient(),
@@ -149,6 +149,31 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : StringSpec({
         val result = orderPlacedEvent.play(books)
         result.events shouldBe List.of(expectedBookEntry.toEntryAddedToBookEvent(bookId))
         result.aggregate.buyLimitBook.entries.values() shouldBe List.of(existingEntry)
+        result.aggregate.sellLimitBook.entries.values() shouldBe List.of(expectedBookEntry)
+    }
+    "[5 - No wash trade] When a SELL Limit GTC Order 4 at 10 is placed by the same firm, both without firm client, then the new entry is added to the SELL side" {
+        val orderPlacedEvent = anOrderPlacedEvent(
+            requestId = anotherClientRequestId(),
+            whoRequested = anotherFirmWithoutClient(),
+            bookId = bookId,
+            entryType = EntryType.LIMIT,
+            side = Side.SELL,
+            price = Price(10),
+            timeInForce = TimeInForce.GOOD_TILL_CANCEL,
+            whenHappened = now,
+            eventId = EventId(2),
+            sizes = EntrySizes(4)
+        )
+        val expectedBookEntry = expectedBookEntry(orderPlacedEvent)
+        val existingEntryWithoutFirmClient = existingEntry.copy(whoRequested = anotherFirmWithoutClient())
+        val result = orderPlacedEvent.play(
+            existingEntryWithoutFirmClient
+                .toEntryAddedToBookEvent(bookId)
+                .play(Books(BookId("book")))
+                .aggregate
+        )
+        result.events shouldBe List.of(expectedBookEntry.toEntryAddedToBookEvent(bookId))
+        result.aggregate.buyLimitBook.entries.values() shouldBe List.of(existingEntryWithoutFirmClient)
         result.aggregate.sellLimitBook.entries.values() shouldBe List.of(expectedBookEntry)
     }
     "[6 - Aggressor takes better execution price] When a SELL Limit GTC Order 4 at 9 is placed, then 4 at 10 traded and the BUY entry removed" {
