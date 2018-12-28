@@ -7,7 +7,7 @@ data class EntrySizes(
 ) {
     init {
         if (available < 0 || traded < 0 || cancelled < 0) {
-            throw IllegalArgumentException("Order sizes cannot be negative: available=$available, traded=$traded, cancelled=$cancelled")
+            throw IllegalArgumentException("Entry sizes cannot be negative: available=$available, traded=$traded, cancelled=$cancelled")
         }
     }
 
@@ -18,8 +18,8 @@ data class EntrySizes(
 
     fun amended(newOrderSize: Int): EntrySizes = copy(
         available =
-        if (newOrderSize == traded + cancelled)
-            throw IllegalArgumentException("Cannot amend to zero available sizes: $newOrderSize")
+        if (newOrderSize <= traded + cancelled)
+            throw IllegalArgumentException("Cannot amend to zero or negative available size: $newOrderSize, available=$available, traded=$traded, cancelled=$cancelled")
         else newOrderSize - traded - cancelled
     )
 

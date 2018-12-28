@@ -36,7 +36,8 @@ internal class EntrySizesTest : StringSpec({
     "Disallows amending down to equal to or lower than traded plus cancelled"{
         forall(
             row(100, 25, 33, 58),
-            row(100, 25, 33, 57)
+            row(100, 25, 33, 57),
+            row(100, 25, 33, 56)
         ) { available, traded, cancelled, newOrderSize ->
             shouldThrow<IllegalArgumentException> {
                 EntrySizes(
