@@ -117,7 +117,7 @@ internal class FindNextMatchTest : StringSpec({
         findNextMatch(
             aggressor = entry.copy(
                 side = Side.BUY,
-                key = entryKey.copy(price =null)
+                key = entryKey.copy(price = null)
             ),
             passives = List.of(
                 passive.copy(key = entryKey.copy(price = null)),

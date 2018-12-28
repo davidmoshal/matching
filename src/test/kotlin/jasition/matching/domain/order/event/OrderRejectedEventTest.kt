@@ -60,7 +60,7 @@ internal class `Given an order is rejected` : StringSpec({
     val actual = event.play(books)
 
     "The books only have the last event ID updated" {
-        actual.aggregate shouldBe  books.copy(lastEventId = eventId)
+        actual.aggregate shouldBe books.copy(lastEventId = eventId)
     }
     "There is no side effect" {
         actual.events shouldBe List.empty()

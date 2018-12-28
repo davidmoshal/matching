@@ -7,7 +7,7 @@ import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import jasition.matching.domain.EventId
 import jasition.matching.domain.aBookEntry
-import jasition.matching.domain.book.BookId
+import jasition.matching.domain.aBookId
 import jasition.matching.domain.book.event.EntryAddedToBookEvent
 import jasition.matching.domain.trade.event.TradeSideEntry
 import java.time.Instant
@@ -16,7 +16,7 @@ internal class BookEntryTest : StringSpec({
     val entry = aBookEntry(
         sizes = EntrySizes(available = 23, traded = 2, cancelled = 0)
     )
-    val bookId = BookId("bookId")
+    val bookId = aBookId()
 
     "Converts to EntryAddedToBookEvent" {
         entry.toEntryAddedToBookEvent(bookId) shouldBe EntryAddedToBookEvent(

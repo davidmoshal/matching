@@ -2,14 +2,14 @@ package jasition.matching.domain.book.entry
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
-import jasition.matching.domain.book.BookId
+import jasition.matching.domain.aBookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.LimitBook
 
 internal class SideTest : StringSpec({
     val buyLimitBook = LimitBook(Side.BUY)
     val sellLimitBook = LimitBook(Side.SELL)
-    val books = Books(BookId("bookId"))
+    val books = Books(aBookId())
         .copy(buyLimitBook = buyLimitBook, sellLimitBook = sellLimitBook)
 
     "BUY side has -1 as the comparator multiplier"{

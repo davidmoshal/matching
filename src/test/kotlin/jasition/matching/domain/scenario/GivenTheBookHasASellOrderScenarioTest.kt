@@ -4,7 +4,6 @@ import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import io.vavr.collection.List
 import jasition.matching.domain.*
-import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.trade.event.TradeEvent
@@ -24,10 +23,10 @@ internal class `Given the book has a SELL Limit GTC Order 4 at 10` : StringSpec(
         sizes = EntrySizes(4),
         status = EntryStatus.NEW
     )
-    val bookId = BookId("book")
-    val books = existingEntry.toEntryAddedToBookEvent(bookId).play(Books(BookId("book"))).aggregate
+    val bookId = aBookId()
+    val books = existingEntry.toEntryAddedToBookEvent(bookId).play(Books(bookId)).aggregate
 
-    "[1 - Lower SELL over lower] When a SELL Limit GTC Order 5 at 9 is placed, then the new entry is added above the existing" {
+    "[1 - Lower SELL over higher] When a SELL Limit GTC Order 5 at 9 is placed, then the new entry is added above the existing" {
         val orderPlacedEvent = anOrderPlacedEvent(
             bookId = bookId,
             entryType = EntryType.LIMIT,
@@ -38,8 +37,9 @@ internal class `Given the book has a SELL Limit GTC Order 4 at 10` : StringSpec(
             eventId = EventId(2),
             sizes = EntrySizes(5)
         )
-        val expectedBookEntry = expectedBookEntry(orderPlacedEvent)
         val result = orderPlacedEvent.play(books)
+
+        val expectedBookEntry = expectedBookEntry(orderPlacedEvent)
         result.events shouldBe List.of(expectedBookEntry.toEntryAddedToBookEvent(bookId))
         result.aggregate.buyLimitBook.entries.size() shouldBe 0
         result.aggregate.sellLimitBook.entries.values() shouldBe List.of(expectedBookEntry, existingEntry)
@@ -55,8 +55,9 @@ internal class `Given the book has a SELL Limit GTC Order 4 at 10` : StringSpec(
             eventId = EventId(2),
             sizes = EntrySizes(5)
         )
-        val expectedBookEntry = expectedBookEntry(orderPlacedEvent)
         val result = orderPlacedEvent.play(books)
+
+        val expectedBookEntry = expectedBookEntry(orderPlacedEvent)
         result.events shouldBe List.of(expectedBookEntry.toEntryAddedToBookEvent(bookId))
         result.aggregate.buyLimitBook.entries.size() shouldBe 0
         result.aggregate.sellLimitBook.entries.values() shouldBe List.of(existingEntry, expectedBookEntry)
@@ -72,8 +73,9 @@ internal class `Given the book has a SELL Limit GTC Order 4 at 10` : StringSpec(
             eventId = EventId(2),
             sizes = EntrySizes(5)
         )
-        val expectedBookEntry = expectedBookEntry(orderPlacedEvent)
         val result = orderPlacedEvent.play(books)
+
+        val expectedBookEntry = expectedBookEntry(orderPlacedEvent)
         result.events shouldBe List.of(expectedBookEntry.toEntryAddedToBookEvent(bookId))
         result.aggregate.buyLimitBook.entries.size() shouldBe 0
         result.aggregate.sellLimitBook.entries.values() shouldBe List.of(existingEntry, expectedBookEntry)
@@ -90,8 +92,9 @@ internal class `Given the book has a SELL Limit GTC Order 4 at 10` : StringSpec(
             eventId = EventId(2),
             sizes = EntrySizes(5)
         )
-        val expectedBookEntry = expectedBookEntry(orderPlacedEvent)
         val result = orderPlacedEvent.play(books)
+
+        val expectedBookEntry = expectedBookEntry(orderPlacedEvent)
         result.events shouldBe List.of(expectedBookEntry.toEntryAddedToBookEvent(bookId))
         result.aggregate.buyLimitBook.entries.size() shouldBe 0
         result.aggregate.sellLimitBook.entries.values() shouldBe List.of(existingEntry, expectedBookEntry)
@@ -107,8 +110,9 @@ internal class `Given the book has a SELL Limit GTC Order 4 at 10` : StringSpec(
             eventId = EventId(2),
             sizes = EntrySizes(2)
         )
-        val expectedBookEntry = expectedBookEntry(orderPlacedEvent)
         val result = orderPlacedEvent.play(books)
+
+        val expectedBookEntry = expectedBookEntry(orderPlacedEvent)
         result.events shouldBe List.of(expectedBookEntry.toEntryAddedToBookEvent(bookId))
         result.aggregate.buyLimitBook.entries.values() shouldBe List.of(expectedBookEntry)
         result.aggregate.sellLimitBook.entries.values() shouldBe List.of(existingEntry)
@@ -126,8 +130,9 @@ internal class `Given the book has a SELL Limit GTC Order 4 at 10` : StringSpec(
             eventId = EventId(2),
             sizes = EntrySizes(4)
         )
-        val expectedBookEntry = expectedBookEntry(orderPlacedEvent)
         val result = orderPlacedEvent.play(books)
+
+        val expectedBookEntry = expectedBookEntry(orderPlacedEvent)
         result.events shouldBe List.of(expectedBookEntry.toEntryAddedToBookEvent(bookId))
         result.aggregate.buyLimitBook.entries.values() shouldBe List.of(expectedBookEntry)
         result.aggregate.sellLimitBook.entries.values() shouldBe List.of(existingEntry)
@@ -145,8 +150,9 @@ internal class `Given the book has a SELL Limit GTC Order 4 at 10` : StringSpec(
             eventId = EventId(2),
             sizes = EntrySizes(4)
         )
-        val expectedBookEntry = expectedBookEntry(orderPlacedEvent)
         val result = orderPlacedEvent.play(books)
+
+        val expectedBookEntry = expectedBookEntry(orderPlacedEvent)
         result.events shouldBe List.of(expectedBookEntry.toEntryAddedToBookEvent(bookId))
         result.aggregate.buyLimitBook.entries.values() shouldBe List.of(expectedBookEntry)
         result.aggregate.sellLimitBook.entries.values() shouldBe List.of(existingEntry)
@@ -164,14 +170,15 @@ internal class `Given the book has a SELL Limit GTC Order 4 at 10` : StringSpec(
             eventId = EventId(2),
             sizes = EntrySizes(4)
         )
-        val expectedBookEntry = expectedBookEntry(orderPlacedEvent)
         val existingEntryWithoutFirmClient = existingEntry.copy(whoRequested = anotherFirmWithoutClient())
         val result = orderPlacedEvent.play(
             existingEntryWithoutFirmClient
                 .toEntryAddedToBookEvent(bookId)
-                .play(Books(BookId("book")))
+                .play(Books(bookId))
                 .aggregate
         )
+
+        val expectedBookEntry = expectedBookEntry(orderPlacedEvent)
         result.events shouldBe List.of(expectedBookEntry.toEntryAddedToBookEvent(bookId))
         result.aggregate.buyLimitBook.entries.values() shouldBe List.of(expectedBookEntry)
         result.aggregate.sellLimitBook.entries.values() shouldBe List.of(existingEntryWithoutFirmClient)
@@ -189,13 +196,6 @@ internal class `Given the book has a SELL Limit GTC Order 4 at 10` : StringSpec(
         )
         val result = orderPlacedEvent.play(books)
 
-        expectedBookEntry(
-            orderPlacedEvent = orderPlacedEvent,
-            eventId = EventId(4),
-            status = EntryStatus.FILLED,
-            sizes = EntrySizes(available = 0, traded = 4, cancelled = 0)
-        )
-
         result.events shouldBe List.of(
             TradeEvent(
                 eventId = EventId(3),
@@ -205,7 +205,7 @@ internal class `Given the book has a SELL Limit GTC Order 4 at 10` : StringSpec(
                 whenHappened = now,
                 aggressor = expectedTradeSideEntry(
                     orderPlacedEvent = orderPlacedEvent,
-                    eventId = EventId(2),
+                    eventId = orderPlacedEvent.eventId,
                     sizes = EntrySizes(available = 0, traded = 4, cancelled = 0),
                     status = EntryStatus.FILLED
                 ),
@@ -217,7 +217,6 @@ internal class `Given the book has a SELL Limit GTC Order 4 at 10` : StringSpec(
                 )
             )
         )
-
         result.aggregate.buyLimitBook.entries.size() shouldBe 0
         result.aggregate.sellLimitBook.entries.size() shouldBe 0
     }
@@ -248,7 +247,7 @@ internal class `Given the book has a SELL Limit GTC Order 4 at 10` : StringSpec(
                 whenHappened = now,
                 aggressor = expectedTradeSideEntry(
                     orderPlacedEvent = orderPlacedEvent,
-                    eventId = EventId(2),
+                    eventId = orderPlacedEvent.eventId,
                     sizes = EntrySizes(available = 0, traded = 3, cancelled = 0),
                     status = EntryStatus.FILLED
                 ),
@@ -260,7 +259,6 @@ internal class `Given the book has a SELL Limit GTC Order 4 at 10` : StringSpec(
                 )
             )
         )
-
         result.aggregate.buyLimitBook.entries.size() shouldBe 0
         result.aggregate.sellLimitBook.entries.values() shouldBe List.of(expectedBookEntry)
     }
@@ -277,13 +275,6 @@ internal class `Given the book has a SELL Limit GTC Order 4 at 10` : StringSpec(
         )
         val result = orderPlacedEvent.play(books)
 
-        expectedBookEntry(
-            orderPlacedEvent = orderPlacedEvent,
-            eventId = EventId(4),
-            status = EntryStatus.FILLED,
-            sizes = EntrySizes(available = 0, traded = 4, cancelled = 0)
-        )
-
         result.events shouldBe List.of(
             TradeEvent(
                 eventId = EventId(3),
@@ -293,7 +284,7 @@ internal class `Given the book has a SELL Limit GTC Order 4 at 10` : StringSpec(
                 whenHappened = now,
                 aggressor = expectedTradeSideEntry(
                     orderPlacedEvent = orderPlacedEvent,
-                    eventId = EventId(2),
+                    eventId = orderPlacedEvent.eventId,
                     sizes = EntrySizes(available = 0, traded = 4, cancelled = 0),
                     status = EntryStatus.FILLED
                 ),
@@ -305,7 +296,6 @@ internal class `Given the book has a SELL Limit GTC Order 4 at 10` : StringSpec(
                 )
             )
         )
-
         result.aggregate.buyLimitBook.entries.size() shouldBe 0
         result.aggregate.sellLimitBook.entries.size() shouldBe 0
     }
@@ -338,7 +328,7 @@ internal class `Given the book has a SELL Limit GTC Order 4 at 10` : StringSpec(
                 whenHappened = now,
                 aggressor = expectedTradeSideEntry(
                     orderPlacedEvent = orderPlacedEvent,
-                    eventId = EventId(2),
+                    eventId = orderPlacedEvent.eventId,
                     sizes = EntrySizes(available = 1, traded = 4, cancelled = 0),
                     status = EntryStatus.PARTIAL_FILL
                 ),
@@ -351,7 +341,6 @@ internal class `Given the book has a SELL Limit GTC Order 4 at 10` : StringSpec(
             )
             , expectedBookEntry.toEntryAddedToBookEvent(bookId)
         )
-
         result.aggregate.buyLimitBook.entries.values() shouldBe List.of(expectedBookEntry)
         result.aggregate.sellLimitBook.entries.size() shouldBe 0
     }

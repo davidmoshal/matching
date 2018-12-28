@@ -39,8 +39,8 @@ internal class BooksTest : StringSpec({
 
     every { buyLimitBook.add(buyEntry) } returns newBuyLimitBook
     every { sellLimitBook.add(sellEntry) } returns newSellLimitBook
-    every { buyLimitBook.update(tradeBuySideEntry)} returns tradedBuyLimitBook
-    every { sellLimitBook.update(tradeSellSideEntry)} returns tradedSellLimitBook
+    every { buyLimitBook.update(tradeBuySideEntry) } returns tradedBuyLimitBook
+    every { sellLimitBook.update(tradeSellSideEntry) } returns tradedSellLimitBook
 
     "Adding BUY entry updates the BUY Limit Book and Last event ID only" {
         books.addBookEntry(buyEntry) shouldBe books.copy(

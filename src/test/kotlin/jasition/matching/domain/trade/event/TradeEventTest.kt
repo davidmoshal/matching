@@ -5,9 +5,7 @@ import io.kotlintest.specs.StringSpec
 import io.mockk.every
 import io.mockk.spyk
 import io.vavr.collection.List
-import jasition.matching.domain.EventId
-import jasition.matching.domain.EventType
-import jasition.matching.domain.Transaction
+import jasition.matching.domain.*
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.*
@@ -17,7 +15,7 @@ import java.time.Instant
 
 internal class TradeEventPropertyTest : StringSpec({
     val eventId = EventId(3)
-    val bookId = BookId("book")
+    val bookId = aBookId()
     val event = TradeEvent(
         bookId = bookId,
         whenHappened = Instant.now(),
@@ -25,24 +23,24 @@ internal class TradeEventPropertyTest : StringSpec({
         size = 10,
         price = Price(20),
         aggressor = TradeSideEntry(
-            requestId = ClientRequestId("req1"),
-            whoRequested = Client(firmId = "firm1", firmClientId = "client1"),
+            requestId = aClientRequestId(),
+            whoRequested = aFirmWithClient(),
             entryType = EntryType.LIMIT,
             side = Side.BUY,
-            sizes = EntrySizes(10, traded = 10, cancelled = 0),
-            price = Price(20),
+            sizes = anEntrySizes(),
+            price = aPrice(),
             timeInForce = TimeInForce.GOOD_TILL_CANCEL,
             status = EntryStatus.PARTIAL_FILL,
             eventId = EventId(2),
             whenSubmitted = Instant.now()
         ),
         passive = TradeSideEntry(
-            requestId = ClientRequestId("req2"),
-            whoRequested = Client(firmId = "firm2", firmClientId = "client2"),
+            requestId = anotherClientRequestId(),
+            whoRequested = anotherFirmWithClient(),
             entryType = EntryType.LIMIT,
             side = Side.SELL,
-            sizes = EntrySizes(0, traded = 10, cancelled = 0),
-            price = Price(20),
+            sizes = anEntrySizes(),
+            price = aPrice(),
             timeInForce = TimeInForce.GOOD_TILL_CANCEL,
             status = EntryStatus.FILLED,
             eventId = EventId(1),

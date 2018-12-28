@@ -41,19 +41,18 @@ fun expectedBookEntry(
     eventId: EventId,
     status: EntryStatus,
     sizes: EntrySizes
-) =
-    BookEntry(
-        price = orderPlacedEvent.price,
-        whenSubmitted = orderPlacedEvent.whenHappened,
-        eventId = eventId,
-        requestId = orderPlacedEvent.requestId,
-        whoRequested = orderPlacedEvent.whoRequested,
-        entryType = orderPlacedEvent.entryType,
-        side = orderPlacedEvent.side,
-        timeInForce = orderPlacedEvent.timeInForce,
-        sizes = sizes,
-        status = status
-    )
+) = BookEntry(
+    price = orderPlacedEvent.price,
+    whenSubmitted = orderPlacedEvent.whenHappened,
+    eventId = eventId,
+    requestId = orderPlacedEvent.requestId,
+    whoRequested = orderPlacedEvent.whoRequested,
+    entryType = orderPlacedEvent.entryType,
+    side = orderPlacedEvent.side,
+    timeInForce = orderPlacedEvent.timeInForce,
+    sizes = sizes,
+    status = status
+)
 
 
 fun anOrderPlacedEvent(
