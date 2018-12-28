@@ -4,9 +4,9 @@ import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import io.vavr.collection.List
 import jasition.matching.domain.aBookEntry
+import jasition.matching.domain.anotherFirmWithClient
 import jasition.matching.domain.book.entry.Price
 import jasition.matching.domain.book.entry.Side
-import jasition.matching.domain.client.Client
 
 internal class FindNextMatchTest : StringSpec({
     val entry = aBookEntry()
@@ -17,7 +17,7 @@ internal class FindNextMatchTest : StringSpec({
         findNextMatch(aggressor = entry, passives = List.of(entry), offset = 1) shouldBe null
     }
     val entryKey = entry.key
-    val otherFirmClient = Client("otherFirm", "otherFirmClient")
+    val otherFirmClient = anotherFirmWithClient()
     "Not found when the prices do not cross between aggressor and the last passive entry" {
         findNextMatch(
             aggressor = entry.copy(

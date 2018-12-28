@@ -45,8 +45,23 @@ fun aFirmWithClient(
     firmClientId = firmClientId
 )
 
+fun anotherFirmWithClient(
+    firmId: String = "firm2",
+    firmClientId: String = "firm1Client2"
+): Client = Client(
+    firmId = firmId,
+    firmClientId = firmClientId
+)
+
 fun aFirmWithoutClient(
     firmId: String = "firm1"
+): Client = Client(
+    firmId = firmId,
+    firmClientId = null
+)
+
+fun anotherFirmWithoutClient(
+    firmId: String = "firm2"
 ): Client = Client(
     firmId = firmId,
     firmClientId = null
@@ -93,8 +108,14 @@ fun aPrice(value: Long = 10) = Price(value = value)
 fun aClientRequestId(
     current: String = "req1",
     original: String? = null,
-    listId: String? = null
-) = ClientRequestId(current, original, listId)
+    parentId: String? = null
+) = ClientRequestId(current, original, parentId)
+
+fun anotherClientRequestId(
+    current: String = "req2",
+    original: String? = null,
+    parentId: String? = null
+) = ClientRequestId(current, original, parentId)
 
 fun aTradingStatuses(
     manual: TradingStatus? = null,

@@ -14,8 +14,8 @@ import jasition.matching.domain.trade.event.TradeEvent
 
 internal class MatchingTest : StringSpec({
     val bookId = aBookId()
-    val client = aFirmWithClient(firmId = "firm1", firmClientId = "firmClient1")
-    val otherClient = aFirmWithClient(firmId = "firm2", firmClientId = "firmClient2")
+    val client = aFirmWithClient()
+    val otherClient = anotherFirmWithClient()
     val existingEvents = List.of(mockk<OrderPlacedEvent>(), mockk<TradeEvent>())
 
     "Stop matching when there is no available size in the aggressor" {

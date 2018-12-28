@@ -5,6 +5,8 @@ import io.kotlintest.should
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.BehaviorSpec
 import jasition.matching.domain.EventId
+import jasition.matching.domain.anotherClientRequestId
+import jasition.matching.domain.anotherFirmWithClient
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.*
@@ -15,15 +17,15 @@ import jasition.matching.domain.expectedBookEntry
 import jasition.matching.domain.order.event.OrderPlacedEvent
 import java.time.Instant
 
-internal class `Buy orders in limit book are sorted in descending order then event time ascending` : BehaviorSpec() {
+internal class `Given the book has a BUY Limit GTC Order 4 at 10` : BehaviorSpec() {
     init {
         given("the book has a BUY Limit GTC Order 4@10") {
             val existingEntry = BookEntry(
                 price = Price(10),
                 whenSubmitted = Instant.now(),
                 eventId = EventId(1),
-                clientRequestId = ClientRequestId("oldReq1"),
-                client = Client(firmId = "firm1", firmClientId = "client1"),
+                clientRequestId = anotherClientRequestId(),
+                client = anotherFirmWithClient(),
                 entryType = EntryType.LIMIT,
                 side = Side.BUY,
                 timeInForce = TimeInForce.GOOD_TILL_CANCEL,
