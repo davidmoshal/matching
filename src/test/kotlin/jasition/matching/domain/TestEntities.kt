@@ -9,6 +9,7 @@ import jasition.matching.domain.book.event.EntryAddedToBookEvent
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.order.event.OrderPlacedEvent
+import jasition.matching.domain.trade.event.TradeSideEntry
 import java.time.Instant
 
 fun expectedEntryAddedToBookEvent(
@@ -34,6 +35,26 @@ fun expectedBookEntry(orderPlacedEvent: OrderPlacedEvent): BookEntry = BookEntry
     size = orderPlacedEvent.size,
     status = orderPlacedEvent.entryStatus
 )
+
+fun expectedBookEntry(
+    orderPlacedEvent: OrderPlacedEvent,
+    eventId: EventId,
+    status: EntryStatus,
+    size: EntryQuantity
+) =
+    BookEntry(
+        price = orderPlacedEvent.price,
+        whenSubmitted = orderPlacedEvent.whenHappened,
+        eventId = eventId,
+        clientRequestId = orderPlacedEvent.requestId,
+        client = orderPlacedEvent.whoRequested,
+        entryType = orderPlacedEvent.entryType,
+        side = orderPlacedEvent.side,
+        timeInForce = orderPlacedEvent.timeInForce,
+        size = size,
+        status = status
+    )
+
 
 fun anOrderPlacedEvent(
     requestId: ClientRequestId = aClientRequestId(),
@@ -152,3 +173,43 @@ fun aTradingStatuses(
     scheduled = scheduled,
     default = default
 )
+
+fun expectedTradeSideEntry(
+    orderPlacedEvent: OrderPlacedEvent,
+    eventId: EventId,
+    entryQuantity: EntryQuantity,
+    entryStatus: EntryStatus
+): TradeSideEntry {
+    return TradeSideEntry(
+        requestId = orderPlacedEvent.requestId,
+        whoRequested = orderPlacedEvent.whoRequested,
+        entryType = orderPlacedEvent.entryType,
+        size = entryQuantity,
+        side = orderPlacedEvent.side,
+        price = orderPlacedEvent.price,
+        timeInForce = orderPlacedEvent.timeInForce,
+        whenSubmitted = orderPlacedEvent.whenHappened,
+        entryEventId = eventId,
+        entryStatus = entryStatus
+    )
+}
+
+fun expectedTradeSideEntry(
+    bookEntry: BookEntry,
+    eventId: EventId,
+    entryQuantity: EntryQuantity,
+    entryStatus: EntryStatus
+): TradeSideEntry {
+    return TradeSideEntry(
+        requestId = bookEntry.clientRequestId,
+        whoRequested = bookEntry.client,
+        entryType = bookEntry.entryType,
+        size = entryQuantity,
+        side = bookEntry.side,
+        price = bookEntry.key.price,
+        timeInForce = bookEntry.timeInForce,
+        whenSubmitted = bookEntry.key.whenSubmitted,
+        entryEventId = eventId,
+        entryStatus = entryStatus
+    )
+}
