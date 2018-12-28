@@ -14,7 +14,7 @@ import java.time.Instant
 
 internal class BookEntryTest : StringSpec({
     val entry = aBookEntry(
-        size = EntryQuantity(availableSize = 23, tradedSize = 2, cancelledSize = 0)
+        sizes = EntrySizes(available = 23, traded = 2, cancelled = 0)
     )
     val bookId = BookId("bookId")
 
@@ -37,21 +37,21 @@ internal class BookEntryTest : StringSpec({
     }
     "Converts to TradeSideEntry" {
         entry.toTradeSideEntry() shouldBe TradeSideEntry(
-            requestId = entry.clientRequestId,
-            whoRequested = entry.client,
+            requestId = entry.requestId,
+            whoRequested = entry.whoRequested,
             entryType = entry.entryType,
             side = entry.side,
-            size = EntryQuantity(availableSize = 23, tradedSize = 2, cancelledSize = 0),
+            sizes = EntrySizes(available = 23, traded = 2, cancelled = 0),
             price = entry.key.price,
             timeInForce = entry.timeInForce,
             whenSubmitted = entry.key.whenSubmitted,
-            entryEventId = entry.key.eventId,
-            entryStatus = EntryStatus.PARTIAL_FILL
+            eventId = entry.key.eventId,
+            status = EntryStatus.PARTIAL_FILL
         )
     }
     "Updates sizes and status when traded" {
         entry.traded(23) shouldBe entry.copy(
-            size = EntryQuantity(availableSize = 0, tradedSize = 25, cancelledSize = 0),
+            sizes = EntrySizes(available = 0, traded = 25, cancelled = 0),
             status = EntryStatus.FILLED
         )
     }

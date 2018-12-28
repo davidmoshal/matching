@@ -33,7 +33,7 @@ data class PlaceOrderCommand(
                     books = books,
                     currentTime = whenRequested,
                     rejectReason = OrderRejectReason.INCORRECT_QUANTITY,
-                    rejectText = "Order size must be positive : $size"
+                    rejectText = "Order sizes must be positive : $size"
                 )
             )
         }
@@ -61,10 +61,10 @@ data class PlaceOrderCommand(
         bookId = bookId,
         entryType = entryType,
         side = side,
-        size = EntryQuantity(
-            availableSize = size,
-            tradedSize = 0,
-            cancelledSize = 0
+        sizes = EntrySizes(
+            available = size,
+            traded = 0,
+            cancelled = 0
         ),
         price = price,
         timeInForce = timeInForce,
@@ -83,7 +83,7 @@ data class PlaceOrderCommand(
         bookId = bookId,
         entryType = entryType,
         side = side,
-        size = size,
+        sizes = size,
         price = price,
         timeInForce = timeInForce,
         whenHappened = currentTime,

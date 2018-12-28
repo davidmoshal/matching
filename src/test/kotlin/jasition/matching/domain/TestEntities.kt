@@ -27,31 +27,31 @@ fun expectedBookEntry(orderPlacedEvent: OrderPlacedEvent): BookEntry = BookEntry
     price = orderPlacedEvent.price,
     whenSubmitted = orderPlacedEvent.whenHappened,
     eventId = orderPlacedEvent.eventId.next(),
-    clientRequestId = orderPlacedEvent.requestId,
-    client = orderPlacedEvent.whoRequested,
+    requestId = orderPlacedEvent.requestId,
+    whoRequested = orderPlacedEvent.whoRequested,
     entryType = orderPlacedEvent.entryType,
     side = orderPlacedEvent.side,
     timeInForce = orderPlacedEvent.timeInForce,
-    size = orderPlacedEvent.size,
-    status = orderPlacedEvent.entryStatus
+    sizes = orderPlacedEvent.sizes,
+    status = orderPlacedEvent.status
 )
 
 fun expectedBookEntry(
     orderPlacedEvent: OrderPlacedEvent,
     eventId: EventId,
     status: EntryStatus,
-    size: EntryQuantity
+    sizes: EntrySizes
 ) =
     BookEntry(
         price = orderPlacedEvent.price,
         whenSubmitted = orderPlacedEvent.whenHappened,
         eventId = eventId,
-        clientRequestId = orderPlacedEvent.requestId,
-        client = orderPlacedEvent.whoRequested,
+        requestId = orderPlacedEvent.requestId,
+        whoRequested = orderPlacedEvent.whoRequested,
         entryType = orderPlacedEvent.entryType,
         side = orderPlacedEvent.side,
         timeInForce = orderPlacedEvent.timeInForce,
-        size = size,
+        sizes = sizes,
         status = status
     )
 
@@ -66,7 +66,7 @@ fun anOrderPlacedEvent(
     timeInForce: TimeInForce = TimeInForce.GOOD_TILL_CANCEL,
     whenHappened: Instant = Instant.now(),
     eventId: EventId = anEventId(),
-    size: EntryQuantity = anEntryQuantity()
+    sizes: EntrySizes = anEntrySizes()
 ): OrderPlacedEvent = OrderPlacedEvent(
     requestId = requestId,
     whoRequested = whoRequested,
@@ -77,7 +77,7 @@ fun anOrderPlacedEvent(
     timeInForce = timeInForce,
     whenHappened = whenHappened,
     eventId = eventId,
-    size = size
+    sizes = sizes
 )
 
 fun aBookId(bookId: String = "book"): BookId = BookId(bookId = bookId)
@@ -126,25 +126,25 @@ fun aBookEntry(
     price: Price? = aPrice(),
     whenSubmitted: Instant = Instant.now(),
     eventId: EventId = anEventId(),
-    clientRequestId: ClientRequestId = aClientRequestId(),
-    client: Client = aFirmWithClient(),
+    requestId: ClientRequestId = aClientRequestId(),
+    whoRequested: Client = aFirmWithClient(),
     entryType: EntryType = EntryType.LIMIT,
     side: Side = Side.BUY,
     timeInForce: TimeInForce = TimeInForce.GOOD_TILL_CANCEL,
-    size: EntryQuantity = anEntryQuantity(),
+    sizes: EntrySizes = anEntrySizes(),
     status: EntryStatus = EntryStatus.NEW
 ) = BookEntry(
     key = aBookEntryKey(price, whenSubmitted, eventId),
-    clientRequestId = clientRequestId,
-    client = client,
+    requestId = requestId,
+    whoRequested = whoRequested,
     entryType = entryType,
     side = side,
     timeInForce = timeInForce,
-    size = size,
+    sizes = sizes,
     status = status
 )
 
-fun anEntryQuantity(i: Int = 20) = EntryQuantity(i)
+fun anEntrySizes(i: Int = 20) = EntrySizes(i)
 
 fun anEventId(value: Long = 1) = EventId(value)
 
@@ -177,39 +177,39 @@ fun aTradingStatuses(
 fun expectedTradeSideEntry(
     orderPlacedEvent: OrderPlacedEvent,
     eventId: EventId,
-    entryQuantity: EntryQuantity,
-    entryStatus: EntryStatus
+    sizes: EntrySizes,
+    status: EntryStatus
 ): TradeSideEntry {
     return TradeSideEntry(
         requestId = orderPlacedEvent.requestId,
         whoRequested = orderPlacedEvent.whoRequested,
         entryType = orderPlacedEvent.entryType,
-        size = entryQuantity,
+        sizes = sizes,
         side = orderPlacedEvent.side,
         price = orderPlacedEvent.price,
         timeInForce = orderPlacedEvent.timeInForce,
         whenSubmitted = orderPlacedEvent.whenHappened,
-        entryEventId = eventId,
-        entryStatus = entryStatus
+        eventId = eventId,
+        status = status
     )
 }
 
 fun expectedTradeSideEntry(
     bookEntry: BookEntry,
     eventId: EventId,
-    entryQuantity: EntryQuantity,
-    entryStatus: EntryStatus
+    size: EntrySizes,
+    status: EntryStatus
 ): TradeSideEntry {
     return TradeSideEntry(
-        requestId = bookEntry.clientRequestId,
-        whoRequested = bookEntry.client,
+        requestId = bookEntry.requestId,
+        whoRequested = bookEntry.whoRequested,
         entryType = bookEntry.entryType,
-        size = entryQuantity,
+        sizes = size,
         side = bookEntry.side,
         price = bookEntry.key.price,
         timeInForce = bookEntry.timeInForce,
         whenSubmitted = bookEntry.key.whenSubmitted,
-        entryEventId = eventId,
-        entryStatus = entryStatus
+        eventId = eventId,
+        status = status
     )
 }

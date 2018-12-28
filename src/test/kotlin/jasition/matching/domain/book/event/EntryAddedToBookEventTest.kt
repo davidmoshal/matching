@@ -33,8 +33,8 @@ internal class EntryAddedToBookEventPropertyTest : StringSpec({
 
 internal class `Given an entry is added to an empty book` : StringSpec({
     val bookId = aBookId()
-    val entryEventId = anEventId()
-    val entry = aBookEntry(eventId = entryEventId)
+    val eventId = anEventId()
+    val entry = aBookEntry(eventId = eventId)
     val originalBooks = spyk(Books(bookId))
     val newBooks = spyk(Books(bookId))
     every { originalBooks.addBookEntry(entry) } returns newBooks
@@ -43,7 +43,7 @@ internal class `Given an entry is added to an empty book` : StringSpec({
         EntryAddedToBookEvent(
             bookId = bookId,
             whenHappened = Instant.now(),
-            eventId = entryEventId,
+            eventId = eventId,
             entry = entry
         ).play(originalBooks) shouldBe Transaction<BookId, Books>(
             aggregate = newBooks,
@@ -51,7 +51,7 @@ internal class `Given an entry is added to an empty book` : StringSpec({
         )
     }
     "When a wrong event ID is used in the event, then an exception is thrown" {
-        val wrongEventId = entryEventId.next()
+        val wrongEventId = eventId.next()
         every { originalBooks.verifyEventId(wrongEventId) } throws IllegalArgumentException()
 
         shouldThrow<IllegalArgumentException> {
@@ -71,7 +71,7 @@ internal class `Given an entry is added to an empty book` : StringSpec({
             EntryAddedToBookEvent(
                 bookId = bookId,
                 whenHappened = Instant.now(),
-                eventId = entryEventId.next(),
+                eventId = eventId.next(),
                 entry = entry
             ).play(originalBooks)
         }

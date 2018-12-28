@@ -29,11 +29,11 @@ internal class TradeEventPropertyTest : StringSpec({
             whoRequested = Client(firmId = "firm1", firmClientId = "client1"),
             entryType = EntryType.LIMIT,
             side = Side.BUY,
-            size = EntryQuantity(10, tradedSize = 10, cancelledSize = 0),
+            sizes = EntrySizes(10, traded = 10, cancelled = 0),
             price = Price(20),
             timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-            entryStatus = EntryStatus.PARTIAL_FILL,
-            entryEventId = EventId(2),
+            status = EntryStatus.PARTIAL_FILL,
+            eventId = EventId(2),
             whenSubmitted = Instant.now()
         ),
         passive = TradeSideEntry(
@@ -41,11 +41,11 @@ internal class TradeEventPropertyTest : StringSpec({
             whoRequested = Client(firmId = "firm2", firmClientId = "client2"),
             entryType = EntryType.LIMIT,
             side = Side.SELL,
-            size = EntryQuantity(0, tradedSize = 10, cancelledSize = 0),
+            sizes = EntrySizes(0, traded = 10, cancelled = 0),
             price = Price(20),
             timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-            entryStatus = EntryStatus.FILLED,
-            entryEventId = EventId(1),
+            status = EntryStatus.FILLED,
+            eventId = EventId(1),
             whenSubmitted = Instant.now()
         )
     )
@@ -67,18 +67,18 @@ internal class TradeSideEntryTest : StringSpec({
             whoRequested = Client(firmId = "firm1", firmClientId = "client1"),
             entryType = EntryType.LIMIT,
             side = Side.BUY,
-            size = EntryQuantity(10, tradedSize = 10, cancelledSize = 0),
+            sizes = EntrySizes(10, traded = 10, cancelled = 0),
             price = Price(20),
             timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-            entryStatus = EntryStatus.PARTIAL_FILL,
-            entryEventId = EventId(2),
+            status = EntryStatus.PARTIAL_FILL,
+            eventId = EventId(2),
             whenSubmitted = Instant.now()
         )
 
         entry.toBookEntryKey() shouldBe BookEntryKey(
             price = entry.price,
             whenSubmitted = entry.whenSubmitted,
-            eventId = entry.entryEventId
+            eventId = entry.eventId
         )
     }
 })
@@ -91,19 +91,19 @@ internal class `When a trade has happened between an aggressor and a passive ent
         whoRequested = Client(firmId = "firm1", firmClientId = "client1"),
         entryType = EntryType.LIMIT,
         side = Side.BUY,
-        size = EntryQuantity(10, tradedSize = 10, cancelledSize = 0),
+        sizes = EntrySizes(10, traded = 10, cancelled = 0),
         price = Price(20),
         timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-        entryStatus = EntryStatus.PARTIAL_FILL,
-        entryEventId = EventId(2),
+        status = EntryStatus.PARTIAL_FILL,
+        eventId = EventId(2),
         whenSubmitted = Instant.now()
     )
     val passive = aggressor.copy(
         requestId = ClientRequestId("req2"),
         whoRequested = Client(firmId = "firm2", firmClientId = "client2"),
         side = Side.SELL,
-        size = EntryQuantity(0, tradedSize = 10, cancelledSize = 0),
-        entryEventId = EventId(1)
+        sizes = EntrySizes(0, traded = 10, cancelled = 0),
+        eventId = EventId(1)
     )
     val event = TradeEvent(
         bookId = bookId,

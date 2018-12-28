@@ -15,7 +15,7 @@ enum class Side {
         override fun oppositeSideBook(books: Books): LimitBook = books.buyLimitBook
     };
 
-    abstract fun comparatorMultiplier() : Int
+    abstract fun comparatorMultiplier(): Int
 
     abstract fun sameSideBook(books: Books): LimitBook
 

@@ -14,6 +14,7 @@ import jasition.matching.domain.expectedBookEntry
 internal class `Given the book is empty` : StringSpec({
     val bookId = BookId("book")
     val books = Books(bookId)
+
     "When a BUY Limit GTC Order is placed, then the new entry is added to the BUY side" {
         val orderPlacedEvent = anOrderPlacedEvent(
             bookId = bookId,

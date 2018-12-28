@@ -25,5 +25,5 @@ enum class TradingStatus {
         override fun allows(command: PlaceOrderCommand): Boolean = false
     };
 
-    abstract fun allows(command: PlaceOrderCommand) : Boolean
+    abstract fun allows(command: PlaceOrderCommand): Boolean
 }

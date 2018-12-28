@@ -4,21 +4,21 @@ import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 
 internal class EntryStatusTest : StringSpec({
-    "Positive available size is partial fill"{
+    "Positive available sizes is partial fill"{
         EntryStatus.PARTIAL_FILL.traded(
-            EntryQuantity(
-                availableSize = 30,
-                tradedSize = 10,
-                cancelledSize = 0
+            EntrySizes(
+                available = 30,
+                traded = 10,
+                cancelled = 0
             )
         ) shouldBe EntryStatus.PARTIAL_FILL
     }
-    "Zero available size is filled"{
+    "Zero available sizes is filled"{
         EntryStatus.PARTIAL_FILL.traded(
-            EntryQuantity(
-                availableSize = 0,
-                tradedSize = 10,
-                cancelledSize = 0
+            EntrySizes(
+                available = 0,
+                traded = 10,
+                cancelled = 0
             )
         ) shouldBe EntryStatus.FILLED
     }

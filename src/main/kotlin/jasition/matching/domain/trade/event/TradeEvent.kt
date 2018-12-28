@@ -36,15 +36,15 @@ data class TradeSideEntry(
     val whoRequested: Client,
     val entryType: EntryType,
     val side: Side,
-    val size: EntryQuantity,
+    val sizes: EntrySizes,
     val price: Price?,
     val timeInForce: TimeInForce,
     val whenSubmitted: Instant,
-    val entryEventId: EventId,
-    val entryStatus: EntryStatus
+    val eventId: EventId,
+    val status: EntryStatus
 ) {
     fun toBookEntryKey(): BookEntryKey =
-        BookEntryKey(price = price, whenSubmitted = whenSubmitted, eventId = entryEventId)
+        BookEntryKey(price = price, whenSubmitted = whenSubmitted, eventId = eventId)
 }
 
 

@@ -5,7 +5,7 @@ import io.kotlintest.specs.StringSpec
 import io.vavr.collection.List
 import jasition.matching.domain.EventId
 import jasition.matching.domain.aBookEntry
-import jasition.matching.domain.book.entry.EntryQuantity
+import jasition.matching.domain.book.entry.EntrySizes
 import jasition.matching.domain.book.entry.EntryStatus
 import jasition.matching.domain.book.entry.Price
 import jasition.matching.domain.book.entry.Side
@@ -86,16 +86,16 @@ internal class LimitBookTest : StringSpec({
         val original = aBookEntry(
             side = Side.SELL,
             price = Price(10),
-            size = EntryQuantity(availableSize = 15, tradedSize = 0, cancelledSize = 0),
+            sizes = EntrySizes(available = 15, traded = 0, cancelled = 0),
             status = EntryStatus.NEW
         )
-        val updatedSize = EntryQuantity(availableSize = 3, tradedSize = 12, cancelledSize = 0)
-        val updated = original.copy(size = updatedSize).toTradeSideEntry()
+        val updatedSizes = EntrySizes(available = 3, traded = 12, cancelled = 0)
+        val updated = original.copy(sizes = updatedSizes).toTradeSideEntry()
         val newBook = LimitBook(Side.SELL).add(original).update(updated)
 
         newBook.entries.values() shouldBe List.of(
             original.copy(
-                size = updatedSize,
+                sizes = updatedSizes,
                 status = EntryStatus.PARTIAL_FILL
             )
         )
@@ -104,7 +104,7 @@ internal class LimitBookTest : StringSpec({
         val original = aBookEntry(
             side = Side.SELL,
             price = Price(10),
-            size = EntryQuantity(availableSize = 0, tradedSize = 15, cancelledSize = 0)
+            sizes = EntrySizes(available = 0, traded = 15, cancelled = 0)
         )
         val updated = original.toTradeSideEntry()
         val newBook = LimitBook(Side.SELL).add(original).update(updated)

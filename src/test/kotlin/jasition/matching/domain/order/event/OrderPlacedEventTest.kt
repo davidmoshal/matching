@@ -24,7 +24,7 @@ internal class OrderPlacedEventPropertyTest : StringSpec({
         timeInForce = TimeInForce.GOOD_TILL_CANCEL,
         whenHappened = Instant.now(),
         eventId = eventId,
-        size = anEntryQuantity()
+        sizes = anEntrySizes()
     )
     "Has Book ID as Aggregate ID" {
         event.aggregateId() shouldBe bookId
@@ -40,13 +40,13 @@ internal class OrderPlacedEventPropertyTest : StringSpec({
             price = event.price,
             whenSubmitted = event.whenHappened,
             eventId = eventId,
-            clientRequestId = event.requestId,
-            client = event.whoRequested,
+            requestId = event.requestId,
+            whoRequested = event.whoRequested,
             entryType = event.entryType,
             side = event.side,
             timeInForce = event.timeInForce,
-            size = event.size,
-            status = event.entryStatus
+            sizes = event.sizes,
+            status = event.status
         )
     }
 })
@@ -63,7 +63,7 @@ internal class `Given an order is placed on an empty book` : StringSpec({
         timeInForce = TimeInForce.GOOD_TILL_CANCEL,
         whenHappened = Instant.now(),
         eventId = anEventId(),
-        size = anEntryQuantity()
+        sizes = anEntrySizes()
     )
 
     val actual = orderPlacedEvent.play(books)

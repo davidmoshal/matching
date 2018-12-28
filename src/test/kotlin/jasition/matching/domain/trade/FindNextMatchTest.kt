@@ -28,12 +28,12 @@ internal class FindNextMatchTest : StringSpec({
                 entry.copy(
                     side = Side.SELL,
                     key = entryKey.copy(price = Price(10)),
-                    client = otherFirmClient
+                    whoRequested = otherFirmClient
                 ),
                 entry.copy(
                     side = Side.SELL,
                     key = entryKey.copy(price = Price(11)),
-                    client = otherFirmClient
+                    whoRequested = otherFirmClient
                 )
 
             )
@@ -43,7 +43,7 @@ internal class FindNextMatchTest : StringSpec({
         val passive = entry.copy(
             side = Side.SELL,
             key = entryKey.copy(price = Price(10)),
-            client = otherFirmClient
+            whoRequested = otherFirmClient
         )
         findNextMatch(
             aggressor = entry.copy(
@@ -56,11 +56,11 @@ internal class FindNextMatchTest : StringSpec({
             )
         ) shouldBe Match(passive, Price(10))
     }
-    "Skipped the first passive entry due to same firm client and found the second as the next matched" {
+    "Skipped the first passive entry due to same firm whoRequested and found the second as the next matched" {
         val passive = entry.copy(
             side = Side.SELL,
             key = entryKey.copy(price = Price(10)),
-            client = otherFirmClient
+            whoRequested = otherFirmClient
         )
         findNextMatch(
             aggressor = entry.copy(
@@ -68,16 +68,16 @@ internal class FindNextMatchTest : StringSpec({
                 key = entryKey.copy(price = Price(10))
             ),
             passives = List.of(
-                passive.copy(client = entry.client),
+                passive.copy(whoRequested = entry.whoRequested),
                 passive
             )
         ) shouldBe Match(passive, Price(10))
     }
-    "Skipped the first passive entry due to same firm (firm against client) and found the second as the next matched" {
+    "Skipped the first passive entry due to same firm (firm against whoRequested) and found the second as the next matched" {
         val passive = entry.copy(
             side = Side.SELL,
             key = entryKey.copy(price = Price(10)),
-            client = otherFirmClient
+            whoRequested = otherFirmClient
         )
         findNextMatch(
             aggressor = entry.copy(
@@ -85,25 +85,25 @@ internal class FindNextMatchTest : StringSpec({
                 key = entryKey.copy(price = Price(10))
             ),
             passives = List.of(
-                passive.copy(client = entry.client.copy(firmClientId = null)),
+                passive.copy(whoRequested = entry.whoRequested.copy(firmClientId = null)),
                 passive
             )
         ) shouldBe Match(passive, Price(10))
     }
-    "Skipped the first passive entry due to same firm (no client) and found the second as the next matched" {
+    "Skipped the first passive entry due to same firm (no whoRequested) and found the second as the next matched" {
         val passive = entry.copy(
             side = Side.SELL,
             key = entryKey.copy(price = Price(10)),
-            client = otherFirmClient
+            whoRequested = otherFirmClient
         )
         findNextMatch(
             aggressor = entry.copy(
                 side = Side.BUY,
                 key = entryKey.copy(price = Price(10)),
-                client = entry.client.copy(firmClientId = null)
+                whoRequested = entry.whoRequested.copy(firmClientId = null)
             ),
             passives = List.of(
-                passive.copy(client = entry.client.copy(firmClientId = null)),
+                passive.copy(whoRequested = entry.whoRequested.copy(firmClientId = null)),
                 passive
             )
         ) shouldBe Match(passive, Price(10))
@@ -112,7 +112,7 @@ internal class FindNextMatchTest : StringSpec({
         val passive = entry.copy(
             side = Side.SELL,
             key = entryKey.copy(price = Price(10)),
-            client = otherFirmClient
+            whoRequested = otherFirmClient
         )
         findNextMatch(
             aggressor = entry.copy(

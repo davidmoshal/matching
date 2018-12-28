@@ -13,19 +13,20 @@ import java.time.Instant
 internal class `Given the book has a BUY Limit GTC Order 4 at 10` : StringSpec({
     val now = Instant.now()
     val existingEntry = aBookEntry(
-        clientRequestId = anotherClientRequestId(),
-        client = anotherFirmWithClient(),
+        requestId = anotherClientRequestId(),
+        whoRequested = anotherFirmWithClient(),
         price = Price(10),
         whenSubmitted = now,
         eventId = EventId(1),
         entryType = EntryType.LIMIT,
         side = Side.BUY,
         timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-        size = EntryQuantity(4),
+        sizes = EntrySizes(4),
         status = EntryStatus.NEW
     )
     val bookId = BookId("book")
     val books = existingEntry.toEntryAddedToBookEvent(bookId).play(Books(BookId("book"))).aggregate
+
     "When a BUY Limit GTC Order 5 at 11 is placed, then the new entry is added above the existing" {
         val orderPlacedEvent = anOrderPlacedEvent(
             bookId = bookId,
@@ -35,7 +36,7 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : StringSpec({
             timeInForce = TimeInForce.GOOD_TILL_CANCEL,
             whenHappened = now,
             eventId = EventId(2),
-            size = EntryQuantity(5)
+            sizes = EntrySizes(5)
         )
         val expectedBookEntry = expectedBookEntry(orderPlacedEvent)
         val result = orderPlacedEvent.play(books)
@@ -53,7 +54,7 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : StringSpec({
             timeInForce = TimeInForce.GOOD_TILL_CANCEL,
             whenHappened = now.plusMillis(1),
             eventId = EventId(2),
-            size = EntryQuantity(5)
+            sizes = EntrySizes(5)
         )
         val expectedBookEntry = expectedBookEntry(orderPlacedEvent)
         val result = orderPlacedEvent.play(books)
@@ -71,7 +72,7 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : StringSpec({
             timeInForce = TimeInForce.GOOD_TILL_CANCEL,
             whenHappened = existingEntry.key.whenSubmitted,
             eventId = EventId(2),
-            size = EntryQuantity(5)
+            sizes = EntrySizes(5)
         )
         val expectedBookEntry = expectedBookEntry(orderPlacedEvent)
         val result = orderPlacedEvent.play(books)
@@ -88,7 +89,7 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : StringSpec({
             timeInForce = TimeInForce.GOOD_TILL_CANCEL,
             whenHappened = now,
             eventId = EventId(2),
-            size = EntryQuantity(5)
+            sizes = EntrySizes(5)
         )
         val expectedBookEntry = expectedBookEntry(orderPlacedEvent)
         val result = orderPlacedEvent.play(books)
@@ -105,7 +106,7 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : StringSpec({
             timeInForce = TimeInForce.GOOD_TILL_CANCEL,
             whenHappened = now,
             eventId = EventId(2),
-            size = EntryQuantity(5)
+            sizes = EntrySizes(5)
         )
         val expectedBookEntry = expectedBookEntry(orderPlacedEvent)
         val result = orderPlacedEvent.play(books)
@@ -122,7 +123,7 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : StringSpec({
             timeInForce = TimeInForce.GOOD_TILL_CANCEL,
             whenHappened = now,
             eventId = EventId(2),
-            size = EntryQuantity(5)
+            sizes = EntrySizes(5)
         )
         val result = orderPlacedEvent.play(books)
 
@@ -130,7 +131,7 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : StringSpec({
             orderPlacedEvent = orderPlacedEvent,
             eventId = EventId(4),
             status = EntryStatus.PARTIAL_FILL,
-            size = EntryQuantity(availableSize = 1, tradedSize = 4, cancelledSize = 0)
+            sizes = EntrySizes(available = 1, traded = 4, cancelled = 0)
         )
 
         result.events shouldBe List.of(
@@ -143,13 +144,13 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : StringSpec({
                 aggressor = expectedTradeSideEntry(
                     orderPlacedEvent = orderPlacedEvent,
                     eventId = EventId(2),
-                    entryQuantity = EntryQuantity(availableSize = 1, tradedSize = 4, cancelledSize = 0),
-                    entryStatus = EntryStatus.PARTIAL_FILL
+                    sizes = EntrySizes(available = 1, traded = 4, cancelled = 0),
+                    status = EntryStatus.PARTIAL_FILL
                 ),
                 passive = expectedTradeSideEntry(
                     existingEntry,
                     existingEntry.key.eventId,
-                    EntryQuantity(availableSize = 0, tradedSize = 4, cancelledSize = 0),
+                    EntrySizes(available = 0, traded = 4, cancelled = 0),
                     EntryStatus.FILLED
                 )
             )

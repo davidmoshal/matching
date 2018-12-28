@@ -19,11 +19,11 @@ data class OrderPlacedEvent(
     val bookId: BookId,
     val entryType: EntryType,
     val side: Side,
-    val size: EntryQuantity,
+    val sizes: EntrySizes,
     val price: Price?,
     val timeInForce: TimeInForce,
     val whenHappened: Instant,
-    val entryStatus: EntryStatus = EntryStatus.NEW
+    val status: EntryStatus = EntryStatus.NEW
 ) : Event<BookId, Books> {
     override fun aggregateId(): BookId = bookId
     override fun eventId(): EventId = eventId
@@ -35,7 +35,7 @@ data class OrderPlacedEvent(
             books = aggregate.copy(lastEventId = aggregate.verifyEventId(eventId))
         )
 
-        if (aggressor.timeInForce.canStayOnBook(aggressor.size)) {
+        if (aggressor.timeInForce.canStayOnBook(aggressor.sizes)) {
             val newBooks = transaction.aggregate
             val nextEventId = newBooks.lastEventId.next()
             val entryAddedToBookEvent = aggressor.toEntryAddedToBookEvent(
@@ -54,13 +54,13 @@ data class OrderPlacedEvent(
         price = price,
         whenSubmitted = whenHappened,
         eventId = eventId,
-        clientRequestId = requestId,
-        client = whoRequested,
+        requestId = requestId,
+        whoRequested = whoRequested,
         entryType = entryType,
         side = side,
         timeInForce = timeInForce,
-        size = size,
-        status = entryStatus
+        sizes = sizes,
+        status = status
     )
 }
 

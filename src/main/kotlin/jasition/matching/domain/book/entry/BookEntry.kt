@@ -10,33 +10,33 @@ import java.time.Instant
 
 data class BookEntry(
     val key: BookEntryKey,
-    val clientRequestId: ClientRequestId,
-    val client: Client,
+    val requestId: ClientRequestId,
+    val whoRequested: Client,
     val entryType: EntryType,
     val side: Side,
     val timeInForce: TimeInForce,
-    val size: EntryQuantity,
+    val sizes: EntrySizes,
     val status: EntryStatus
 ) {
     constructor(
         price: Price?,
         whenSubmitted: Instant,
         eventId: EventId,
-        clientRequestId: ClientRequestId,
-        client: Client,
+        requestId: ClientRequestId,
+        whoRequested: Client,
         entryType: EntryType,
         side: Side,
         timeInForce: TimeInForce,
-        size: EntryQuantity,
+        sizes: EntrySizes,
         status: EntryStatus
     ) : this(
         key = BookEntryKey(price = price, whenSubmitted = whenSubmitted, eventId = eventId),
-        clientRequestId = clientRequestId,
-        client = client,
+        requestId = requestId,
+        whoRequested = whoRequested,
         entryType = entryType,
         side = side,
         timeInForce = timeInForce,
-        size = size,
+        sizes = sizes,
         status = status
     )
 
@@ -57,24 +57,24 @@ data class BookEntry(
         )
 
     fun toTradeSideEntry(): TradeSideEntry = TradeSideEntry(
-        requestId = clientRequestId,
-        whoRequested = client,
+        requestId = requestId,
+        whoRequested = whoRequested,
         entryType = entryType,
         side = side,
-        size = size,
+        sizes = sizes,
         price = key.price,
         timeInForce = timeInForce,
         whenSubmitted = key.whenSubmitted,
-        entryEventId = key.eventId,
-        entryStatus = status.traded(size)
+        eventId = key.eventId,
+        status = status.traded(sizes)
     )
 
     fun traded(tradeSize: Int): BookEntry {
-        val newQuantity = size.traded(tradeSize)
+        val newSizes = sizes.traded(tradeSize)
 
         return copy(
-            size = newQuantity,
-            status = status.traded(newQuantity)
+            sizes = newSizes,
+            status = status.traded(newSizes)
         )
     }
 }

@@ -26,7 +26,7 @@ fun match(
     val nextMatch = findNextMatch(aggressor, limitBook.entries.values())
         ?: return MatchResult(aggressor, Transaction(books, events))
 
-    val tradeSize = getTradeSize(aggressor.size, nextMatch.passive.size)
+    val tradeSize = getTradeSize(aggressor.sizes, nextMatch.passive.sizes)
     val tradedAggressor = aggressor.traded(tradeSize)
     val tradedPassive = nextMatch.passive.traded(tradeSize)
     val tradeEvent = TradeEvent(
@@ -55,7 +55,7 @@ fun findNextMatch(
     val passive = findPassive(passives, offset) ?: return null
 
     if (cannotMatchTheseTwoPrices(aggressor.key.price, passive.key.price)
-        || cannotMatchTheseTwoClients(aggressor.client, passive.client)
+        || cannotMatchTheseTwoClients(aggressor.whoRequested, passive.whoRequested)
     ) return findNextMatch(
         aggressor = aggressor,
         passives = passives,
@@ -72,7 +72,7 @@ fun findNextMatch(
 }
 
 private fun cannotMatchAnyFurther(aggressor: BookEntry, limitBook: LimitBook) =
-    aggressor.size.availableSize <= 0 || limitBook.entries.isEmpty
+    aggressor.sizes.available <= 0 || limitBook.entries.isEmpty
 
 private fun cannotMatchTheseTwoClients(aggressor: Client, passive: Client): Boolean =
     sameFirmAndSameFirmClient(aggressor, passive) || sameFirmButPossibleFirmAgainstClient(aggressor, passive)

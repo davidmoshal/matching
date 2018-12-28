@@ -21,7 +21,7 @@ data class OrderRejectedEvent(
     val bookId: BookId,
     val entryType: EntryType,
     val side: Side,
-    val size: Int,
+    val sizes: Int,
     val price: Price?,
     val timeInForce: TimeInForce,
     val whenHappened: Instant,

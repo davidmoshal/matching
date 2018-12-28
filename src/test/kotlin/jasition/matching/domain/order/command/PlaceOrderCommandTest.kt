@@ -42,16 +42,16 @@ internal class `Given there is a request to place an order` : StringSpec({
                 bookId = command.bookId,
                 entryType = command.entryType,
                 side = command.side,
-                size = EntryQuantity(availableSize = command.size, tradedSize = 0, cancelledSize = 0),
+                sizes = EntrySizes(available = command.size, traded = 0, cancelled = 0),
                 price = command.price,
                 timeInForce = command.timeInForce,
                 whenHappened = command.whenRequested,
-                entryStatus = EntryStatus.NEW
+                status = EntryStatus.NEW
             )
         }
     }
 
-    "When the request uses negative size, then the order is rejected" {
+    "When the request uses negative sizes, then the order is rejected" {
         val result = command.copy(size = -1).validate(books)
 
         result.isLeft() shouldBe true
@@ -63,12 +63,12 @@ internal class `Given there is a request to place an order` : StringSpec({
                 bookId = command.bookId,
                 entryType = command.entryType,
                 side = command.side,
-                size = -1,
+                sizes = -1,
                 price = command.price,
                 timeInForce = command.timeInForce,
                 whenHappened = command.whenRequested,
                 rejectReason = OrderRejectReason.INCORRECT_QUANTITY,
-                rejectText = "Order size must be positive : -1"
+                rejectText = "Order sizes must be positive : -1"
             )
         }
     }
@@ -85,7 +85,7 @@ internal class `Given there is a request to place an order` : StringSpec({
                 bookId = command.bookId,
                 entryType = command.entryType,
                 side = command.side,
-                size = command.size,
+                sizes = command.size,
                 price = command.price,
                 timeInForce = command.timeInForce,
                 whenHappened = command.whenRequested,

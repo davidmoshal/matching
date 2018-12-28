@@ -23,7 +23,7 @@ internal class OrderRejectedEventPropertyTest : StringSpec({
         timeInForce = TimeInForce.GOOD_TILL_CANCEL,
         whenHappened = Instant.now(),
         eventId = eventId,
-        size = 10,
+        sizes = 10,
         rejectReason = OrderRejectReason.BROKER_EXCHANGE_OPTION,
         rejectText = "Not allowed"
     )
@@ -52,7 +52,7 @@ internal class `Given an order is rejected` : StringSpec({
         timeInForce = TimeInForce.GOOD_TILL_CANCEL,
         whenHappened = Instant.now(),
         eventId = eventId,
-        size = 10,
+        sizes = 10,
         rejectReason = OrderRejectReason.BROKER_EXCHANGE_OPTION,
         rejectText = "Not allowed"
     )
