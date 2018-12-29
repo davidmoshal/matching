@@ -4,18 +4,18 @@ import io.kotlintest.shouldBe
 import io.kotlintest.specs.FeatureSpec
 import io.vavr.collection.List
 import jasition.matching.domain.aBookId
+import jasition.matching.domain.aBooks
 import jasition.matching.domain.anOrderPlacedEvent
-import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.EntryType
 import jasition.matching.domain.book.entry.Side
 import jasition.matching.domain.book.entry.TimeInForce
 import jasition.matching.domain.expectedBookEntry
 
-internal class `Given the book is empty` : FeatureSpec ({
+internal class `Given the book is empty` : FeatureSpec({
     val addEntryToEmptyBookFeature = "[Add entry to empty book] "
 
     val bookId = aBookId()
-    val books = Books(bookId)
+    val books = aBooks(bookId)
 
     feature(addEntryToEmptyBookFeature) {
         scenario(addEntryToEmptyBookFeature + "When a BUY Limit GTC Order is placed, then the new entry is added to the BUY side") {

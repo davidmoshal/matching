@@ -6,7 +6,6 @@ import io.kotlintest.specs.FeatureSpec
 import io.kotlintest.tables.row
 import io.vavr.collection.List
 import jasition.matching.domain.*
-import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.trade.event.TradeEvent
 import java.time.Instant
@@ -36,7 +35,7 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : FeatureSpec(
         status = EntryStatus.NEW
     )
     val bookId = aBookId()
-    val books = existingEntry.toEntryAddedToBookEvent(bookId).play(Books(bookId)).aggregate
+    val books = aBooks(bookId, List.of(existingEntry))
 
     feature(higherBuyOverLowerFeature) {
         scenario(higherBuyOverLowerFeature + "When a BUY Limit GTC Order 5 at 11 is placed, then the new entry is added above the existing") {
@@ -182,10 +181,7 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : FeatureSpec(
             )
             val existingEntryWithoutFirmClient = existingEntry.copy(whoRequested = anotherFirmWithoutClient())
             val result = orderPlacedEvent.play(
-                existingEntryWithoutFirmClient
-                    .toEntryAddedToBookEvent(bookId)
-                    .play(Books(bookId))
-                    .aggregate
+                aBooks(bookId, List.of(existingEntryWithoutFirmClient))
             )
 
             val expectedBookEntry = expectedBookEntry(orderPlacedEvent)

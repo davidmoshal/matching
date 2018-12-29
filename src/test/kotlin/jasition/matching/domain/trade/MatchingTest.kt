@@ -5,7 +5,6 @@ import io.kotlintest.specs.StringSpec
 import io.mockk.mockk
 import io.vavr.collection.List
 import jasition.matching.domain.*
-import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.EntrySizes
 import jasition.matching.domain.book.entry.Price
 import jasition.matching.domain.book.entry.Side
@@ -19,10 +18,7 @@ internal class MatchingTest : StringSpec({
     val existingEvents = List.of(mockk<OrderPlacedEvent>(), mockk<TradeEvent>())
 
     "Stop matching when there is no available sizes in the aggressor" {
-        val books = aBookEntry(side = Side.SELL, whoRequested = client)
-            .toEntryAddedToBookEvent(bookId)
-            .play(Books(bookId))
-            .aggregate
+        val books = aBooks(bookId, List.of(aBookEntry(side = Side.SELL, whoRequested = client)))
         val aggressor = aBookEntry(side = Side.BUY, whoRequested = otherClient, sizes = EntrySizes(0))
         match(
             aggressor = aggressor,
@@ -34,10 +30,7 @@ internal class MatchingTest : StringSpec({
         )
     }
     "Stop matching when there is no more entries in the opposite-side book" {
-        val books = aBookEntry(side = Side.BUY, whoRequested = client)
-            .toEntryAddedToBookEvent(bookId)
-            .play(Books(bookId))
-            .aggregate
+        val books = aBooks(bookId, List.of(aBookEntry(side = Side.BUY, whoRequested = client)))
         val aggressor = aBookEntry(side = Side.BUY, whoRequested = otherClient)
         match(
             aggressor = aggressor,
@@ -49,10 +42,7 @@ internal class MatchingTest : StringSpec({
         )
     }
     "Stop matching when there is no more next match in the opposite-side book" {
-        val books = aBookEntry(side = Side.SELL, whoRequested = client, price = Price(35))
-            .toEntryAddedToBookEvent(bookId)
-            .play(Books(bookId))
-            .aggregate
+        val books = aBooks(bookId, List.of(aBookEntry(side = Side.SELL, whoRequested = client, price = Price(35))))
         val aggressor = aBookEntry(side = Side.BUY, whoRequested = otherClient, price = Price(30))
         match(
             aggressor = aggressor,
@@ -72,10 +62,7 @@ internal class MatchingTest : StringSpec({
             sizes = EntrySizes(tradeSize),
             price = tradePrice
         )
-        val books = passive
-            .toEntryAddedToBookEvent(bookId)
-            .play(Books(bookId))
-            .aggregate
+        val books = aBooks(bookId, List.of(passive))
         val aggressor = aBookEntry(
             side = Side.BUY,
             whoRequested = otherClient,
@@ -91,7 +78,7 @@ internal class MatchingTest : StringSpec({
         ) shouldBe MatchResult(
             aggressor = tradedAggressor,
             transaction = Transaction(
-                aggregate = Books(bookId).copy(lastEventId = EventId(2)),
+                aggregate = aBooks(bookId).copy(lastEventId = EventId(2)),
                 events = existingEvents.append(
                     TradeEvent(
                         eventId = EventId(2),
@@ -115,10 +102,7 @@ internal class MatchingTest : StringSpec({
             sizes = EntrySizes(tradeSize + 5),
             price = tradePrice
         )
-        val books = passive
-            .toEntryAddedToBookEvent(bookId)
-            .play(Books(bookId))
-            .aggregate
+        val books = aBooks(bookId, List.of(passive))
         val aggressor = aBookEntry(
             side = Side.BUY,
             whoRequested = otherClient,
@@ -134,7 +118,7 @@ internal class MatchingTest : StringSpec({
         ) shouldBe MatchResult(
             aggressor = tradedAggressor,
             transaction = Transaction(
-                aggregate = Books(bookId)
+                aggregate = aBooks(bookId)
                     .addBookEntry(tradedPassive)
                     .copy(lastEventId = EventId(2)),
                 events = existingEvents.append(
@@ -165,9 +149,7 @@ internal class MatchingTest : StringSpec({
             sizes = EntrySizes(tradeSize2 + 10),
             key = passive.key.copy(eventId = passive.key.eventId.next())
         )
-        val books = passive2.toEntryAddedToBookEvent(bookId).play(
-            passive.toEntryAddedToBookEvent(bookId).play(Books(bookId)).aggregate
-        ).aggregate
+        val books = aBooks(bookId, List.of(passive, passive2))
         val aggressor = aBookEntry(
             side = Side.BUY,
             whoRequested = otherClient,
@@ -185,7 +167,7 @@ internal class MatchingTest : StringSpec({
         ) shouldBe MatchResult(
             aggressor = tradedAggressor2,
             transaction = Transaction(
-                aggregate = Books(bookId)
+                aggregate = aBooks(bookId)
                     .addBookEntry(tradedPassive2)
                     .copy(lastEventId = EventId(4)),
                 events = existingEvents.appendAll(

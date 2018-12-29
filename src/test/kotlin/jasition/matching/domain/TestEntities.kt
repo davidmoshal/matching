@@ -1,5 +1,7 @@
 package jasition.matching.domain
 
+import io.vavr.collection.List
+import io.vavr.collection.Seq
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.TradingStatus
@@ -11,6 +13,23 @@ import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.order.event.OrderPlacedEvent
 import jasition.matching.domain.trade.event.TradeSideEntry
 import java.time.Instant
+
+fun aBooks(bookId: BookId, bookEntries: Seq<BookEntry> = List.empty()): Books =
+    aBooksWithEntities(Books(bookId), bookEntries)
+
+fun aBooksWithEntities(
+    books: Books,
+    bookEntries: Seq<BookEntry>,
+    offset: Int = 0
+): Books =
+    if (offset >= bookEntries.size()) books
+    else aBooksWithEntities(
+        aBooksWithEntity(books, bookEntries.get(offset)),
+        bookEntries, offset + 1
+    )
+
+fun aBooksWithEntity(books: Books, bookEntry: BookEntry): Books =
+    bookEntry.toEntryAddedToBookEvent(books.bookId).play(books).aggregate
 
 fun expectedEntryAddedToBookEvent(
     orderPlacedEvent: OrderPlacedEvent,

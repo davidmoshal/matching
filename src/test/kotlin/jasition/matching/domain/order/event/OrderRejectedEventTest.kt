@@ -4,7 +4,6 @@ import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import io.vavr.collection.List
 import jasition.matching.domain.*
-import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.EntryType
 import jasition.matching.domain.book.entry.Side
 import jasition.matching.domain.book.entry.TimeInForce
@@ -41,7 +40,7 @@ internal class OrderRejectedEventPropertyTest : StringSpec({
 internal class `Given an order is rejected` : StringSpec({
     val eventId = EventId(1)
     val bookId = aBookId()
-    val books = Books(bookId)
+    val books = aBooks(bookId)
     val event = OrderRejectedEvent(
         requestId = aClientRequestId(),
         whoRequested = aFirmWithClient(),

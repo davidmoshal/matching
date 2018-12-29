@@ -2,12 +2,7 @@ package jasition.matching.domain.order.command
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
-import jasition.matching.domain.aBookId
-import jasition.matching.domain.aClientRequestId
-import jasition.matching.domain.aFirmWithClient
-import jasition.matching.domain.aPrice
-import jasition.matching.domain.book.BookId
-import jasition.matching.domain.book.Books
+import jasition.matching.domain.*
 import jasition.matching.domain.book.TradingStatus
 import jasition.matching.domain.book.TradingStatuses
 import jasition.matching.domain.book.entry.*
@@ -17,11 +12,12 @@ import jasition.matching.domain.order.event.OrderRejectedEvent
 import java.time.Instant
 
 internal class `Given there is a request to place an order` : StringSpec({
-    val books = Books(BookId(bookId = "book"))
+    val bookId = aBookId()
+    val books = aBooks(bookId)
     val command = PlaceOrderCommand(
         requestId = aClientRequestId(),
         whoRequested = aFirmWithClient(),
-        bookId = aBookId(),
+        bookId = bookId,
         entryType = EntryType.LIMIT,
         side = Side.BUY,
         price = aPrice(),
