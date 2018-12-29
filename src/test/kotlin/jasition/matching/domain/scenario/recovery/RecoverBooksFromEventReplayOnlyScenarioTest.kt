@@ -13,10 +13,11 @@ internal class `Recover books from replaying events only` : FeatureSpec({
     val books = aBooks(bookId)
 
     feature("Recover from event re-playing") {
-        scenario("Recover the books that was created by a random number of PlaceOrderCommands with random values (Placed, Rejected and Trade)") {
+        val commandCount = Random.nextInt(10, 50)
+        scenario("Recover the books that was created by $commandCount PlaceOrderCommands with random values (Placed, Rejected and Trade)") {
             var latest = Transaction<BookId, Books>(books)
 
-            for (i in 0 until Random.nextInt(10, 50)) {
+            for (i in 0 until commandCount) {
                 randomPlaceOrderCommand(bookId = bookId)
                     .validate(latest.aggregate)
                     .fold({ rejected ->
