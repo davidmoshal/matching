@@ -149,4 +149,5 @@ I am perfectly aware that this project may become something of commercial value.
 
 ## References
 [Change Log](/doc/change-log.md)
+
 [Strictly Programming](https://jasition.github.io) - My technical blog 
