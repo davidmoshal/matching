@@ -18,7 +18,7 @@ internal class `Given the book is empty` : FeatureSpec({
     val books = aBooks(bookId)
 
     feature(addEntryToEmptyBookFeature) {
-        scenario(addEntryToEmptyBookFeature + "When a BUY Limit GTC Order is placed, then the new entry is added to the BUY side") {
+        scenario(addEntryToEmptyBookFeature + "When a BUY Limit GTC Order is placed, then the BUY entry is added") {
             val orderPlacedEvent = anOrderPlacedEvent(
                 bookId = bookId,
                 entryType = EntryType.LIMIT,
@@ -33,7 +33,7 @@ internal class `Given the book is empty` : FeatureSpec({
             result.aggregate.buyLimitBook.entries.values() shouldBe List.of(expectedBookEntry(orderPlacedEvent))
             result.aggregate.sellLimitBook.entries.size() shouldBe 0
         }
-        scenario(addEntryToEmptyBookFeature + "When a SELL Limit GTC order is placed, then the new entry is added to the SELL side") {
+        scenario(addEntryToEmptyBookFeature + "When a SELL Limit GTC order is placed, then the new SELL entry is added") {
             val orderPlacedEvent = anOrderPlacedEvent(
                 bookId = bookId,
                 entryType = EntryType.LIMIT,

@@ -119,7 +119,7 @@ internal class `Given the book has a SELL Limit GTC Order 4 at 10` : FeatureSpec
     }
 
     feature(noTradeIfPricesDoNotCrossFeature) {
-        scenario(noTradeIfPricesDoNotCrossFeature + "When a BUY Limit GTC Order 2 at 9 is placed, then the new entry is added to the BUY side") {
+        scenario(noTradeIfPricesDoNotCrossFeature + "When a BUY Limit GTC Order 2 at 9 is placed, then the BUY entry is added") {
             val orderPlacedEvent = anOrderPlacedEvent(
                 bookId = bookId,
                 entryType = EntryType.LIMIT,
@@ -144,7 +144,7 @@ internal class `Given the book has a SELL Limit GTC Order 4 at 10` : FeatureSpec
             row(anotherFirmWithClient(), "the same firm and same firm client"),
             row(anotherFirmWithoutClient(), "the same firm, one with but another without firm client")
         ) { client, details ->
-            scenario(noWashTradeFeature + "When a BUY Limit GTC Order 4 at 10 is placed by $details, then the new entry is added to the BUY side") {
+            scenario(noWashTradeFeature + "When a BUY Limit GTC Order 4 at 10 is placed by $details, then the BUY entry is added") {
                 val orderPlacedEvent = anOrderPlacedEvent(
                     requestId = anotherClientRequestId(),
                     whoRequested = client,
@@ -165,7 +165,7 @@ internal class `Given the book has a SELL Limit GTC Order 4 at 10` : FeatureSpec
                 result.aggregate.sellLimitBook.entries.values() shouldBe List.of(existingEntry)
             }
         }
-        scenario(noWashTradeFeature + "When a BUY Limit GTC Order 4 at 10 is placed by the same firm, both without firm client, then the new entry is added to the BUY side") {
+        scenario(noWashTradeFeature + "When a BUY Limit GTC Order 4 at 10 is placed by the same firm, both without firm client, then the BUY entry is added") {
             val orderPlacedEvent = anOrderPlacedEvent(
                 requestId = anotherClientRequestId(),
                 whoRequested = anotherFirmWithoutClient(),
