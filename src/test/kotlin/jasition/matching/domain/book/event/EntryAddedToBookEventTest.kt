@@ -6,7 +6,10 @@ import io.kotlintest.specs.StringSpec
 import io.mockk.every
 import io.mockk.spyk
 import io.vavr.collection.List
-import jasition.matching.domain.*
+import jasition.matching.domain.Transaction
+import jasition.matching.domain.aBookEntry
+import jasition.matching.domain.aBookId
+import jasition.matching.domain.anEventId
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import java.time.Instant
@@ -27,7 +30,7 @@ internal class EntryAddedToBookEventPropertyTest : StringSpec({
         event.eventId() shouldBe eventId
     }
     "Is a Side-effect event" {
-        event.eventType() shouldBe EventType.SIDE_EFFECT
+        event.isPrimary() shouldBe false
     }
 })
 

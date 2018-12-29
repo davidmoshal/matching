@@ -169,7 +169,7 @@ fun anEventId(value: Long = 1) = EventId(value)
 fun aPrice(value: Long = 10) = Price(value = value)
 
 fun aClientRequestId(
-    current: String = "req1",
+    current: String = "req",
     original: String? = null,
     parentId: String? = null
 ) = ClientRequestId(current, original, parentId)
@@ -230,4 +230,30 @@ fun expectedTradeSideEntry(
         eventId = eventId,
         status = status
     )
+}
+
+fun countEventsByClass(events: List<Event<BookId, Books>>) =
+    events.groupBy { it.javaClass.simpleName }.mapValues {it.size()}
+
+
+internal class TestAggregate(val value: String = "test") : Aggregate
+
+internal data class TestEvent(
+    val aggregateId: Int = 1,
+    val eventId: EventId
+) : Event<Int, TestAggregate> {
+    override fun aggregateId(): Int = aggregateId
+    override fun eventId(): EventId = eventId
+    override fun isPrimary(): Boolean = false
+    override fun play(aggregate: TestAggregate): Transaction<Int, TestAggregate> = Transaction(aggregate)
+}
+
+internal data class TestPrimaryEvent(
+    val aggregateId: Int = 1,
+    val eventId: EventId
+) : Event<Int, TestAggregate> {
+    override fun aggregateId(): Int = aggregateId
+    override fun eventId(): EventId = eventId
+    override fun isPrimary(): Boolean = true
+    override fun play(aggregate: TestAggregate): Transaction<Int, TestAggregate> = Transaction(aggregate)
 }

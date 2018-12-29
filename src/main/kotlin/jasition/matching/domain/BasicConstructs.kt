@@ -12,21 +12,8 @@ interface Query
 interface Event<K, A : Aggregate> {
     fun aggregateId(): K
     fun eventId(): EventId
-    fun eventType(): EventType
+    fun isPrimary(): Boolean
     fun play(aggregate: A): Transaction<K, A>
-}
-
-enum class EventType {
-    /**
-     * A Primary [Event] is a direct response to a [Command].
-     */
-    PRIMARY,
-
-    /**
-     * An [Event] that is generated when playing another [Event]. During recovery stage, Side-effect [Event]s are not
-     * re-played because they will be re-generated when re-playing the Primary [Event].
-     */
-    SIDE_EFFECT
 }
 
 data class EventId(val value: Long) : Comparable<EventId> {

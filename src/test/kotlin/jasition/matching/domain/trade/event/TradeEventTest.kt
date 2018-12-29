@@ -54,7 +54,7 @@ internal class TradeEventPropertyTest : StringSpec({
         event.eventId() shouldBe eventId
     }
     "Is a Side-effect event" {
-        event.eventType() shouldBe EventType.SIDE_EFFECT
+        event.isPrimary() shouldBe false
     }
 })
 

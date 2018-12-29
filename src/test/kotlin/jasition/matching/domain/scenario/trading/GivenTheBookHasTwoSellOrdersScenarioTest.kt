@@ -1,4 +1,4 @@
-package jasition.matching.domain.scenario
+package jasition.matching.domain.scenario.trading
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.FeatureSpec
@@ -8,8 +8,8 @@ import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.trade.event.TradeEvent
 import java.time.Instant
 
-internal class `Given the book has one BUY Limit GTC Order 5 at 10 and one 3 at 8` : FeatureSpec({
-    val higherBuyOverLowerFeature = "[1 - Higher BUY over lower] "
+internal class `Given the book has one SELL Limit GTC Order 5 at 8 and one 3 at 10` : FeatureSpec({
+    val lowerSellOverHigherFeature = "[1 - Lower SELL over higher] "
     val stopMatchingWhenPricesDoNotCrossFeature = "[2 - Stop matching when prices do not cross] "
     val aggressorMatchMultiplePassives = "[3 - Aggressor matches multiple passives] "
 
@@ -17,11 +17,11 @@ internal class `Given the book has one BUY Limit GTC Order 5 at 10 and one 3 at 
     val existingEntry = aBookEntry(
         requestId = anotherClientRequestId(),
         whoRequested = anotherFirmWithClient(),
-        price = Price(10),
+        price = Price(8),
         whenSubmitted = now,
         eventId = EventId(1),
         entryType = EntryType.LIMIT,
-        side = Side.BUY,
+        side = Side.SELL,
         timeInForce = TimeInForce.GOOD_TILL_CANCEL,
         sizes = EntrySizes(5),
         status = EntryStatus.NEW
@@ -29,11 +29,11 @@ internal class `Given the book has one BUY Limit GTC Order 5 at 10 and one 3 at 
     val existingEntry2 = aBookEntry(
         requestId = anotherClientRequestId(),
         whoRequested = anotherFirmWithClient(),
-        price = Price(8),
+        price = Price(10),
         whenSubmitted = now,
         eventId = EventId(2),
         entryType = EntryType.LIMIT,
-        side = Side.BUY,
+        side = Side.SELL,
         timeInForce = TimeInForce.GOOD_TILL_CANCEL,
         sizes = EntrySizes(3),
         status = EntryStatus.NEW
@@ -41,12 +41,12 @@ internal class `Given the book has one BUY Limit GTC Order 5 at 10 and one 3 at 
     val bookId = aBookId()
     val books = aBooks(bookId, List.of(existingEntry, existingEntry2))
 
-    feature(higherBuyOverLowerFeature) {
-        scenario(higherBuyOverLowerFeature + "When a BUY Limit GTC Order 5 at 9 is placed, then the new entry is between the two existing entries") {
+    feature(lowerSellOverHigherFeature) {
+        scenario(lowerSellOverHigherFeature + "When a SELL Limit GTC Order 5 at 9 is placed, then the new entry is between the two existing entries") {
             val orderPlacedEvent = anOrderPlacedEvent(
                 bookId = bookId,
                 entryType = EntryType.LIMIT,
-                side = Side.BUY,
+                side = Side.SELL,
                 price = Price(9),
                 timeInForce = TimeInForce.GOOD_TILL_CANCEL,
                 whenHappened = now,
@@ -57,21 +57,21 @@ internal class `Given the book has one BUY Limit GTC Order 5 at 10 and one 3 at 
 
             val expectedBookEntry = expectedBookEntry(orderPlacedEvent)
             result.events shouldBe List.of(expectedBookEntry.toEntryAddedToBookEvent(bookId))
-            result.aggregate.buyLimitBook.entries.values() shouldBe List.of(
+            result.aggregate.buyLimitBook.entries.size() shouldBe 0
+            result.aggregate.sellLimitBook.entries.values() shouldBe List.of(
                 existingEntry,
                 expectedBookEntry,
                 existingEntry2
             )
-            result.aggregate.sellLimitBook.entries.size() shouldBe 0
         }
     }
 
     feature(stopMatchingWhenPricesDoNotCrossFeature) {
-        scenario(stopMatchingWhenPricesDoNotCrossFeature + "When a SELL Limit GTC Order 7 at 9 is placed, then 5 at 10 is traded and the SELL entry 2 at 9 is added and the first BUY entry removed and the second BUY entry remains 3 at 8") {
+        scenario(stopMatchingWhenPricesDoNotCrossFeature + "When a BUY Limit GTC Order 7 at 9 is placed, then 5 at 8 is traded and the BUY entry 2 at 9 is added and the first SELL entry removed and the second SELL entry remains 3 at 10") {
             val orderPlacedEvent = anOrderPlacedEvent(
                 bookId = bookId,
                 entryType = EntryType.LIMIT,
-                side = Side.SELL,
+                side = Side.BUY,
                 price = Price(9),
                 timeInForce = TimeInForce.GOOD_TILL_CANCEL,
                 whenHappened = now,
@@ -93,7 +93,7 @@ internal class `Given the book has one BUY Limit GTC Order 5 at 10 and one 3 at 
                     eventId = EventId(4),
                     bookId = bookId,
                     size = 5,
-                    price = Price(10),
+                    price = Price(8),
                     whenHappened = now,
                     aggressor = expectedTradeSideEntry(
                         orderPlacedEvent = orderPlacedEvent,
@@ -109,18 +109,18 @@ internal class `Given the book has one BUY Limit GTC Order 5 at 10 and one 3 at 
                     )
                 ), expectedBookEntry.toEntryAddedToBookEvent(bookId)
             )
-            result.aggregate.buyLimitBook.entries.values() shouldBe List.of(existingEntry2)
-            result.aggregate.sellLimitBook.entries.values() shouldBe List.of(expectedBookEntry)
+            result.aggregate.buyLimitBook.entries.values() shouldBe List.of(expectedBookEntry)
+            result.aggregate.sellLimitBook.entries.values() shouldBe List.of(existingEntry2)
         }
     }
 
     feature(aggressorMatchMultiplePassives) {
-        scenario(aggressorMatchMultiplePassives + "When a SELL Limit GTC Order 7 at 8 is placed, then 5 at 10 is traded and 2 at 8 is traded and the first BUY entry removed and the second BUY entry remains 1 at 8") {
+        scenario(aggressorMatchMultiplePassives + "When a BUY Limit GTC Order 7 at 10 is placed, then 5 at 8 is traded and 2 at 10 is traded and the first SELL entry removed and the second SELL entry remains 1 at 10") {
             val orderPlacedEvent = anOrderPlacedEvent(
                 bookId = bookId,
                 entryType = EntryType.LIMIT,
-                side = Side.SELL,
-                price = Price(8),
+                side = Side.BUY,
+                price = Price(10),
                 timeInForce = TimeInForce.GOOD_TILL_CANCEL,
                 whenHappened = now,
                 eventId = EventId(3),
@@ -134,7 +134,7 @@ internal class `Given the book has one BUY Limit GTC Order 5 at 10 and one 3 at 
                     eventId = EventId(4),
                     bookId = bookId,
                     size = 5,
-                    price = Price(10),
+                    price = Price(8),
                     whenHappened = now,
                     aggressor = expectedTradeSideEntry(
                         orderPlacedEvent = orderPlacedEvent,
@@ -153,7 +153,7 @@ internal class `Given the book has one BUY Limit GTC Order 5 at 10 and one 3 at 
                     eventId = EventId(5),
                     bookId = bookId,
                     size = 2,
-                    price = Price(8),
+                    price = Price(10),
                     whenHappened = now,
                     aggressor = expectedTradeSideEntry(
                         orderPlacedEvent = orderPlacedEvent,
@@ -169,20 +169,20 @@ internal class `Given the book has one BUY Limit GTC Order 5 at 10 and one 3 at 
                     )
                 )
             )
-            result.aggregate.buyLimitBook.entries.values() shouldBe List.of(
+            result.aggregate.buyLimitBook.entries.values().size() shouldBe 0
+            result.aggregate.sellLimitBook.entries.values() shouldBe List.of(
                 existingEntry2.copy(
                     status = EntryStatus.PARTIAL_FILL,
                     sizes = EntrySizes(available = 1, traded = 2, cancelled = 0)
                 )
             )
-            result.aggregate.sellLimitBook.entries.values().size() shouldBe 0
         }
-        scenario(aggressorMatchMultiplePassives + "When a SELL Limit GTC Order 11 at 8 is placed, then 5 at 10 is traded and 3 at 8 is traded and the SELL entry 3 at 8 is added and the all BUY entries removed") {
+        scenario(aggressorMatchMultiplePassives + "When a BUY Limit GTC Order 11 at 10 is placed, then 5 at 8 is traded and 3 at 10 is traded and the BUY entry 3 at 10 is added and the all SELL entries removed") {
             val orderPlacedEvent = anOrderPlacedEvent(
                 bookId = bookId,
                 entryType = EntryType.LIMIT,
-                side = Side.SELL,
-                price = Price(8),
+                side = Side.BUY,
+                price = Price(10),
                 timeInForce = TimeInForce.GOOD_TILL_CANCEL,
                 whenHappened = now,
                 eventId = EventId(3),
@@ -202,7 +202,7 @@ internal class `Given the book has one BUY Limit GTC Order 5 at 10 and one 3 at 
                     eventId = EventId(4),
                     bookId = bookId,
                     size = 5,
-                    price = Price(10),
+                    price = Price(8),
                     whenHappened = now,
                     aggressor = expectedTradeSideEntry(
                         orderPlacedEvent = orderPlacedEvent,
@@ -220,7 +220,7 @@ internal class `Given the book has one BUY Limit GTC Order 5 at 10 and one 3 at 
                     eventId = EventId(5),
                     bookId = bookId,
                     size = 3,
-                    price = Price(8),
+                    price = Price(10),
                     whenHappened = now,
                     aggressor = expectedTradeSideEntry(
                         orderPlacedEvent = orderPlacedEvent,
@@ -236,8 +236,8 @@ internal class `Given the book has one BUY Limit GTC Order 5 at 10 and one 3 at 
                     )
                 ), expectedBookEntry.toEntryAddedToBookEvent(bookId)
             )
-            result.aggregate.buyLimitBook.entries.values().size() shouldBe 0
-            result.aggregate.sellLimitBook.entries.values() shouldBe List.of(expectedBookEntry)
+            result.aggregate.buyLimitBook.entries.values() shouldBe List.of(expectedBookEntry)
+            result.aggregate.sellLimitBook.entries.values().size() shouldBe 0
         }
     }
 })

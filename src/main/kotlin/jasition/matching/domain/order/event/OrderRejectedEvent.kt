@@ -2,7 +2,6 @@ package jasition.matching.domain.order.event
 
 import jasition.matching.domain.Event
 import jasition.matching.domain.EventId
-import jasition.matching.domain.EventType
 import jasition.matching.domain.Transaction
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
@@ -30,7 +29,7 @@ data class OrderRejectedEvent(
 ) : Event<BookId, Books> {
     override fun aggregateId(): BookId = bookId
     override fun eventId(): EventId = eventId
-    override fun eventType(): EventType = EventType.PRIMARY
+    override fun isPrimary(): Boolean = true
 
     override fun play(aggregate: Books): Transaction<BookId, Books> =
         Transaction(aggregate.copy(lastEventId = aggregate.verifyEventId(eventId)))

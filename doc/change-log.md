@@ -11,4 +11,5 @@
     * Multiple trades for one aggressor
     * Reject orders of negative size
     * Reject orders when effective trading status disallows 
+    * Recover book state from re-playing primary events
 * 2018-12-16 - Created the project

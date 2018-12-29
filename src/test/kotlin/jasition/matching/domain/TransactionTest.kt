@@ -42,14 +42,3 @@ internal class TransactionTest : StringSpec({
     }
 })
 
-private class TestAggregate(val value: String) : Aggregate
-
-private data class TestEvent(
-    val aggregateId: Int,
-    val eventId: EventId
-) : Event<Int, TestAggregate> {
-    override fun aggregateId(): Int = aggregateId
-    override fun eventId(): EventId = eventId
-    override fun eventType(): EventType = EventType.PRIMARY
-    override fun play(aggregate: TestAggregate): Transaction<Int, TestAggregate> = Transaction(aggregate)
-}

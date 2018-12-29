@@ -2,7 +2,6 @@ package jasition.matching.domain.book.event
 
 import jasition.matching.domain.Event
 import jasition.matching.domain.EventId
-import jasition.matching.domain.EventType
 import jasition.matching.domain.Transaction
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
@@ -22,7 +21,7 @@ data class EntryAddedToBookEvent(
 
     override fun aggregateId(): BookId = bookId
     override fun eventId(): EventId = eventId
-    override fun eventType(): EventType = EventType.SIDE_EFFECT
+    override fun isPrimary(): Boolean = false
 
     override fun play(aggregate: Books): Transaction<BookId, Books> {
         aggregate.verifyEventId(eventId)

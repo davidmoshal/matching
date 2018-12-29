@@ -33,7 +33,7 @@ internal class OrderRejectedEventPropertyTest : StringSpec({
         event.eventId() shouldBe eventId
     }
     "Is a Primary event" {
-        event.eventType() shouldBe EventType.PRIMARY
+        event.isPrimary() shouldBe true
     }
 })
 

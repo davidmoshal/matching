@@ -1,4 +1,4 @@
-package jasition.matching.domain.scenario
+package jasition.matching.domain.scenario.trading
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.FeatureSpec
