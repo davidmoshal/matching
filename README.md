@@ -148,4 +148,5 @@ I have been working on Exchange systems for more or less 10 years. It was natura
 I am perfectly aware that this project may become something of commercial value. While I am sharing the source code of the matching algorithm here, I am also very happy to be consulted how to realise it as an enterprise system. Contact me if you are interested.
 
 ## References
+[Change Log](/doc/change-log.md)
 [Strictly Programming](https://jasition.github.io) - My technical blog 
