@@ -8,8 +8,8 @@ data class LimitBook(val entries: TreeMap<BookEntryKey, BookEntry>) {
     constructor(side: Side) : this(
         TreeMap.empty(
             HighestBuyOrLowestSellPriceFirst(side)
-                    then EarliestSubmittedTimeFirst()
-                    then SmallestEventIdFirst()
+                    then EarliestSubmittedTimeFirst
+                    then SmallestEventIdFirst
         )
     )
 

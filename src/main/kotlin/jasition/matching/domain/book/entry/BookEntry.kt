@@ -85,11 +85,11 @@ data class BookEntryKey(
     val eventId: EventId
 )
 
-class EarliestSubmittedTimeFirst : Comparator<BookEntryKey> {
+object EarliestSubmittedTimeFirst : Comparator<BookEntryKey> {
     override fun compare(o1: BookEntryKey, o2: BookEntryKey): Int = o1.whenSubmitted.compareTo(o2.whenSubmitted)
 }
 
-class SmallestEventIdFirst : Comparator<BookEntryKey> {
+object SmallestEventIdFirst : Comparator<BookEntryKey> {
     override fun compare(o1: BookEntryKey, o2: BookEntryKey): Int = o1.eventId.compareTo(o2.eventId)
 }
 

@@ -63,20 +63,19 @@ internal class EarliestSubmittedTimeFirstTest : StringSpec({
         whenSubmitted = Instant.now(),
         eventId = EventId(9)
     )
-    val comparator = EarliestSubmittedTimeFirst()
 
     "Evaluates earlier submitted time as before later" {
-        comparator.compare(
+        EarliestSubmittedTimeFirst.compare(
             entryKey, entryKey.copy(whenSubmitted = entryKey.whenSubmitted.minusMillis(3))
         ) should beGreaterThan(0)
     }
     "Evaluates later submitted time as after earlier" {
-        comparator.compare(
+        EarliestSubmittedTimeFirst.compare(
             entryKey, entryKey.copy(whenSubmitted = entryKey.whenSubmitted.plusMillis(3))
         ) should beLessThan(0)
     }
     "Evaluates same submitted time as the same" {
-        comparator.compare(
+        EarliestSubmittedTimeFirst.compare(
             entryKey, entryKey.copy(price = Price(15), eventId = EventId(22))
         ) shouldBe 0
     }
@@ -88,20 +87,19 @@ internal class SmallestEventIdFirstTest : StringSpec({
         whenSubmitted = Instant.now(),
         eventId = EventId(9)
     )
-    val comparator = SmallestEventIdFirst()
 
     "Evaluates smaller Event ID as before bigger" {
-        comparator.compare(
+        SmallestEventIdFirst.compare(
             entryKey, entryKey.copy(eventId = EventId(8))
         ) should beGreaterThan(0)
     }
     "Evaluates bigger Event ID as after smaller" {
-        comparator.compare(
+        SmallestEventIdFirst.compare(
             entryKey, entryKey.copy(eventId = EventId(10))
         ) should beLessThan(0)
     }
     "Evaluates same Event ID as the same" {
-        comparator.compare(
+        SmallestEventIdFirst.compare(
             entryKey, entryKey.copy(price = Price(15), whenSubmitted = entryKey.whenSubmitted.plusMillis(3))
         ) shouldBe 0
     }

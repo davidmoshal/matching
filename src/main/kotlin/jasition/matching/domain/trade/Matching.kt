@@ -52,23 +52,23 @@ fun findNextMatch(
     passives: Seq<BookEntry>,
     offset: Int = 0
 ): Match? {
-    val passive = findPassive(passives, offset) ?: return null
+    return findPassive(passives, offset)?.let { passive ->
+        if (cannotMatchTheseTwoPrices(aggressor.key.price, passive.key.price)
+            || cannotMatchTheseTwoClients(aggressor.whoRequested, passive.whoRequested)
+        ) return findNextMatch(
+            aggressor = aggressor,
+            passives = passives,
+            offset = offset + 1
+        )
 
-    if (cannotMatchTheseTwoPrices(aggressor.key.price, passive.key.price)
-        || cannotMatchTheseTwoClients(aggressor.whoRequested, passive.whoRequested)
-    ) return findNextMatch(
-        aggressor = aggressor,
-        passives = passives,
-        offset = offset + 1
-    )
-
-    val tradePrice = findTradePrice(
-        aggressorSide = aggressor.side,
-        aggressor = aggressor.key.price,
-        passive = passive.key.price
-    ) ?: return null
-
-    return Match(passive, tradePrice)
+        findTradePrice(
+            aggressorSide = aggressor.side,
+            aggressor = aggressor.key.price,
+            passive = passive.key.price
+        )?.let { tradePrice ->
+            return Match(passive, tradePrice)
+        }
+    }
 }
 
 private fun cannotMatchAnyFurther(aggressor: BookEntry, limitBook: LimitBook) =
