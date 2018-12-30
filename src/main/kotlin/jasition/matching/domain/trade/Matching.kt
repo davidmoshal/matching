@@ -2,8 +2,8 @@ package jasition.matching.domain.trade
 
 import io.vavr.collection.List
 import io.vavr.collection.Seq
-import jasition.matching.domain.Event
-import jasition.matching.domain.Transaction
+import jasition.cqrs.Event
+import jasition.cqrs.Transaction
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.LimitBook

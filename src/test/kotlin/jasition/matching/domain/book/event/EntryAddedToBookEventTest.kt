@@ -6,7 +6,7 @@ import io.kotlintest.specs.StringSpec
 import io.mockk.every
 import io.mockk.spyk
 import io.vavr.collection.List
-import jasition.matching.domain.Transaction
+import jasition.cqrs.Transaction
 import jasition.matching.domain.aBookEntry
 import jasition.matching.domain.aBookId
 import jasition.matching.domain.anEventId

@@ -3,6 +3,7 @@ package jasition.matching.domain.order.event
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import io.vavr.collection.List
+import jasition.cqrs.EventId
 import jasition.matching.domain.*
 import jasition.matching.domain.book.entry.EntryType
 import jasition.matching.domain.book.entry.Side

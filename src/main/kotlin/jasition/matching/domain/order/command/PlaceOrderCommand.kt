@@ -1,7 +1,7 @@
 package jasition.matching.domain.order.command
 
 import arrow.core.Either
-import jasition.matching.domain.Command
+import jasition.cqrs.Command
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.*

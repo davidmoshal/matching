@@ -2,6 +2,8 @@ package jasition.matching.domain
 
 import io.vavr.collection.List
 import io.vavr.collection.Seq
+import jasition.cqrs.Event
+import jasition.cqrs.EventId
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.TradingStatus
@@ -235,25 +237,3 @@ fun expectedTradeSideEntry(
 fun countEventsByClass(events: List<Event<BookId, Books>>) =
     events.groupBy { it.javaClass.simpleName }.mapValues {it.size()}
 
-
-internal class TestAggregate(val value: String = "test") : Aggregate
-
-internal data class TestEvent(
-    val aggregateId: Int = 1,
-    val eventId: EventId
-) : Event<Int, TestAggregate> {
-    override fun aggregateId(): Int = aggregateId
-    override fun eventId(): EventId = eventId
-    override fun isPrimary(): Boolean = false
-    override fun play(aggregate: TestAggregate): Transaction<Int, TestAggregate> = Transaction(aggregate)
-}
-
-internal data class TestPrimaryEvent(
-    val aggregateId: Int = 1,
-    val eventId: EventId
-) : Event<Int, TestAggregate> {
-    override fun aggregateId(): Int = aggregateId
-    override fun eventId(): EventId = eventId
-    override fun isPrimary(): Boolean = true
-    override fun play(aggregate: TestAggregate): Transaction<Int, TestAggregate> = Transaction(aggregate)
-}

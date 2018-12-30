@@ -7,7 +7,7 @@ import io.kotlintest.specs.StringSpec
 import io.kotlintest.tables.row
 import io.mockk.every
 import io.mockk.spyk
-import jasition.matching.domain.EventId
+import jasition.cqrs.EventId
 import jasition.matching.domain.aBookEntry
 import jasition.matching.domain.aBookId
 import jasition.matching.domain.aTradingStatuses
@@ -41,6 +41,10 @@ internal class BooksTest : StringSpec({
     every { sellLimitBook.add(sellEntry) } returns newSellLimitBook
     every { buyLimitBook.update(tradeBuySideEntry) } returns tradedBuyLimitBook
     every { sellLimitBook.update(tradeSellSideEntry) } returns tradedSellLimitBook
+
+    "Aggregate ID of a Books is the Book ID" {
+        books.aggregateId() shouldBe books.bookId
+    }
 
     "Adding BUY entry updates the BUY Limit Book and Last event ID only" {
         books.addBookEntry(buyEntry) shouldBe books.copy(

@@ -4,6 +4,8 @@ import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import io.mockk.mockk
 import io.vavr.collection.List
+import jasition.cqrs.EventId
+import jasition.cqrs.Transaction
 import jasition.matching.domain.*
 import jasition.matching.domain.book.entry.EntrySizes
 import jasition.matching.domain.book.entry.Price

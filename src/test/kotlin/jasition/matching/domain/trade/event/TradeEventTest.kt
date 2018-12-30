@@ -5,6 +5,8 @@ import io.kotlintest.specs.StringSpec
 import io.mockk.every
 import io.mockk.spyk
 import io.vavr.collection.List
+import jasition.cqrs.EventId
+import jasition.cqrs.Transaction
 import jasition.matching.domain.*
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books

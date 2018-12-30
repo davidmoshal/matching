@@ -1,6 +1,6 @@
 package jasition.matching.domain.book.entry
 
-import jasition.matching.domain.EventId
+import jasition.cqrs.EventId
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.event.EntryAddedToBookEvent
 import jasition.matching.domain.client.Client

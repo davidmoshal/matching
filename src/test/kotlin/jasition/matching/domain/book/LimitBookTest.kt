@@ -3,7 +3,7 @@ package jasition.matching.domain.book
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import io.vavr.collection.List
-import jasition.matching.domain.EventId
+import jasition.cqrs.EventId
 import jasition.matching.domain.aBookEntry
 import jasition.matching.domain.book.entry.EntrySizes
 import jasition.matching.domain.book.entry.EntryStatus

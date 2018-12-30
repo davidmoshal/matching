@@ -1,7 +1,7 @@
 package jasition.matching.domain.book
 
-import jasition.matching.domain.Aggregate
-import jasition.matching.domain.EventId
+import jasition.cqrs.Aggregate
+import jasition.cqrs.EventId
 import jasition.matching.domain.book.entry.BookEntry
 import jasition.matching.domain.book.entry.Side
 import jasition.matching.domain.trade.event.TradeSideEntry
@@ -16,7 +16,8 @@ data class Books(
     val businessDate: LocalDate = LocalDate.now(),
     val tradingStatuses: TradingStatuses = TradingStatuses(TradingStatus.OPEN_FOR_TRADING),
     val lastEventId: EventId = EventId(0)
-) : Aggregate {
+) : Aggregate<BookId> {
+    override fun aggregateId(): BookId = bookId
 
     fun addBookEntry(entry: BookEntry): Books = copy(
         buyLimitBook = if (Side.BUY == entry.side) buyLimitBook.add(entry) else buyLimitBook,

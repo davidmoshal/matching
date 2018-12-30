@@ -1,4 +1,4 @@
-package jasition.matching.domain
+package jasition.cqrs
 
 import io.kotlintest.data.forall
 import io.kotlintest.shouldBe

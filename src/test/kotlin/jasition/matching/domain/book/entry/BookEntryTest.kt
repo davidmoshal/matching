@@ -5,7 +5,7 @@ import io.kotlintest.matchers.beLessThan
 import io.kotlintest.should
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
-import jasition.matching.domain.EventId
+import jasition.cqrs.EventId
 import jasition.matching.domain.aBookEntry
 import jasition.matching.domain.aBookId
 import jasition.matching.domain.book.event.EntryAddedToBookEvent

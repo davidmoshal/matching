@@ -2,10 +2,14 @@ package jasition.matching.domain.scenario.recovery
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.FeatureSpec
-import jasition.matching.domain.*
+import jasition.cqrs.Transaction
+import jasition.cqrs.recovery.replay
+import jasition.matching.domain.aBookId
+import jasition.matching.domain.aBooks
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
-import jasition.matching.domain.recovery.replay
+import jasition.matching.domain.countEventsByClass
+import jasition.matching.domain.randomPlaceOrderCommand
 import kotlin.random.Random
 
 internal class `Recover books from replaying events only` : FeatureSpec({

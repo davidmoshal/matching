@@ -1,4 +1,4 @@
-package jasition.matching.domain.recovery
+package jasition.cqrs.recovery
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
@@ -6,7 +6,7 @@ import io.mockk.every
 import io.mockk.spyk
 import io.mockk.verify
 import io.vavr.collection.List
-import jasition.matching.domain.*
+import jasition.cqrs.*
 
 internal class ReplayEventsTest : StringSpec({
     "Events are re-played incrementally and sequentially" {
