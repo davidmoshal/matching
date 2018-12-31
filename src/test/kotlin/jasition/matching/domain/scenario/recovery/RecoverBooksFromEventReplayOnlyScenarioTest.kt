@@ -26,7 +26,7 @@ internal class `Recover books from replaying events only` : FeatureSpec({
         .append(booksCreatedEvent)
         .append(booksCreatedEvent.play(initialBooks))
 
-    val commandCount = Random.nextInt(50, 100)
+    val commandCount = Random.nextInt(1000, 2000)
     for (i in 0 until commandCount) {
         randomPlaceOrderCommand(bookId = bookId)
             .validate(latest.aggregate)

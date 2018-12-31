@@ -38,7 +38,8 @@ Determines when the Order is in effect.
 * Aggressors take the better execution price. For example, if a Sell @ 15 is passive, and a Buy @ 20 is aggressor, then the Trade is executed @ 15 so the aggressor gets a better execution price.
 * The Order Book is prioritised by price and then time. Firstly, better prices come first, i.e. higher buy prices and lower buy prices. For the same price, the earlier Orders or Quotes come first.
 * No customer can match its own Orders.
-* Market makers cannot match another Market makers. One of parties in the trade must have real products or money. 
+* Market makers cannot match another Market makers. One of parties in the trade must have real products or money.
+* As there are cases where the aggressor and passive entries will not match, the prices in the book may look crossed. This is called backwardation. 
 
 ### Entities
 * Order - an instruction of Buy or Sell given quantity of the unit. It may or may not have a price.
