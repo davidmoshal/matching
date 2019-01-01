@@ -9,6 +9,7 @@ import jasition.matching.domain.book.entry.EntrySizes
 import jasition.matching.domain.book.entry.EntryStatus
 import jasition.matching.domain.book.entry.Price
 import jasition.matching.domain.book.entry.Side
+import jasition.matching.domain.randomPrice
 import java.time.Instant
 
 internal class LimitBookTest : StringSpec({
@@ -108,6 +109,20 @@ internal class LimitBookTest : StringSpec({
         )
         val updated = original.toTradeSideEntry()
         val newBook = LimitBook(Side.SELL).add(original).update(updated)
+
+        newBook.entries.size() shouldBe 0
+    }
+    "Removes all entries from the book"{
+        val entry1 = aBookEntry(
+            side = Side.SELL,
+            price = Price(10),
+            sizes = EntrySizes(available = 0, traded = 15, cancelled = 0)
+        )
+        val entry2 = entry1.copy(key = entry1.key.copy(price = randomPrice()))
+        val newBook = LimitBook(Side.SELL)
+            .add(entry1)
+            .add(entry2)
+            .removeAll(List.of(entry1, entry2))
 
         newBook.entries.size() shouldBe 0
     }

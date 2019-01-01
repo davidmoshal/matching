@@ -7,11 +7,11 @@ import io.kotlintest.specs.StringSpec
 import io.kotlintest.tables.row
 import io.mockk.every
 import io.mockk.spyk
+import io.vavr.collection.List
 import jasition.cqrs.EventId
-import jasition.matching.domain.aBookEntry
-import jasition.matching.domain.aBookId
-import jasition.matching.domain.aTradingStatuses
+import jasition.matching.domain.*
 import jasition.matching.domain.book.entry.Side
+import java.util.function.Predicate
 
 
 internal class BooksTest : StringSpec({
@@ -20,6 +20,8 @@ internal class BooksTest : StringSpec({
         side = Side.BUY
     )
     val sellEntry = buyEntry.copy(side = Side.SELL)
+    val excludedEntry =
+        sellEntry.copy(key = sellEntry.key.copy(price = randomPrice()), whoRequested = anotherFirmWithClient())
     val tradeBuySideEntry = buyEntry.toTradeSideEntry()
     val tradeSellSideEntry = sellEntry.toTradeSideEntry()
 
@@ -79,5 +81,28 @@ internal class BooksTest : StringSpec({
         ) { nextEventId ->
             shouldThrow<IllegalArgumentException> { newBooks.verifyEventId(EventId(nextEventId)) }
         }
+    }
+    "Able to find the entries fulfilling the predicate" {
+
+        Books(aBookId())
+            .addBookEntry(buyEntry)
+            .addBookEntry(sellEntry)
+            .addBookEntry(excludedEntry)
+            .findBookEntries(
+                Predicate { sellEntry.whoRequested == it.whoRequested }
+            ) shouldBe List.of(
+            buyEntry, sellEntry
+        )
+    }
+    "Removing buy and sell entries in one go" {
+        Books(aBookId())
+            .addBookEntry(buyEntry)
+            .addBookEntry(sellEntry)
+            .addBookEntry(excludedEntry)
+            .removeBookEntries(excludedEntry.key.eventId, List.of(buyEntry, sellEntry)) shouldBe books.copy(
+            buyLimitBook = LimitBook(Side.BUY),
+            sellLimitBook = LimitBook(Side.SELL).add(excludedEntry),
+            lastEventId = excludedEntry.key.eventId
+        )
     }
 })

@@ -28,7 +28,7 @@ data class LimitBook(val entries: TreeMap<BookEntryKey, BookEntry>) {
             if (entry.sizes.available <= 0)
                 entries.remove(bookEntryKey)
             else
-                entries.computeIfPresent(bookEntryKey) { existingKey: BookEntryKey, existingEntry: BookEntry ->
+                entries.computeIfPresent(bookEntryKey) { _: BookEntryKey, existingEntry: BookEntry ->
                     existingEntry.copy(
                         sizes = entry.sizes,
                         status = entry.status
