@@ -39,6 +39,7 @@ internal class BookEntryTest : StringSpec({
         entry.toTradeSideEntry() shouldBe TradeSideEntry(
             requestId = entry.requestId,
             whoRequested = entry.whoRequested,
+            isQuote = entry.isQuote,
             entryType = entry.entryType,
             side = entry.side,
             sizes = EntrySizes(available = 23, traded = 2, cancelled = 0),

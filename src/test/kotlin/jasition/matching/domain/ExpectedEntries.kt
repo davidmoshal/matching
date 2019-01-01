@@ -7,6 +7,7 @@ import jasition.matching.domain.book.entry.EntrySizes
 import jasition.matching.domain.book.entry.EntryStatus
 import jasition.matching.domain.book.entry.Side
 import jasition.matching.domain.book.event.EntryAddedToBookEvent
+import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.order.event.OrderPlacedEvent
 import jasition.matching.domain.quote.command.QuoteEntry
 import jasition.matching.domain.quote.event.MassQuotePlacedEvent
@@ -35,6 +36,7 @@ fun expectedBookEntry(
     eventId = eventId,
     requestId = event.requestId,
     whoRequested = event.whoRequested,
+    isQuote = false,
     entryType = event.entryType,
     side = event.side,
     timeInForce = event.timeInForce,
@@ -54,8 +56,9 @@ fun expectedBookEntry(
         price = side.price(entry),
         whenSubmitted = event.whenHappened,
         eventId = eventId,
-        requestId = entry.toClientRequestId(event.quoteId),
+        requestId = expectedClientRequestId(event, entry),
         whoRequested = event.whoRequested,
+        isQuote = true,
         entryType = entry.entryType,
         side = side,
         timeInForce = event.timeInForce,
@@ -72,8 +75,9 @@ fun expectedTradeSideEntry(
     status: EntryStatus
 ): TradeSideEntry {
     return TradeSideEntry(
-        requestId = entry.toClientRequestId(quoteId = event.quoteId),
+        requestId = expectedClientRequestId(event, entry),
         whoRequested = event.whoRequested,
+        isQuote = true,
         entryType = entry.entryType,
         sizes = sizes,
         side = side,
@@ -85,6 +89,14 @@ fun expectedTradeSideEntry(
     )
 }
 
+fun expectedClientRequestId(
+    event: MassQuotePlacedEvent,
+    entry: QuoteEntry
+): ClientRequestId = ClientRequestId(
+    current = entry.quoteEntryId,
+    collectionId = entry.quoteSetId,
+    parentId = event.quoteId
+)
 
 fun expectedTradeSideEntry(
     event: OrderPlacedEvent,
@@ -95,6 +107,7 @@ fun expectedTradeSideEntry(
     return TradeSideEntry(
         requestId = event.requestId,
         whoRequested = event.whoRequested,
+        isQuote = false,
         entryType = event.entryType,
         sizes = sizes,
         side = event.side,
@@ -115,6 +128,7 @@ fun expectedTradeSideEntry(
     return TradeSideEntry(
         requestId = bookEntry.requestId,
         whoRequested = bookEntry.whoRequested,
+        isQuote = bookEntry.isQuote,
         entryType = bookEntry.entryType,
         sizes = size,
         side = bookEntry.side,

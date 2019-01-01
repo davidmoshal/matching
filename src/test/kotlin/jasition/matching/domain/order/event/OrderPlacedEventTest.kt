@@ -41,6 +41,7 @@ internal class OrderPlacedEventPropertyTest : StringSpec({
             eventId = eventId,
             requestId = event.requestId,
             whoRequested = event.whoRequested,
+            isQuote = false,
             entryType = event.entryType,
             side = event.side,
             timeInForce = event.timeInForce,

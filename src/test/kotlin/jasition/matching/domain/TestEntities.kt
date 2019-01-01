@@ -105,6 +105,7 @@ fun aBookEntry(
     eventId: EventId = anEventId(),
     requestId: ClientRequestId = aClientRequestId(),
     whoRequested: Client = aFirmWithClient(),
+    isQuote : Boolean = false,
     entryType: EntryType = EntryType.LIMIT,
     side: Side = Side.BUY,
     timeInForce: TimeInForce = TimeInForce.GOOD_TILL_CANCEL,
@@ -114,6 +115,7 @@ fun aBookEntry(
     key = aBookEntryKey(price, whenSubmitted, eventId),
     requestId = requestId,
     whoRequested = whoRequested,
+    isQuote = isQuote,
     entryType = entryType,
     side = side,
     timeInForce = timeInForce,
@@ -151,7 +153,7 @@ fun aTradingStatuses(
     default = default
 )
 
-fun countEventsByClass(events: List<Event<BookId, Books>>) =
+fun countEventsByClass(events: Seq<Event<BookId, Books>>) =
     events.groupBy { it.javaClass.simpleName }.mapValues { it.size() }
 
 fun aQuoteEntryId(

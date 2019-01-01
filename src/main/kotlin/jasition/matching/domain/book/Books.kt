@@ -27,6 +27,13 @@ data class Books(
         lastEventId = entry.key.eventId
     )
 
+    fun removeBookEntries(eventId: EventId, entries: Seq<BookEntry>): Books =
+        copy(
+            buyLimitBook = buyLimitBook.removeAll(entries),
+            sellLimitBook = sellLimitBook.removeAll(entries),
+            lastEventId = eventId
+        )
+
     fun findBookEntries(predicate: Predicate<BookEntry>): Seq<BookEntry> =
         buyLimitBook.entries
             .filterValues(predicate)

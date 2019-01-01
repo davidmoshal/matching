@@ -33,6 +33,7 @@ data class TradeEvent(
 data class TradeSideEntry(
     val requestId: ClientRequestId,
     val whoRequested: Client,
+    val isQuote : Boolean,
     val entryType: EntryType,
     val side: Side,
     val sizes: EntrySizes,

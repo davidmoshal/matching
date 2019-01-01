@@ -1,5 +1,6 @@
 package jasition.matching.domain.book
 
+import io.vavr.collection.Seq
 import io.vavr.collection.TreeMap
 import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.trade.event.TradeSideEntry
@@ -14,23 +15,21 @@ data class LimitBook(val entries: TreeMap<BookEntryKey, BookEntry>) {
     )
 
     fun add(entry: BookEntry): LimitBook =
-        LimitBook(entries.put(entry.key, entry))
+        copy(entries = entries.put(entry.key, entry))
+
+    fun removeAll(toBeRemoved: Seq<BookEntry>): LimitBook =
+        copy(entries = entries.removeAll(toBeRemoved.map { it.key }))
 
     fun update(entry: TradeSideEntry): LimitBook {
         val bookEntryKey = entry.toBookEntryKey()
 
-        return LimitBook(
+        return copy(
+            entries =
             if (entry.sizes.available <= 0)
                 entries.remove(bookEntryKey)
             else
                 entries.computeIfPresent(bookEntryKey) { existingKey: BookEntryKey, existingEntry: BookEntry ->
-                    BookEntry(
-                        key = existingKey,
-                        requestId = existingEntry.requestId,
-                        whoRequested = existingEntry.whoRequested,
-                        entryType = existingEntry.entryType,
-                        side = existingEntry.side,
-                        timeInForce = existingEntry.timeInForce,
+                    existingEntry.copy(
                         sizes = entry.sizes,
                         status = entry.status
                     )

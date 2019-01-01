@@ -41,6 +41,7 @@ data class OrderPlacedEvent(
         eventId = eventId,
         requestId = requestId,
         whoRequested = whoRequested,
+        isQuote = false,
         entryType = entryType,
         side = side,
         timeInForce = timeInForce,
