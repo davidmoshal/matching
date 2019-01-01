@@ -11,17 +11,20 @@ import jasition.matching.domain.order.command.PlaceOrderCommand
 import java.time.Instant
 import kotlin.random.Random
 
+
+fun randomId(prefix: String = "req", from: Int = 1, to: Int = 1000): String = prefix + Random.nextInt(from, to)
+
 fun randomSize(): Int = Random.nextInt(-5, 30)
 
 fun randomPrice(): Price = Price(Random.nextLong(20, 30))
 
 fun randomFirmWithClient(): Client = Client(
-    firmId = "firm" + Random.nextInt(1, 5),
-    firmClientId = "client" + Random.nextInt(1, 5)
+    firmId = randomId(prefix = "firm", from = 1, to = 5),
+    firmClientId = randomId(prefix = "client", from = 1, to = 5)
 )
 
 fun randomPlaceOrderCommand(
-    requestId: ClientRequestId = aClientRequestId(current = "req" + Random.nextInt()),
+    requestId: ClientRequestId = aClientRequestId(current = randomId()),
     bookId: BookId = aBookId(),
     entryType: EntryType = EntryType.LIMIT,
     side: Side = if (Random.nextBoolean()) Side.BUY else Side.SELL,

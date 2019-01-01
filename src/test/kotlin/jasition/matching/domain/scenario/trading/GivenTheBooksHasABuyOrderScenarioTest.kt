@@ -46,7 +46,7 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : FeatureSpec(
                 side = Side.BUY,
                 price = Price(11),
                 timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-                whenHappened = now,
+                whenRequested = now,
                 eventId = EventId(2),
                 sizes = EntrySizes(5)
             )
@@ -64,7 +64,7 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : FeatureSpec(
                 side = Side.BUY,
                 price = Price(9),
                 timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-                whenHappened = now,
+                whenRequested = now,
                 eventId = EventId(2),
                 sizes = EntrySizes(5)
             )
@@ -85,7 +85,7 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : FeatureSpec(
                 side = Side.BUY,
                 price = Price(10),
                 timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-                whenHappened = now.plusMillis(1),
+                whenRequested = now.plusMillis(1),
                 eventId = EventId(2),
                 sizes = EntrySizes(5)
             )
@@ -106,7 +106,7 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : FeatureSpec(
                 side = Side.BUY,
                 price = Price(10),
                 timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-                whenHappened = existingEntry.key.whenSubmitted,
+                whenRequested = existingEntry.key.whenSubmitted,
                 eventId = EventId(2),
                 sizes = EntrySizes(5)
             )
@@ -127,7 +127,7 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : FeatureSpec(
                 side = Side.SELL,
                 price = Price(11),
                 timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-                whenHappened = now,
+                whenRequested = now,
                 eventId = EventId(2),
                 sizes = EntrySizes(2)
             )
@@ -155,7 +155,7 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : FeatureSpec(
                     side = Side.SELL,
                     price = Price(10),
                     timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-                    whenHappened = now,
+                    whenRequested = now,
                     eventId = EventId(2),
                     sizes = EntrySizes(4)
                 )
@@ -176,7 +176,7 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : FeatureSpec(
                 side = Side.SELL,
                 price = Price(10),
                 timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-                whenHappened = now,
+                whenRequested = now,
                 eventId = EventId(2),
                 sizes = EntrySizes(4)
             )
@@ -200,7 +200,7 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : FeatureSpec(
                 side = Side.SELL,
                 price = Price(9),
                 timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-                whenHappened = now,
+                whenRequested = now,
                 eventId = EventId(2),
                 sizes = EntrySizes(4)
             )
@@ -214,7 +214,7 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : FeatureSpec(
                     price = Price(10),
                     whenHappened = now,
                     aggressor = expectedTradeSideEntry(
-                        orderPlacedEvent = orderPlacedEvent,
+                        event = orderPlacedEvent,
                         eventId = orderPlacedEvent.eventId,
                         sizes = EntrySizes(available = 0, traded = 4, cancelled = 0),
                         status = EntryStatus.FILLED
@@ -240,7 +240,7 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : FeatureSpec(
                 side = Side.SELL,
                 price = Price(10),
                 timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-                whenHappened = now,
+                whenRequested = now,
                 eventId = EventId(2),
                 sizes = EntrySizes(3)
             )
@@ -259,7 +259,7 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : FeatureSpec(
                     price = Price(10),
                     whenHappened = now,
                     aggressor = expectedTradeSideEntry(
-                        orderPlacedEvent = orderPlacedEvent,
+                        event = orderPlacedEvent,
                         eventId = orderPlacedEvent.eventId,
                         sizes = EntrySizes(available = 0, traded = 3, cancelled = 0),
                         status = EntryStatus.FILLED
@@ -285,7 +285,7 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : FeatureSpec(
                 side = Side.SELL,
                 price = Price(10),
                 timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-                whenHappened = now,
+                whenRequested = now,
                 eventId = EventId(2),
                 sizes = EntrySizes(4)
             )
@@ -299,7 +299,7 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : FeatureSpec(
                     price = Price(10),
                     whenHappened = now,
                     aggressor = expectedTradeSideEntry(
-                        orderPlacedEvent = orderPlacedEvent,
+                        event = orderPlacedEvent,
                         eventId = orderPlacedEvent.eventId,
                         sizes = EntrySizes(available = 0, traded = 4, cancelled = 0),
                         status = EntryStatus.FILLED
@@ -325,14 +325,14 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : FeatureSpec(
                 side = Side.SELL,
                 price = Price(10),
                 timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-                whenHappened = now,
+                whenRequested = now,
                 eventId = EventId(2),
                 sizes = EntrySizes(5)
             )
             val result = orderPlacedEvent.play(books)
 
             val expectedBookEntry = expectedBookEntry(
-                orderPlacedEvent = orderPlacedEvent,
+                event = orderPlacedEvent,
                 eventId = EventId(4),
                 status = EntryStatus.PARTIAL_FILL,
                 sizes = EntrySizes(available = 1, traded = 4, cancelled = 0)
@@ -346,7 +346,7 @@ internal class `Given the book has a BUY Limit GTC Order 4 at 10` : FeatureSpec(
                     price = Price(10),
                     whenHappened = now,
                     aggressor = expectedTradeSideEntry(
-                        orderPlacedEvent = orderPlacedEvent,
+                        event = orderPlacedEvent,
                         eventId = orderPlacedEvent.eventId,
                         sizes = EntrySizes(available = 1, traded = 4, cancelled = 0),
                         status = EntryStatus.PARTIAL_FILL

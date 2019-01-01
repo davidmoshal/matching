@@ -9,11 +9,10 @@ import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.TradingStatus
 import jasition.matching.domain.book.TradingStatuses
 import jasition.matching.domain.book.entry.*
-import jasition.matching.domain.book.event.EntryAddedToBookEvent
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.order.event.OrderPlacedEvent
-import jasition.matching.domain.trade.event.TradeSideEntry
+import jasition.matching.domain.quote.command.QuoteEntry
 import java.time.Instant
 
 fun aBooks(bookId: BookId, bookEntries: Seq<BookEntry> = List.empty()): Books =
@@ -33,48 +32,6 @@ fun aBooksWithEntities(
 fun aBooksWithEntity(books: Books, bookEntry: BookEntry): Books =
     bookEntry.toEntryAddedToBookEvent(books.bookId).play(books).aggregate
 
-fun expectedEntryAddedToBookEvent(
-    orderPlacedEvent: OrderPlacedEvent,
-    books: Books,
-    expectedBookEntry: BookEntry
-): EntryAddedToBookEvent = EntryAddedToBookEvent(
-    eventId = orderPlacedEvent.eventId.next(),
-    bookId = books.bookId,
-    entry = expectedBookEntry,
-    whenHappened = orderPlacedEvent.whenHappened
-)
-
-fun expectedBookEntry(orderPlacedEvent: OrderPlacedEvent): BookEntry = BookEntry(
-    price = orderPlacedEvent.price,
-    whenSubmitted = orderPlacedEvent.whenHappened,
-    eventId = orderPlacedEvent.eventId.next(),
-    requestId = orderPlacedEvent.requestId,
-    whoRequested = orderPlacedEvent.whoRequested,
-    entryType = orderPlacedEvent.entryType,
-    side = orderPlacedEvent.side,
-    timeInForce = orderPlacedEvent.timeInForce,
-    sizes = orderPlacedEvent.sizes,
-    status = orderPlacedEvent.status
-)
-
-fun expectedBookEntry(
-    orderPlacedEvent: OrderPlacedEvent,
-    eventId: EventId,
-    status: EntryStatus,
-    sizes: EntrySizes
-) = BookEntry(
-    price = orderPlacedEvent.price,
-    whenSubmitted = orderPlacedEvent.whenHappened,
-    eventId = eventId,
-    requestId = orderPlacedEvent.requestId,
-    whoRequested = orderPlacedEvent.whoRequested,
-    entryType = orderPlacedEvent.entryType,
-    side = orderPlacedEvent.side,
-    timeInForce = orderPlacedEvent.timeInForce,
-    sizes = sizes,
-    status = status
-)
-
 
 fun anOrderPlacedEvent(
     requestId: ClientRequestId = aClientRequestId(),
@@ -84,7 +41,7 @@ fun anOrderPlacedEvent(
     side: Side = Side.BUY,
     price: Price = aPrice(),
     timeInForce: TimeInForce = TimeInForce.GOOD_TILL_CANCEL,
-    whenHappened: Instant = Instant.now(),
+    whenRequested: Instant = Instant.now(),
     eventId: EventId = anEventId(),
     sizes: EntrySizes = anEntrySizes()
 ): OrderPlacedEvent = OrderPlacedEvent(
@@ -95,7 +52,7 @@ fun anOrderPlacedEvent(
     side = side,
     price = price,
     timeInForce = timeInForce,
-    whenHappened = whenHappened,
+    whenHappened = whenRequested,
     eventId = eventId,
     sizes = sizes
 )
@@ -194,46 +151,19 @@ fun aTradingStatuses(
     default = default
 )
 
-fun expectedTradeSideEntry(
-    orderPlacedEvent: OrderPlacedEvent,
-    eventId: EventId,
-    sizes: EntrySizes,
-    status: EntryStatus
-): TradeSideEntry {
-    return TradeSideEntry(
-        requestId = orderPlacedEvent.requestId,
-        whoRequested = orderPlacedEvent.whoRequested,
-        entryType = orderPlacedEvent.entryType,
-        sizes = sizes,
-        side = orderPlacedEvent.side,
-        price = orderPlacedEvent.price,
-        timeInForce = orderPlacedEvent.timeInForce,
-        whenSubmitted = orderPlacedEvent.whenHappened,
-        eventId = eventId,
-        status = status
-    )
-}
-
-fun expectedTradeSideEntry(
-    bookEntry: BookEntry,
-    eventId: EventId,
-    size: EntrySizes,
-    status: EntryStatus
-): TradeSideEntry {
-    return TradeSideEntry(
-        requestId = bookEntry.requestId,
-        whoRequested = bookEntry.whoRequested,
-        entryType = bookEntry.entryType,
-        sizes = size,
-        side = bookEntry.side,
-        price = bookEntry.key.price,
-        timeInForce = bookEntry.timeInForce,
-        whenSubmitted = bookEntry.key.whenSubmitted,
-        eventId = eventId,
-        status = status
-    )
-}
-
 fun countEventsByClass(events: List<Event<BookId, Books>>) =
-    events.groupBy { it.javaClass.simpleName }.mapValues {it.size()}
+    events.groupBy { it.javaClass.simpleName }.mapValues { it.size() }
+
+fun aQuoteEntryId(
+    quoteEntryId: String = randomId(),
+    quoteSetId: String = "1",
+    entryType: EntryType = EntryType.LIMIT,
+    bid: PriceWithSize? = null,
+    offer: PriceWithSize? = null
+): QuoteEntry = QuoteEntry(
+    quoteEntryId = quoteEntryId,
+    quoteSetId = quoteSetId,
+    entryType = entryType,
+    bid = bid,
+    offer = offer)
 

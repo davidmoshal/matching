@@ -50,7 +50,7 @@ internal class `Given the book has one SELL Limit GTC Order 5 at 8 and one 3 at 
                 side = Side.SELL,
                 price = Price(9),
                 timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-                whenHappened = now,
+                whenRequested = now,
                 eventId = EventId(3),
                 sizes = EntrySizes(5)
             )
@@ -75,7 +75,7 @@ internal class `Given the book has one SELL Limit GTC Order 5 at 8 and one 3 at 
                 side = Side.BUY,
                 price = Price(9),
                 timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-                whenHappened = now,
+                whenRequested = now,
                 eventId = EventId(3),
                 sizes = EntrySizes(7)
             )
@@ -83,7 +83,7 @@ internal class `Given the book has one SELL Limit GTC Order 5 at 8 and one 3 at 
             val result = orderPlacedEvent.play(books)
 
             val expectedBookEntry = expectedBookEntry(
-                orderPlacedEvent = orderPlacedEvent,
+                event = orderPlacedEvent,
                 eventId = EventId(5),
                 status = EntryStatus.PARTIAL_FILL,
                 sizes = EntrySizes(available = 2, traded = 5, cancelled = 0)
@@ -97,7 +97,7 @@ internal class `Given the book has one SELL Limit GTC Order 5 at 8 and one 3 at 
                     price = Price(8),
                     whenHappened = now,
                     aggressor = expectedTradeSideEntry(
-                        orderPlacedEvent = orderPlacedEvent,
+                        event = orderPlacedEvent,
                         eventId = orderPlacedEvent.eventId,
                         sizes = EntrySizes(available = 2, traded = 5, cancelled = 0),
                         status = EntryStatus.PARTIAL_FILL
@@ -123,7 +123,7 @@ internal class `Given the book has one SELL Limit GTC Order 5 at 8 and one 3 at 
                 side = Side.BUY,
                 price = Price(10),
                 timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-                whenHappened = now,
+                whenRequested = now,
                 eventId = EventId(3),
                 sizes = EntrySizes(7)
             )
@@ -138,7 +138,7 @@ internal class `Given the book has one SELL Limit GTC Order 5 at 8 and one 3 at 
                     price = Price(8),
                     whenHappened = now,
                     aggressor = expectedTradeSideEntry(
-                        orderPlacedEvent = orderPlacedEvent,
+                        event = orderPlacedEvent,
                         eventId = orderPlacedEvent.eventId,
                         sizes = EntrySizes(available = 2, traded = 5, cancelled = 0),
                         status = EntryStatus.PARTIAL_FILL
@@ -157,7 +157,7 @@ internal class `Given the book has one SELL Limit GTC Order 5 at 8 and one 3 at 
                     price = Price(10),
                     whenHappened = now,
                     aggressor = expectedTradeSideEntry(
-                        orderPlacedEvent = orderPlacedEvent,
+                        event = orderPlacedEvent,
                         eventId = orderPlacedEvent.eventId,
                         sizes = EntrySizes(available = 0, traded = 7, cancelled = 0),
                         status = EntryStatus.FILLED
@@ -185,7 +185,7 @@ internal class `Given the book has one SELL Limit GTC Order 5 at 8 and one 3 at 
                 side = Side.BUY,
                 price = Price(10),
                 timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-                whenHappened = now,
+                whenRequested = now,
                 eventId = EventId(3),
                 sizes = EntrySizes(11)
             )
@@ -193,7 +193,7 @@ internal class `Given the book has one SELL Limit GTC Order 5 at 8 and one 3 at 
             val result = orderPlacedEvent.play(books)
 
             val expectedBookEntry = expectedBookEntry(
-                orderPlacedEvent = orderPlacedEvent,
+                event = orderPlacedEvent,
                 eventId = EventId(6),
                 status = EntryStatus.PARTIAL_FILL,
                 sizes = EntrySizes(available = 3, traded = 8, cancelled = 0)
@@ -206,7 +206,7 @@ internal class `Given the book has one SELL Limit GTC Order 5 at 8 and one 3 at 
                     price = Price(8),
                     whenHappened = now,
                     aggressor = expectedTradeSideEntry(
-                        orderPlacedEvent = orderPlacedEvent,
+                        event = orderPlacedEvent,
                         eventId = orderPlacedEvent.eventId,
                         sizes = EntrySizes(available = 6, traded = 5, cancelled = 0),
                         status = EntryStatus.PARTIAL_FILL
@@ -224,7 +224,7 @@ internal class `Given the book has one SELL Limit GTC Order 5 at 8 and one 3 at 
                     price = Price(10),
                     whenHappened = now,
                     aggressor = expectedTradeSideEntry(
-                        orderPlacedEvent = orderPlacedEvent,
+                        event = orderPlacedEvent,
                         eventId = orderPlacedEvent.eventId,
                         sizes = EntrySizes(available = 3, traded = 8, cancelled = 0),
                         status = EntryStatus.PARTIAL_FILL
