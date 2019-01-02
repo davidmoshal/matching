@@ -27,28 +27,34 @@ data class PlaceOrderCommand(
     fun validate(
         books: Books
     ): Either<OrderRejectedEvent, OrderPlacedEvent> {
-        if (size <= 0) {
-            return Either.left(
-                toRejectedEvent(
-                    books = books,
-                    currentTime = whenRequested,
-                    rejectReason = OrderRejectReason.INCORRECT_QUANTITY,
-                    rejectText = "Order sizes must be positive : $size"
-                )
-            )
-        }
+        val rejection = rejectDueToIncorrectSize(books)
+            ?: rejectDueToExchangeClosed(books)
 
-        if (!books.tradingStatuses.effectiveStatus().allows(this)) {
-            return Either.left(
-                toRejectedEvent(
-                    books = books,
-                    currentTime = whenRequested,
-                    rejectReason = OrderRejectReason.BROKER_EXCHANGE_OPTION,
-                    rejectText = "Placing orders is currently not allowed : ${books.tradingStatuses.effectiveStatus()}"
-                )
-            )
+        if (rejection != null) {
+            return Either.left(rejection)
         }
         return Either.right(toPlacedEvent(books = books, currentTime = whenRequested))
+    }
+
+    private fun rejectDueToExchangeClosed(books: Books): OrderRejectedEvent? =
+        if (!books.tradingStatuses.effectiveStatus().allows(this))
+            toRejectedEvent(
+                books = books,
+                currentTime = whenRequested,
+                rejectReason = OrderRejectReason.EXCHANGE_CLOSED,
+                rejectText = "Placing orders is currently not allowed : ${books.tradingStatuses.effectiveStatus()}"
+            ) else null
+
+
+    private fun rejectDueToIncorrectSize(books: Books): OrderRejectedEvent? {
+        return if (size <= 0)
+            toRejectedEvent(
+                books = books,
+                currentTime = whenRequested,
+                rejectReason = OrderRejectReason.INCORRECT_QUANTITY,
+                rejectText = "Order sizes must be positive : $size"
+            )
+        else null
     }
 
     private fun toPlacedEvent(

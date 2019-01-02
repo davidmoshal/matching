@@ -4,12 +4,9 @@ import io.kotlintest.shouldBe
 import io.kotlintest.specs.FeatureSpec
 import jasition.cqrs.Transaction
 import jasition.cqrs.recovery.replay
-import jasition.matching.domain.aBookId
-import jasition.matching.domain.aBooks
+import jasition.matching.domain.*
 import jasition.matching.domain.book.TradingStatus
 import jasition.matching.domain.book.command.CreateBooksCommand
-import jasition.matching.domain.countEventsByClass
-import jasition.matching.domain.randomPlaceOrderCommand
 import kotlin.random.Random
 
 internal class `Recover books from replaying events only` : FeatureSpec({
@@ -28,7 +25,7 @@ internal class `Recover books from replaying events only` : FeatureSpec({
 
     val commandCount = Random.nextInt(1000, 2000)
     for (i in 0 until commandCount) {
-        randomPlaceOrderCommand(bookId = bookId)
+        randomPlaceOrderCommand(bookId = bookId, size = randomSize(from = -5, until = 30))
             .validate(latest.aggregate)
             .fold({ rejected ->
                 latest = latest.append(rejected).append(rejected.play(latest.aggregate))

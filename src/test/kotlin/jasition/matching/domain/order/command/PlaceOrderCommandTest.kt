@@ -85,7 +85,7 @@ internal class `Given there is a request to place an order` : StringSpec({
                 price = command.price,
                 timeInForce = command.timeInForce,
                 whenHappened = command.whenRequested,
-                rejectReason = OrderRejectReason.BROKER_EXCHANGE_OPTION,
+                rejectReason = OrderRejectReason.EXCHANGE_CLOSED,
                 rejectText = "Placing orders is currently not allowed : NOT_AVAILABLE_FOR_TRADING"
             )
         }
