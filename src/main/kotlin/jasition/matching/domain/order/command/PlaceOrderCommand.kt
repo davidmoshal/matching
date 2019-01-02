@@ -27,14 +27,26 @@ data class PlaceOrderCommand(
     fun validate(
         books: Books
     ): Either<OrderRejectedEvent, OrderPlacedEvent> {
-        val rejection = rejectDueToIncorrectSize(books)
-            ?: rejectDueToExchangeClosed(books)
+        val rejection =
+            rejectDueToUnknownSymbol(books)
+                ?: rejectDueToIncorrectSize(books)
+                ?: rejectDueToExchangeClosed(books)
 
         if (rejection != null) {
             return Either.left(rejection)
         }
         return Either.right(toPlacedEvent(books = books, currentTime = whenRequested))
     }
+
+    private fun rejectDueToUnknownSymbol(books: Books): OrderRejectedEvent? =
+        if (bookId != books.bookId)
+            toRejectedEvent(
+                books = books.copy(bookId = bookId),
+                currentTime = whenRequested,
+                rejectReason = OrderRejectReason.UNKNOWN_SYMBOL,
+                rejectText = "Unknown book ID : ${bookId.bookId}"
+            )
+        else null
 
     private fun rejectDueToExchangeClosed(books: Books): OrderRejectedEvent? =
         if (!books.tradingStatuses.effectiveStatus().allows(this))
@@ -89,7 +101,7 @@ data class PlaceOrderCommand(
         bookId = bookId,
         entryType = entryType,
         side = side,
-        sizes = size,
+        size = size,
         price = price,
         timeInForce = timeInForce,
         whenHappened = currentTime,

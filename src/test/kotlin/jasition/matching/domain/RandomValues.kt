@@ -14,9 +14,9 @@ import kotlin.random.Random
 
 fun randomId(prefix: String = "req", from: Int = 1, to: Int = 1000): String = prefix + Random.nextInt(from, to)
 
-fun randomSize(from: Int = 1 , until: Int = 30): Int = Random.nextInt(from, until)
+fun randomSize(from: Int = 10, until: Int = 30): Int = Random.nextInt(from, until)
 
-fun randomPrice(): Price = Price(Random.nextLong(20, 30))
+fun randomPrice(from: Long = 20, until: Long = 30): Price = Price(Random.nextLong(from = from, until = until))
 
 fun randomFirmWithClient(): Client = Client(
     firmId = randomId(prefix = "firm", from = 1, to = 5),

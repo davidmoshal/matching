@@ -1,8 +1,10 @@
 package jasition.matching.domain.order.command
 
+import arrow.core.Either
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import jasition.matching.domain.*
+import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.TradingStatus
 import jasition.matching.domain.book.TradingStatuses
 import jasition.matching.domain.book.entry.*
@@ -27,11 +29,8 @@ internal class `Given there is a request to place an order` : StringSpec({
     )
 
     "When the request is valid, then the order is placed" {
-        val result = command.validate(books)
-
-        result.isRight() shouldBe true
-        result.map { orderPlacedEvent ->
-            orderPlacedEvent shouldBe OrderPlacedEvent(
+        command.validate(books) shouldBe Either.right(
+            OrderPlacedEvent(
                 eventId = books.lastEventId.next(),
                 requestId = command.requestId,
                 whoRequested = command.whoRequested,
@@ -44,50 +43,61 @@ internal class `Given there is a request to place an order` : StringSpec({
                 whenHappened = command.whenRequested,
                 status = EntryStatus.NEW
             )
-        }
+        )
     }
-
+    "When the wrong book ID is used, then the order is rejected" {
+        val wrongBookId = "Wrong ID"
+        command.copy(bookId = BookId(wrongBookId)).validate(books) shouldBe Either.left(
+            OrderRejectedEvent(
+                eventId = books.lastEventId.next(),
+                requestId = command.requestId,
+                whoRequested = command.whoRequested,
+                bookId = BookId(wrongBookId),
+                entryType = command.entryType,
+                side = command.side,
+                size = command.size,
+                price = command.price,
+                timeInForce = command.timeInForce,
+                whenHappened = command.whenRequested,
+                rejectReason = OrderRejectReason.UNKNOWN_SYMBOL,
+                rejectText = "Unknown book ID : $wrongBookId"
+            )
+        )
+    }
     "When the request uses negative sizes, then the order is rejected" {
-        val result = command.copy(size = -1).validate(books)
-
-        result.isLeft() shouldBe true
-        result.mapLeft { orderRejectedEvent ->
-            orderRejectedEvent shouldBe OrderRejectedEvent(
+        command.copy(size = -1).validate(books) shouldBe Either.left(
+            OrderRejectedEvent(
                 eventId = books.lastEventId.next(),
                 requestId = command.requestId,
                 whoRequested = command.whoRequested,
                 bookId = command.bookId,
                 entryType = command.entryType,
                 side = command.side,
-                sizes = -1,
+                size = -1,
                 price = command.price,
                 timeInForce = command.timeInForce,
                 whenHappened = command.whenRequested,
                 rejectReason = OrderRejectReason.INCORRECT_QUANTITY,
                 rejectText = "Order sizes must be positive : -1"
             )
-        }
+        )
     }
     "When the effective trading status disallows placing order, then the order is rejected" {
-        val result =
-            command.validate(books.copy(tradingStatuses = TradingStatuses(TradingStatus.NOT_AVAILABLE_FOR_TRADING)))
-
-        result.isLeft() shouldBe true
-        result.mapLeft { orderRejectedEvent ->
-            orderRejectedEvent shouldBe OrderRejectedEvent(
+        command.validate(books.copy(tradingStatuses = TradingStatuses(TradingStatus.NOT_AVAILABLE_FOR_TRADING))) shouldBe Either.left(
+            OrderRejectedEvent(
                 eventId = books.lastEventId.next(),
                 requestId = command.requestId,
                 whoRequested = command.whoRequested,
                 bookId = command.bookId,
                 entryType = command.entryType,
                 side = command.side,
-                sizes = command.size,
+                size = command.size,
                 price = command.price,
                 timeInForce = command.timeInForce,
                 whenHappened = command.whenRequested,
                 rejectReason = OrderRejectReason.EXCHANGE_CLOSED,
-                rejectText = "Placing orders is currently not allowed : NOT_AVAILABLE_FOR_TRADING"
+                rejectText = "Placing orders is currently not allowed : ${TradingStatus.NOT_AVAILABLE_FOR_TRADING.name}"
             )
-        }
+        )
     }
 })
