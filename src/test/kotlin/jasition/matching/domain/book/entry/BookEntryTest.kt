@@ -66,6 +66,12 @@ internal class BookEntryTest : StringSpec({
             status = EntryStatus.FILLED
         )
     }
+    "Updates sizes and status when cancelled" {
+        entry.cancelled() shouldBe entry.copy(
+            sizes = EntrySizes(available = 0, traded = 2, cancelled = 23),
+            status = EntryStatus.CANCELLED
+        )
+    }
 })
 
 internal class EarliestSubmittedTimeFirstTest : StringSpec({

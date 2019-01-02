@@ -59,7 +59,7 @@ data class QuoteEntry(
         return entries
     }
 
-    fun toBookEntry(
+    private fun toBookEntry(
         side: Side,
         size: Int,
         price: Price?,
