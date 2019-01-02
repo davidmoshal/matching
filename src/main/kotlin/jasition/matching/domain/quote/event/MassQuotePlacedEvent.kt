@@ -7,7 +7,8 @@ import jasition.cqrs.EventId
 import jasition.cqrs.Transaction
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
-import jasition.matching.domain.book.entry.*
+import jasition.matching.domain.book.entry.BookEntry
+import jasition.matching.domain.book.entry.TimeInForce
 import jasition.matching.domain.book.event.EntriesRemovedFromBookEvent
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.quote.command.QuoteEntry
@@ -66,57 +67,19 @@ data class MassQuotePlacedEvent(
     fun toBookEntries(
         offset: Int = 0,
         bookEntries: Seq<BookEntry> = List.empty()
-    ): Seq<BookEntry> {
-        if (offset >= entries.size()) {
-            return bookEntries
-        }
-
-        val quoteEntry = entries.get(offset)
-        var updatedEntries = bookEntries
-        quoteEntry.bid?.let {
-            updatedEntries = updatedEntries.append(
-                toBookEntry(
-                    quoteEntry = quoteEntry,
-                    side = Side.BUY,
-                    size = it.size,
-                    price = it.price
-                )
-            )
-        }
-        quoteEntry.offer?.let {
-            updatedEntries = updatedEntries.append(
-                toBookEntry(
-                    quoteEntry = quoteEntry,
-                    side = Side.SELL,
-                    size = it.size,
-                    price = it.price
-                )
-            )
-        }
-        return toBookEntries(
+    ): Seq<BookEntry> =
+        if (offset >= entries.size())
+            bookEntries
+        else toBookEntries(
             offset = offset + 1,
-            bookEntries = updatedEntries
+            bookEntries = bookEntries.appendAll(
+                entries.get(offset).toBookEntries(
+                    whenHappened = whenHappened,
+                    eventId = eventId,
+                    whoRequested = whoRequested,
+                    timeInForce = timeInForce,
+                    quoteId = quoteId
+                )
+            )
         )
-    }
-
-    fun toBookEntry(
-        quoteEntry: QuoteEntry,
-        side: Side,
-        size: Int,
-        price: Price?
-    ): BookEntry {
-        return BookEntry(
-            whenSubmitted = whenHappened,
-            eventId = eventId,
-            requestId = quoteEntry.toClientRequestId(quoteId = quoteId),
-            whoRequested = whoRequested,
-            isQuote = true,
-            entryType = quoteEntry.entryType,
-            side = side,
-            sizes = EntrySizes(size),
-            price = price,
-            timeInForce = timeInForce,
-            status = EntryStatus.NEW
-        )
-    }
 }

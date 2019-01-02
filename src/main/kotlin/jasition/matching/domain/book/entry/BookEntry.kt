@@ -12,7 +12,7 @@ data class BookEntry(
     val key: BookEntryKey,
     val requestId: ClientRequestId,
     val whoRequested: Client,
-    val isQuote : Boolean,
+    val isQuote: Boolean,
     val entryType: EntryType,
     val side: Side,
     val timeInForce: TimeInForce,
@@ -25,7 +25,7 @@ data class BookEntry(
         eventId: EventId,
         requestId: ClientRequestId,
         whoRequested: Client,
-        isQuote : Boolean,
+        isQuote: Boolean,
         entryType: EntryType,
         side: Side,
         timeInForce: TimeInForce,
@@ -86,6 +86,19 @@ data class BookEntry(
         sizes = sizes.cancelled(),
         status = EntryStatus.CANCELLED
     )
+
+    fun withKey(
+        price: Price? = key.price,
+        whenSubmitted: Instant = key.whenSubmitted,
+        eventId: EventId = key.eventId
+    ): BookEntry =
+        copy(
+            key = key.copy(
+                price = price,
+                whenSubmitted = whenSubmitted,
+                eventId = eventId
+            )
+        )
 }
 
 data class BookEntryKey(
