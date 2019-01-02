@@ -55,7 +55,7 @@ data class BookEntry(
         EntryAddedToBookEvent(
             eventId = eventId,
             bookId = bookId,
-            entry = copy(key = key.copy(eventId = eventId)),
+            entry = withKey(eventId = eventId),
             whenHappened = key.whenSubmitted
         )
 

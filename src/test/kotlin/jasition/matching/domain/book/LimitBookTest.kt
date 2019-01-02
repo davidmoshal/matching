@@ -118,7 +118,7 @@ internal class LimitBookTest : StringSpec({
             price = Price(10),
             sizes = EntrySizes(available = 0, traded = 15, cancelled = 0)
         )
-        val entry2 = entry1.copy(key = entry1.key.copy(price = randomPrice()))
+        val entry2 = entry1.withKey(price = randomPrice())
         val newBook = LimitBook(Side.SELL)
             .add(entry1)
             .add(entry2)

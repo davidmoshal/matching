@@ -9,8 +9,10 @@ import jasition.cqrs.EventId
 import jasition.matching.domain.aBookEntry
 import jasition.matching.domain.aBookId
 import jasition.matching.domain.book.event.EntryAddedToBookEvent
+import jasition.matching.domain.randomPrice
 import jasition.matching.domain.trade.event.TradeSideEntry
 import java.time.Instant
+import kotlin.random.Random
 
 internal class BookEntryTest : StringSpec({
     val entry = aBookEntry(
@@ -18,6 +20,14 @@ internal class BookEntryTest : StringSpec({
     )
     val bookId = aBookId()
 
+    "Mutates to another BookEntry with given key" {
+        val price = randomPrice()
+        val whenSubmitted = Instant.now()
+        val eventId = EventId(Random.nextLong(0, 100000))
+        entry.withKey(price = price, whenSubmitted = whenSubmitted, eventId = eventId) shouldBe entry.copy(
+            key = entry.key.copy(price = price, whenSubmitted = whenSubmitted, eventId = eventId)
+        )
+    }
     "Converts to EntryAddedToBookEvent" {
         entry.toEntryAddedToBookEvent(bookId) shouldBe EntryAddedToBookEvent(
             eventId = entry.key.eventId,
