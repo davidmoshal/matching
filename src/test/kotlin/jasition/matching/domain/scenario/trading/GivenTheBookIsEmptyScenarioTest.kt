@@ -59,10 +59,10 @@ internal class `Given the book is empty` : FeatureSpec({
                 quoteModelType = QuoteModelType.QUOTE_ENTRY,
                 timeInForce = TimeInForce.GOOD_TILL_CANCEL,
                 entries = List.of(
-                    aQuoteEntryId(
+                    aQuoteEntry(
                         bid = PriceWithSize(size = 4, price = Price(10)),
                         offer = PriceWithSize(size = 4, price = Price(11))
-                    ), aQuoteEntryId(
+                    ), aQuoteEntry(
                         bid = PriceWithSize(size = 5, price = Price(9)),
                         offer = PriceWithSize(size = 5, price = Price(12))
                     )

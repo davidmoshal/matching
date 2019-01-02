@@ -286,10 +286,10 @@ internal class `Given the book has a SELL Limit GTC Order 4 at 10` : FeatureSpec
                 quoteModelType = QuoteModelType.QUOTE_ENTRY,
                 timeInForce = TimeInForce.GOOD_TILL_CANCEL,
                 entries = List.of(
-                    aQuoteEntryId(
+                    aQuoteEntry(
                         bid = PriceWithSize(size = 3, price = Price(10)),
                         offer = PriceWithSize(size = 4, price = Price(11))
-                    ), aQuoteEntryId(
+                    ), aQuoteEntry(
                         bid = PriceWithSize(size = 5, price = Price(9)),
                         offer = PriceWithSize(size = 5, price = Price(12))
                     )
@@ -404,10 +404,10 @@ internal class `Given the book has a SELL Limit GTC Order 4 at 10` : FeatureSpec
                 quoteModelType = QuoteModelType.QUOTE_ENTRY,
                 timeInForce = TimeInForce.GOOD_TILL_CANCEL,
                 entries = List.of(
-                    aQuoteEntryId(
+                    aQuoteEntry(
                         bid = PriceWithSize(size = 4, price = Price(10)),
                         offer = PriceWithSize(size = 4, price = Price(11))
-                    ), aQuoteEntryId(
+                    ), aQuoteEntry(
                         bid = PriceWithSize(size = 5, price = Price(9)),
                         offer = PriceWithSize(size = 5, price = Price(12))
                     )
@@ -525,10 +525,10 @@ internal class `Given the book has a SELL Limit GTC Order 4 at 10` : FeatureSpec
                 quoteModelType = QuoteModelType.QUOTE_ENTRY,
                 timeInForce = TimeInForce.GOOD_TILL_CANCEL,
                 entries = List.of(
-                    aQuoteEntryId(
+                    aQuoteEntry(
                         bid = PriceWithSize(size = 5, price = Price(10)),
                         offer = PriceWithSize(size = 4, price = Price(11))
-                    ), aQuoteEntryId(
+                    ), aQuoteEntry(
                         bid = PriceWithSize(size = 5, price = Price(9)),
                         offer = PriceWithSize(size = 5, price = Price(12))
                     )

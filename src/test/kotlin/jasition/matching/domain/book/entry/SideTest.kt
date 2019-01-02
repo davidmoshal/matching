@@ -2,8 +2,7 @@ package jasition.matching.domain.book.entry
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
-import jasition.matching.domain.aBookId
-import jasition.matching.domain.aBooks
+import jasition.matching.domain.*
 import jasition.matching.domain.book.LimitBook
 
 internal class SideTest : StringSpec({
@@ -21,6 +20,31 @@ internal class SideTest : StringSpec({
     "BUY side has the opposite side book as SELL"{
         Side.BUY.oppositeSideBook(books) shouldBe sellLimitBook
     }
+    "Returns the BID side of a quote entry" {
+        val price = randomPrice()
+        val size = randomSize()
+        Side.BUY.priceWithSize(
+            aQuoteEntry(
+                bid = PriceWithSize(price = price, size = size)
+            )
+        ) shouldBe PriceWithSize(price = price, size = size)
+    }
+    "Returns the BID price of a quote entry" {
+        val price = randomPrice()
+        Side.BUY.price(
+            aQuoteEntry(
+                bid = PriceWithSize(price = price, size = randomSize())
+            )
+        ) shouldBe price
+    }
+    "Returns the BID size of a quote entry" {
+        val size = randomSize()
+        Side.BUY.size(
+            aQuoteEntry(
+                bid = PriceWithSize(price = randomPrice(), size = size)
+            )
+        ) shouldBe size
+    }
     "SELL side has 1 as the comparator multiplier"{
         Side.SELL.comparatorMultiplier() shouldBe 1
     }
@@ -29,5 +53,30 @@ internal class SideTest : StringSpec({
     }
     "SELL side has the opposite side book as BUY"{
         Side.SELL.oppositeSideBook(books) shouldBe buyLimitBook
+    }
+    "Returns the OFFER side of a quote entry" {
+        val price = randomPrice()
+        val size = randomSize()
+        Side.SELL.priceWithSize(
+            aQuoteEntry(
+                offer = PriceWithSize(price = price, size = size)
+            )
+        ) shouldBe PriceWithSize(price = price, size = size)
+    }
+    "Returns the OFFER price of a quote entry" {
+        val price = randomPrice()
+        Side.SELL.price(
+            aQuoteEntry(
+                offer = PriceWithSize(price = price, size = randomSize())
+            )
+        ) shouldBe price
+    }
+    "Returns the OFFER size of a quote entry" {
+        val size = randomSize()
+        Side.SELL.size(
+            aQuoteEntry(
+                offer = PriceWithSize(price = randomPrice(), size = size)
+            )
+        ) shouldBe size
     }
 })

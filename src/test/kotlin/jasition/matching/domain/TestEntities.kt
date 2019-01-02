@@ -105,7 +105,7 @@ fun aBookEntry(
     eventId: EventId = anEventId(),
     requestId: ClientRequestId = aClientRequestId(),
     whoRequested: Client = aFirmWithClient(),
-    isQuote : Boolean = false,
+    isQuote: Boolean = false,
     entryType: EntryType = EntryType.LIMIT,
     side: Side = Side.BUY,
     timeInForce: TimeInForce = TimeInForce.GOOD_TILL_CANCEL,
@@ -156,7 +156,7 @@ fun aTradingStatuses(
 fun countEventsByClass(events: Seq<Event<BookId, Books>>) =
     events.groupBy { it.javaClass.simpleName }.mapValues { it.size() }
 
-fun aQuoteEntryId(
+fun aQuoteEntry(
     quoteEntryId: String = randomId(),
     quoteSetId: String = "1",
     entryType: EntryType = EntryType.LIMIT,
@@ -167,5 +167,5 @@ fun aQuoteEntryId(
     quoteSetId = quoteSetId,
     entryType = entryType,
     bid = bid,
-    offer = offer)
-
+    offer = offer
+)

@@ -28,10 +28,10 @@ internal class `Given the book has quotes of BUY 4 at 9 SELL 4 at 10 and BUY 5 a
         quoteModelType = QuoteModelType.QUOTE_ENTRY,
         timeInForce = TimeInForce.GOOD_TILL_CANCEL,
         entries = List.of(
-            aQuoteEntryId(
+            aQuoteEntry(
                 bid = PriceWithSize(size = 4, price = Price(9)),
                 offer = PriceWithSize(size = 4, price = Price(10))
-            ), aQuoteEntryId(
+            ), aQuoteEntry(
                 bid = PriceWithSize(size = 5, price = Price(8)),
                 offer = PriceWithSize(size = 5, price = Price(11))
             )
@@ -50,10 +50,10 @@ internal class `Given the book has quotes of BUY 4 at 9 SELL 4 at 10 and BUY 5 a
                 quoteModelType = QuoteModelType.QUOTE_ENTRY,
                 timeInForce = TimeInForce.GOOD_TILL_CANCEL,
                 entries = List.of(
-                    aQuoteEntryId(
+                    aQuoteEntry(
                         bid = PriceWithSize(size = 5, price = Price(8)),
                         offer = PriceWithSize(size = 5, price = Price(9))
-                    ), aQuoteEntryId(
+                    ), aQuoteEntry(
                         bid = PriceWithSize(size = 6, price = Price(7)),
                         offer = PriceWithSize(size = 6, price = Price(10))
                     )
@@ -158,10 +158,10 @@ internal class `Given the book has quotes of BUY 4 at 9 SELL 4 at 10 and BUY 5 a
                 quoteModelType = QuoteModelType.QUOTE_ENTRY,
                 timeInForce = TimeInForce.GOOD_TILL_CANCEL,
                 entries = List.of(
-                    aQuoteEntryId(
+                    aQuoteEntry(
                         bid = PriceWithSize(size = 5, price = Price(8)),
                         offer = PriceWithSize(size = 5, price = Price(9))
-                    ), aQuoteEntryId(
+                    ), aQuoteEntry(
                         bid = PriceWithSize(size = 6, price = Price(7)),
                         offer = PriceWithSize(size = 6, price = Price(10))
                     )
