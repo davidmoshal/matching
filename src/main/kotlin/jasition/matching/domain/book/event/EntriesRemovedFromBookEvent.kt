@@ -1,6 +1,6 @@
 package jasition.matching.domain.book.event
 
-import io.vavr.collection.Seq
+import io.vavr.collection.List
 import jasition.cqrs.Event
 import jasition.cqrs.EventId
 import jasition.cqrs.Transaction
@@ -12,15 +12,9 @@ import java.time.Instant
 data class EntriesRemovedFromBookEvent(
     val eventId: EventId,
     val bookId: BookId,
-    val entries: Seq<BookEntry>,
+    val entries: List<BookEntry>,
     val whenHappened: Instant
 ) : Event<BookId, Books> {
-    init {
-        val offending = entries.filter {eventId != it.key.eventId}
-        if (offending.size() > 0)
-            throw IllegalArgumentException("Event ID must match the Event ID in the Book Entry: eventId=$eventId, offendingEntries=$offending")
-    }
-
     override fun aggregateId(): BookId = bookId
     override fun eventId(): EventId = eventId
     override fun isPrimary(): Boolean = false

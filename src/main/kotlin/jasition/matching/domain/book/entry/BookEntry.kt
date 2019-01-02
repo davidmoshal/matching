@@ -81,6 +81,11 @@ data class BookEntry(
             status = status.traded(newSizes)
         )
     }
+
+    fun cancelled(): BookEntry = copy(
+        sizes = sizes.cancelled(),
+        status = EntryStatus.CANCELLED
+    )
 }
 
 data class BookEntryKey(

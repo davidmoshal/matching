@@ -51,7 +51,7 @@ data class MassQuotePlacedEvent(
 
             val entriesRemovedToBookEvent = EntriesRemovedFromBookEvent(
                 eventId = eventId.next(),
-                entries = toBeRemoved,
+                entries = toBeRemoved.map(BookEntry::cancelled),
                 bookId = bookId,
                 whenHappened = whenHappened
             )

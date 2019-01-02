@@ -1,5 +1,6 @@
 package jasition.matching.domain.book
 
+import io.vavr.collection.List
 import io.vavr.collection.Seq
 import jasition.cqrs.Aggregate
 import jasition.cqrs.EventId
@@ -34,11 +35,11 @@ data class Books(
             lastEventId = eventId
         )
 
-    fun findBookEntries(predicate: Predicate<BookEntry>): Seq<BookEntry> =
-        buyLimitBook.entries
+    fun findBookEntries(predicate: Predicate<BookEntry>): List<BookEntry> =
+        List.ofAll(buyLimitBook.entries
             .filterValues(predicate)
             .values()
-            .appendAll(sellLimitBook.entries.filterValues(predicate).values())
+            .appendAll(sellLimitBook.entries.filterValues(predicate).values()))
 
     fun traded(entry: TradeSideEntry): Books = copy(
         buyLimitBook = if (Side.BUY == entry.side) buyLimitBook.update(entry) else buyLimitBook,
