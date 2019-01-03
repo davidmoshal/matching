@@ -9,13 +9,12 @@ import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.BookEntry
 import jasition.matching.domain.book.entry.TimeInForce
-import jasition.matching.domain.book.event.EntriesRemovedFromBookEvent
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.quote.command.QuoteEntry
 import jasition.matching.domain.quote.command.QuoteModelType
+import jasition.matching.domain.quote.command.cancelExistingQuotes
 import jasition.matching.domain.trade.matchAndPlaceEntries
 import java.time.Instant
-import java.util.function.Predicate
 
 data class MassQuotePlacedEvent(
     val eventId: EventId,
@@ -41,27 +40,16 @@ data class MassQuotePlacedEvent(
         )
     }
 
-    private fun cancelQuotesIfRequired(aggregate: Books): Transaction<BookId, Books> {
+    fun cancelQuotesIfRequired(books: Books): Transaction<BookId, Books> {
         if (quoteModelType.shouldCancelPreviousQuotes()) {
-
-            val toBeRemoved = aggregate.findBookEntries(Predicate { p -> p.whoRequested == whoRequested })
-
-            if (toBeRemoved.isEmpty) {
-                return Transaction(aggregate)
-            }
-
-            val entriesRemovedToBookEvent = EntriesRemovedFromBookEvent(
-                eventId = eventId.next(),
-                entries = toBeRemoved.map(BookEntry::cancelled),
-                bookId = bookId,
+            return cancelExistingQuotes(
+                books = books,
+                eventId = eventId,
+                whoRequested = whoRequested,
                 whenHappened = whenHappened
             )
-
-            return Transaction(aggregate)
-                .append(entriesRemovedToBookEvent)
-                .append(entriesRemovedToBookEvent.play(aggregate))
         }
-        return Transaction(aggregate)
+        return Transaction(books)
     }
 
     fun toBookEntries(

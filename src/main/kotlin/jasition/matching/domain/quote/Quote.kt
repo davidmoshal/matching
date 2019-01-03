@@ -3,10 +3,15 @@ package jasition.matching.domain.quote.command
 import io.vavr.collection.List
 import io.vavr.collection.Seq
 import jasition.cqrs.EventId
+import jasition.cqrs.Transaction
+import jasition.matching.domain.book.BookId
+import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.*
+import jasition.matching.domain.book.event.EntriesRemovedFromBookEvent
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
 import java.time.Instant
+import java.util.function.Predicate
 
 data class QuoteEntry(
     val quoteEntryId: String,
@@ -89,4 +94,28 @@ enum class QuoteModelType {
     };
 
     abstract fun shouldCancelPreviousQuotes(): Boolean
+}
+
+fun cancelExistingQuotes(
+    books: Books,
+    eventId: EventId,
+    whoRequested: Client,
+    whenHappened: Instant
+): Transaction<BookId, Books> {
+    val toBeRemoved = books.findBookEntries(Predicate { p -> p.whoRequested == whoRequested })
+
+    if (toBeRemoved.isEmpty) {
+        return Transaction(books)
+    }
+
+    val entriesRemovedToBookEvent = EntriesRemovedFromBookEvent(
+        eventId = eventId.next(),
+        entries = toBeRemoved.map(BookEntry::cancelled),
+        bookId = books.bookId,
+        whenHappened = whenHappened
+    )
+
+    return Transaction(books)
+        .append(entriesRemovedToBookEvent)
+        .append(entriesRemovedToBookEvent.play(books))
 }

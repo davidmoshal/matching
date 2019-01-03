@@ -10,6 +10,7 @@ import jasition.matching.domain.book.entry.TimeInForce
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.quote.command.QuoteEntry
 import jasition.matching.domain.quote.command.QuoteModelType
+import jasition.matching.domain.quote.command.cancelExistingQuotes
 import java.time.Instant
 
 data class MassQuoteRejectedEvent(
@@ -29,8 +30,12 @@ data class MassQuoteRejectedEvent(
     override fun isPrimary(): Boolean = true
 
     override fun play(aggregate: Books): Transaction<BookId, Books> {
-
-        return Transaction(aggregate.copy(lastEventId = aggregate.verifyEventId(eventId)))
+        return cancelExistingQuotes(
+            books = aggregate.copy(lastEventId = aggregate.verifyEventId(eventId)),
+            eventId = eventId,
+            whoRequested = whoRequested,
+            whenHappened = whenHappened
+        )
     }
 }
 
