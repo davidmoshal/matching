@@ -40,7 +40,7 @@ data class MassQuotePlacedEvent(
         )
     }
 
-    fun cancelQuotesIfRequired(books: Books): Transaction<BookId, Books> {
+    private fun cancelQuotesIfRequired(books: Books): Transaction<BookId, Books> {
         if (quoteModelType.shouldCancelPreviousQuotes()) {
             return cancelExistingQuotes(
                 books = books,
