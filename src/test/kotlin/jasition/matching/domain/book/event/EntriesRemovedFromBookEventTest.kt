@@ -11,7 +11,7 @@ import jasition.matching.domain.anEventId
 import jasition.matching.domain.book.Books
 import java.time.Instant
 
-internal class EntriesRemovedToBookEventPropertyTest : StringSpec({
+internal class EntriesRemovedFromBookEventPropertyTest : StringSpec({
     val eventId = anEventId()
     val bookId = aBookId()
     val event = EntriesRemovedFromBookEvent(
