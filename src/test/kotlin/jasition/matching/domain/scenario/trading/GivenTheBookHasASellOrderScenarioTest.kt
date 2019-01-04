@@ -8,7 +8,7 @@ import io.vavr.collection.List
 import jasition.cqrs.EventId
 import jasition.matching.domain.*
 import jasition.matching.domain.book.entry.*
-import jasition.matching.domain.quote.command.QuoteModelType
+import jasition.matching.domain.quote.QuoteModelType
 import jasition.matching.domain.quote.event.MassQuotePlacedEvent
 import jasition.matching.domain.trade.event.TradeEvent
 import java.time.Instant

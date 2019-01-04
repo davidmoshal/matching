@@ -1,4 +1,4 @@
-package jasition.matching.domain.quote.command
+package jasition.matching.domain.quote
 
 import io.vavr.collection.List
 import io.vavr.collection.Seq

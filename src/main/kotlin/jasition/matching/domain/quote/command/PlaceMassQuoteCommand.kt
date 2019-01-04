@@ -7,6 +7,8 @@ import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.TimeInForce
 import jasition.matching.domain.client.Client
+import jasition.matching.domain.quote.QuoteEntry
+import jasition.matching.domain.quote.QuoteModelType
 import jasition.matching.domain.quote.event.MassQuotePlacedEvent
 import jasition.matching.domain.quote.event.MassQuoteRejectedEvent
 import jasition.matching.domain.quote.event.QuoteRejectReason

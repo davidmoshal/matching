@@ -129,7 +129,7 @@ internal class `When a trade has happened between an aggressor and a passive ent
     every { booksWithPassiveUpdated.traded(passive) } returns booksWithPassiveUpdated
 
     "Then both the aggressor, the passive and the last event ID of the book are updated" {
-        event.play(originalBooks) shouldBe Transaction<BookId, Books>(
+        event.play(originalBooks) shouldBe Transaction(
             aggregate = booksWithPassiveUpdated,
             events = List.empty()
         )

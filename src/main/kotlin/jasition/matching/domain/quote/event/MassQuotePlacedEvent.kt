@@ -10,9 +10,9 @@ import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.BookEntry
 import jasition.matching.domain.book.entry.TimeInForce
 import jasition.matching.domain.client.Client
-import jasition.matching.domain.quote.command.QuoteEntry
-import jasition.matching.domain.quote.command.QuoteModelType
-import jasition.matching.domain.quote.command.cancelExistingQuotes
+import jasition.matching.domain.quote.QuoteEntry
+import jasition.matching.domain.quote.QuoteModelType
+import jasition.matching.domain.quote.cancelExistingQuotes
 import jasition.matching.domain.trade.matchAndPlaceEntries
 import java.time.Instant
 

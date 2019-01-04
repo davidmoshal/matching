@@ -2,7 +2,7 @@ package jasition.matching.domain.book.entry
 
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.LimitBook
-import jasition.matching.domain.quote.command.QuoteEntry
+import jasition.matching.domain.quote.QuoteEntry
 
 enum class Side {
     BUY {

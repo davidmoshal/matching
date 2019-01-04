@@ -7,7 +7,7 @@ import jasition.cqrs.EventId
 import jasition.matching.domain.*
 import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.book.event.EntriesRemovedFromBookEvent
-import jasition.matching.domain.quote.command.QuoteModelType
+import jasition.matching.domain.quote.QuoteModelType
 import jasition.matching.domain.quote.event.MassQuotePlacedEvent
 import java.time.Instant
 
@@ -42,7 +42,7 @@ internal class `Given the book has quotes of BUY 4 at 9 SELL 4 at 10 and BUY 5 a
     val books = originalMassQuotePlacedEvent.play(aBooks(bookId)).aggregate
 
     feature(quoteEntryModel) {
-        scenario(quoteEntryModel + "When a Mass Quote with Quote Entry mode of the same firm is placed, then all existing quotes of the same firm are cancelled and all new quote entires are added") {
+        scenario(quoteEntryModel + "When a Mass Quote with Quote Entry mode of the same firm is placed, then all existing quotes of the same firm are cancelled and all new quote entries are added") {
             val massQuotePlacedEvent = MassQuotePlacedEvent(
                 bookId = bookId,
                 eventId = EventId(6),

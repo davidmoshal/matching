@@ -12,7 +12,7 @@ import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.order.event.OrderPlacedEvent
-import jasition.matching.domain.quote.command.QuoteEntry
+import jasition.matching.domain.quote.QuoteEntry
 import java.time.Instant
 
 fun aBooks(bookId: BookId, bookEntries: Seq<BookEntry> = List.empty()): Books =
@@ -154,7 +154,7 @@ fun aTradingStatuses(
 )
 
 fun countEventsByClass(events: Seq<Event<BookId, Books>>) =
-    events.groupBy { it.javaClass.simpleName }.mapValues { it.size() }
+    events.groupBy { it.javaClass.simpleName }.mapValues { it.size() }!!
 
 fun aQuoteEntry(
     quoteEntryId: String = randomId(),

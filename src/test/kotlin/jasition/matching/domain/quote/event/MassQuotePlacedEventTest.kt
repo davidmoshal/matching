@@ -7,7 +7,7 @@ import jasition.cqrs.EventId
 import jasition.matching.domain.*
 import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.book.event.EntriesRemovedFromBookEvent
-import jasition.matching.domain.quote.command.QuoteModelType
+import jasition.matching.domain.quote.QuoteModelType
 import java.time.Instant
 
 internal class MassQuotePlacedEventPropertyTest : StringSpec({

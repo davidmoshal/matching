@@ -6,7 +6,6 @@ import io.vavr.collection.List
 import jasition.matching.domain.*
 import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.client.ClientRequestId
-import jasition.matching.domain.quote.command.QuoteModelType
 import java.time.Instant
 
 internal class QuoteEntryTest : StringSpec({

@@ -9,7 +9,7 @@ import jasition.matching.domain.book.entry.Side
 import jasition.matching.domain.book.event.EntryAddedToBookEvent
 import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.order.event.OrderPlacedEvent
-import jasition.matching.domain.quote.command.QuoteEntry
+import jasition.matching.domain.quote.QuoteEntry
 import jasition.matching.domain.quote.event.MassQuotePlacedEvent
 import jasition.matching.domain.trade.event.TradeSideEntry
 

@@ -8,7 +8,6 @@ import jasition.matching.domain.aBookId
 import jasition.matching.domain.aBooks
 import jasition.matching.domain.aTradingStatuses
 import jasition.matching.domain.anEventId
-import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.LimitBook
 import jasition.matching.domain.book.entry.Side
@@ -45,7 +44,7 @@ internal class `Given a books is created` : StringSpec({
     )
 
     "Then the books is created with correct properties" {
-        event.play(aBooks(bookId)) shouldBe Transaction<BookId, Books>(
+        event.play(aBooks(bookId)) shouldBe Transaction(
             aggregate = Books(
                 bookId = bookId,
                 buyLimitBook = LimitBook(Side.BUY),

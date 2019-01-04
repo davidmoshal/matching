@@ -10,7 +10,6 @@ import jasition.cqrs.Transaction
 import jasition.matching.domain.aBookEntry
 import jasition.matching.domain.aBookId
 import jasition.matching.domain.anEventId
-import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import java.time.Instant
 
@@ -48,7 +47,7 @@ internal class `Given an entry is added to an empty book` : StringSpec({
             whenHappened = Instant.now(),
             eventId = eventId,
             entry = entry
-        ).play(originalBooks) shouldBe Transaction<BookId, Books>(
+        ).play(originalBooks) shouldBe Transaction(
             aggregate = newBooks,
             events = List.empty()
         )

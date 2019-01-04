@@ -13,6 +13,7 @@ import jasition.matching.domain.book.TradingStatuses
 import jasition.matching.domain.book.entry.Price
 import jasition.matching.domain.book.entry.PriceWithSize
 import jasition.matching.domain.book.entry.TimeInForce
+import jasition.matching.domain.quote.QuoteModelType
 import jasition.matching.domain.quote.event.MassQuotePlacedEvent
 import jasition.matching.domain.quote.event.MassQuoteRejectedEvent
 import jasition.matching.domain.quote.event.QuoteRejectReason
