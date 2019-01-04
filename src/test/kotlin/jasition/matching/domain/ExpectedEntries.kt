@@ -46,11 +46,11 @@ fun expectedBookEntry(
 
 fun expectedBookEntry(
     event: MassQuotePlacedEvent,
-    eventId: EventId = event.eventId,
     entry: QuoteEntry,
     side: Side,
-    sizes: EntrySizes,
-    status: EntryStatus
+    eventId: EventId = event.eventId,
+    sizes: EntrySizes = EntrySizes(side.size(entry)!!),
+    status: EntryStatus = EntryStatus.NEW
 ): BookEntry =
     BookEntry(
         price = side.price(entry),

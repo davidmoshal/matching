@@ -67,8 +67,8 @@ internal class `Given there is a request to place a mass quote` : StringSpec({
     }
     forall(
         row(0),
-        row(randomSize(from = -20, until = -1)),
-        row(randomSize(from = -20, until = -1))
+        row(randomSize(from = -10, until = -1)),
+        row(randomSize(from = -20, until = -11))
     ) { negativeSize ->
 
         "When the request has non-positive sizes $negativeSize, the mass quote is rejected" {

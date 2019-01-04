@@ -102,7 +102,7 @@ fun cancelExistingQuotes(
     whoRequested: Client,
     whenHappened: Instant
 ): Transaction<BookId, Books> {
-    val toBeRemoved = books.findBookEntries(Predicate { p -> p.whoRequested == whoRequested })
+    val toBeRemoved = books.findBookEntries(Predicate { p -> p.whoRequested == whoRequested && p.isQuote})
 
     if (toBeRemoved.isEmpty) {
         return Transaction(books)
