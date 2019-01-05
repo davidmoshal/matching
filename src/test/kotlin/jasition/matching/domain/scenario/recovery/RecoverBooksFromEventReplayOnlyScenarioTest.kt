@@ -2,9 +2,12 @@ package jasition.matching.domain.scenario.recovery
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.FeatureSpec
+import jasition.cqrs.Event
 import jasition.cqrs.Transaction
 import jasition.cqrs.recovery.replay
 import jasition.matching.domain.*
+import jasition.matching.domain.book.BookId
+import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.TradingStatus
 import jasition.matching.domain.book.command.CreateBooksCommand
 import kotlin.random.Random
@@ -23,18 +26,32 @@ internal class `Recover books from replaying events only` : FeatureSpec({
         .append(booksCreatedEvent)
         .append(booksCreatedEvent.play(initialBooks))
 
-    val commandCount = Random.nextInt(1000, 2000)
-    for (i in 0 until commandCount) {
-        randomPlaceOrderCommand(bookId = bookId, size = randomSize(from = -5, until = 30))
-            .validate(latest.aggregate)
-            .fold({ rejected ->
-                latest = latest.append(rejected).append(rejected.play(latest.aggregate))
-            }, { placed ->
-                latest = latest.append(placed).append(placed.play(latest.aggregate))
-            })
+    var orderCommandCount = 0
+    var massQuoteCommandCount = 0
+
+    for (i in 0 until Random.nextInt(1000, 2000)) {
+        if (Random.nextBoolean()) {
+            orderCommandCount++
+            randomPlaceOrderCommand(bookId = bookId, size = randomSize(from = -5, until = 30))
+                .validate(latest.aggregate)
+                .fold({ rejected ->
+                    latest = append(latest, rejected)
+                }, { placed ->
+                    latest = append(latest, placed)
+                })
+        } else {
+            massQuoteCommandCount++
+            randomPlaceMassQuoteCommand(bookId = bookId)
+                .validate(latest.aggregate)
+                .fold({ rejected ->
+                    latest = append(latest, rejected)
+                }, { placed ->
+                    latest = append(latest, placed)
+                })
+        }
     }
     feature("Recover from event re-playing") {
-        scenario("Recover the books that was created by $commandCount PlaceOrderCommands with random values (Placed, Rejected and Trade)") {
+        scenario("Recover the books that was created by $orderCommandCount orders and $massQuoteCommandCount mass quotes with random values (Placed, Rejected and Trade)") {
 
             val (aggregate, events) = latest
 
@@ -49,6 +66,10 @@ internal class `Recover books from replaying events only` : FeatureSpec({
         }
     }
 })
+
+private fun append(
+    latest: Transaction<BookId, Books>, event: Event<BookId, Books>
+) = latest.append(event).append(event.play(latest.aggregate))
 
 
 

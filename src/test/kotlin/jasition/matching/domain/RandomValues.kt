@@ -1,13 +1,13 @@
 package jasition.matching.domain
 
+import io.vavr.collection.Array
 import jasition.matching.domain.book.BookId
-import jasition.matching.domain.book.entry.EntryType
-import jasition.matching.domain.book.entry.Price
-import jasition.matching.domain.book.entry.Side
-import jasition.matching.domain.book.entry.TimeInForce
+import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.order.command.PlaceOrderCommand
+import jasition.matching.domain.quote.QuoteModelType
+import jasition.matching.domain.quote.command.PlaceMassQuoteCommand
 import java.time.Instant
 import kotlin.random.Random
 
@@ -44,3 +44,36 @@ fun randomPlaceOrderCommand(
     whoRequested = whoRequested,
     size = size
 )
+
+fun randomPlaceMassQuoteCommand(
+    quoteId: String = randomId(),
+    bookId: BookId = aBookId(),
+    depth: Int = 3,
+    minBuy: Price = Price(15),
+    maxBuy: Price = Price(27),
+    minSell: Price = Price(26),
+    maxSell: Price = Price(35),
+    timeInForce: TimeInForce = TimeInForce.GOOD_TILL_CANCEL,
+    whenRequested: Instant = Instant.now(),
+    whoRequested: Client = randomFirmWithClient()
+): PlaceMassQuoteCommand {
+
+    val entryList = Array.range(0, depth)
+        .map {
+            aQuoteEntry(
+                bid = PriceWithSize(randomPrice(from = minBuy.value, until = maxBuy.value), randomSize()),
+                offer = PriceWithSize(randomPrice(from = minSell.value, until = maxSell.value), randomSize())
+            )
+        }
+    return PlaceMassQuoteCommand(
+        quoteId = quoteId,
+        bookId = bookId,
+        timeInForce = timeInForce,
+        whenRequested = whenRequested,
+        whoRequested = whoRequested,
+        quoteModelType = QuoteModelType.QUOTE_ENTRY,
+        entries = entryList
+    )
+
+
+}
