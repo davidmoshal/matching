@@ -44,7 +44,7 @@ internal class `Recover books from replaying events only` : FeatureSpec({
                 })
         } else {
             massQuoteCommandCount++
-            randomPlaceMassQuoteCommand(bookId = bookId)
+            randomPlaceMassQuoteCommand(bookId = bookId, whoRequested = aFirmWithoutClient())
                 .validate(latest.aggregate)
                 .fold({ rejected ->
                     latest = append(latest, rejected)
