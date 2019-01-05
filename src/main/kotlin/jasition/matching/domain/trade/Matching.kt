@@ -13,28 +13,10 @@ import jasition.matching.domain.client.Client
 import jasition.matching.domain.trade.event.TradeEvent
 
 fun matchAndPlaceEntries(
-    offset: Int = 0,
     bookEntries: Seq<BookEntry>,
-    books: Books,
     transaction: Transaction<BookId, Books>
-): Transaction<BookId, Books> {
-    if (offset >= bookEntries.size()) {
-        return transaction
-    }
-
-    val bookEntry = bookEntries.get(offset)
-    val newTransaction = transaction.append(
-        matchAndPlaceEntry(
-            bookEntry = bookEntry, books = books
-        )
-    )
-
-    return matchAndPlaceEntries(
-        offset = offset + 1,
-        bookEntries = bookEntries,
-        books = newTransaction.aggregate,
-        transaction = newTransaction
-    )
+): Transaction<BookId, Books> = bookEntries.fold(transaction) { txn, entry ->
+    txn.append(matchAndPlaceEntry(entry, txn.aggregate))
 }
 
 fun matchAndPlaceEntry(
@@ -48,9 +30,8 @@ fun matchAndPlaceEntry(
 
     if (aggressor.timeInForce.canStayOnBook(aggressor.sizes)) {
         val newBooks = transaction.aggregate
-        val nextEventId = newBooks.lastEventId.next()
         val entryAddedToBookEvent = aggressor.toEntryAddedToBookEvent(
-            eventId = nextEventId,
+            eventId = newBooks.lastEventId.next(),
             bookId = books.bookId
         )
 
@@ -133,7 +114,7 @@ private fun cannotMatchTheseTwoEntries(aggressorIsQuote: Boolean, passiveIsQuote
 private fun cannotMatchTheseTwoPrices(aggressor: Price?, passive: Price?): Boolean =
     aggressor == null && passive == null
 
-private fun findPassive(passives: Seq<BookEntry>, offset: Int = 0): BookEntry? =
+private fun findPassive(passives: Seq<BookEntry>, offset: Int): BookEntry? =
     if (offset < passives.size()) passives.get(offset) else null
 
 data class Match(val passive: BookEntry, val tradePrice: Price)

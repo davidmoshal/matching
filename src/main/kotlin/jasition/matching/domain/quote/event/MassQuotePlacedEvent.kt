@@ -35,7 +35,6 @@ data class MassQuotePlacedEvent(
 
         return matchAndPlaceEntries(
             bookEntries = toBookEntries(),
-            books = newTransaction.aggregate,
             transaction = newTransaction
         )
     }
