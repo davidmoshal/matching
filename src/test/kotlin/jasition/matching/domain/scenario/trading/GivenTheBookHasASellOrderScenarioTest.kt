@@ -13,6 +13,7 @@ import jasition.matching.domain.quote.event.MassQuotePlacedEvent
 import jasition.matching.domain.trade.event.TradeEvent
 import java.time.Instant
 
+//TODO Replace multiple by single assertion
 internal class `Given the book has a SELL Limit GTC Order 4 at 10` : FeatureSpec({
     val lowerSellOverHigherFeature = "[1 - Lower SELL over higher] "
     val earlierOverLaterFeature = "[2 - Earlier over later] "

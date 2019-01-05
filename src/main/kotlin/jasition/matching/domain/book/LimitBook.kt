@@ -23,6 +23,8 @@ data class LimitBook(val entries: TreeMap<BookEntryKey, BookEntry>) {
     fun update(entry: TradeSideEntry): LimitBook {
         val bookEntryKey = entry.toBookEntryKey()
 
+        // TODO Refactor to use EntriesRemoveFromBookEvent to remove an entry
+        // TODO Refactor to use EntryUpdatedEvent to update an entry
         return copy(
             entries =
             if (entry.sizes.available <= 0)
