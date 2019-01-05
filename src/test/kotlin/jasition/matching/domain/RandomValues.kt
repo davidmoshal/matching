@@ -48,7 +48,7 @@ fun randomPlaceOrderCommand(
 fun randomPlaceMassQuoteCommand(
     quoteId: String = randomId(),
     bookId: BookId = aBookId(),
-    depth: Int = 3,
+    depth: Int = 5,
     minBuy: Price = Price(15),
     maxBuy: Price = Price(27),
     minSell: Price = Price(26),

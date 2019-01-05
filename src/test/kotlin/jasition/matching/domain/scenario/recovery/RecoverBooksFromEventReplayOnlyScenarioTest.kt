@@ -29,8 +29,11 @@ internal class `Recover books from replaying events only` : FeatureSpec({
     var orderCommandCount = 0
     var massQuoteCommandCount = 0
 
-    for (i in 0 until Random.nextInt(1000, 2000)) {
-        if (Random.nextBoolean()) {
+    println("About to start validating the commands and playing the events to create the book state")
+
+    for (i in 0 until Random.nextInt(50, 100)) {
+        val orderOrQuote = Random.nextBoolean()
+        if (orderOrQuote) {
             orderCommandCount++
             randomPlaceOrderCommand(bookId = bookId, size = randomSize(from = -5, until = 30))
                 .validate(latest.aggregate)
@@ -50,6 +53,8 @@ internal class `Recover books from replaying events only` : FeatureSpec({
                 })
         }
     }
+    println("Book state created. noOfEvents=${latest.events.size()}")
+
     feature("Recover from event re-playing") {
         scenario("Recover the books that was created by $orderCommandCount orders and $massQuoteCommandCount mass quotes with random values (Placed, Rejected and Trade)") {
 
