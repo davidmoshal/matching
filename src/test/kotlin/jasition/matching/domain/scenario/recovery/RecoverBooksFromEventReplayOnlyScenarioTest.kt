@@ -2,29 +2,22 @@ package jasition.matching.domain.scenario.recovery
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.FeatureSpec
-import jasition.cqrs.Event
-import jasition.cqrs.Transaction
 import jasition.cqrs.recovery.replay
 import jasition.matching.domain.*
-import jasition.matching.domain.book.BookId
-import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.TradingStatus
 import jasition.matching.domain.book.command.CreateBooksCommand
 import kotlin.random.Random
 
 internal class `Recover books from replaying events only` : FeatureSpec({
     val bookId = aBookId()
-    val initial = Transaction(aBooks(bookId))
-    val initialBooks = initial.aggregate
+    val initialBooks = aBooks(bookId)
 
     val booksCreatedEvent = CreateBooksCommand(
         bookId = bookId,
         defaultTradingStatus = TradingStatus.OPEN_FOR_TRADING
     ).validate()
 
-    var latest = initial
-        .append(booksCreatedEvent)
-        .append(booksCreatedEvent.play(initialBooks))
+    var latest = booksCreatedEvent.playAndAppend(initialBooks)
 
     var orderCommandCount = 0
     var massQuoteCommandCount = 0
@@ -38,18 +31,18 @@ internal class `Recover books from replaying events only` : FeatureSpec({
             randomPlaceOrderCommand(bookId = bookId, size = randomSize(from = -5, until = 30))
                 .validate(latest.aggregate)
                 .fold({ rejected ->
-                    latest = append(latest, rejected)
+                    latest = latest.thenPlay(rejected)
                 }, { placed ->
-                    latest = append(latest, placed)
+                    latest = latest.thenPlay(placed)
                 })
         } else {
             massQuoteCommandCount++
             randomPlaceMassQuoteCommand(bookId = bookId, whoRequested = aFirmWithoutClient())
                 .validate(latest.aggregate)
                 .fold({ rejected ->
-                    latest = append(latest, rejected)
+                    latest = latest.thenPlay(rejected)
                 }, { placed ->
-                    latest = append(latest, placed)
+                    latest = latest.thenPlay(placed)
                 })
         }
     }
@@ -71,10 +64,6 @@ internal class `Recover books from replaying events only` : FeatureSpec({
         }
     }
 })
-
-private fun append(
-    latest: Transaction<BookId, Books>, event: Event<BookId, Books>
-) = latest.append(event).append(event.play(latest.aggregate))
 
 
 

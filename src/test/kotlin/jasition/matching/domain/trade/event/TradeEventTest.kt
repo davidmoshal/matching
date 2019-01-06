@@ -120,13 +120,10 @@ internal class `When a trade has happened between an aggressor and a passive ent
     )
     val originalBooks = spyk(Books(bookId))
     val booksWithEventIdVerified = spyk(Books(bookId))
-    val booksWithAggressorUpdated = spyk(Books(bookId))
     val booksWithPassiveUpdated = spyk(Books(bookId))
 
     every { originalBooks.verifyEventId(eventId) } returns eventId
     every { originalBooks.copy(lastEventId = eventId) } returns booksWithEventIdVerified
-    every { booksWithEventIdVerified.traded(aggressor) } returns booksWithAggressorUpdated
-    every { booksWithPassiveUpdated.traded(passive) } returns booksWithPassiveUpdated
 
     "Then both the aggressor, the passive and the last event ID of the book are updated" {
         event.play(originalBooks) shouldBe Transaction(

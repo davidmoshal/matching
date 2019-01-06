@@ -17,36 +17,6 @@ import jasition.matching.domain.book.event.EntryAddedToBookEvent
 import jasition.matching.domain.order.event.OrderPlacedEvent
 import jasition.matching.domain.trade.event.TradeEvent
 
-internal class MatchAndPlaceEntriesTest : StringSpec({
-    val bookId = aBookId()
-
-    "Entries are matched and placed recursively" {
-        mockkStatic("jasition.matching.domain.trade.MatchingKt")
-
-        val bookEntry = aBookEntry()
-        val bookEntry2 = aBookEntry()
-        val books = aBooks(bookId)
-
-        val updatedBooks = mockk<Books>()
-        val updatedEvents = List.of<Event<BookId, Books>>(mockk<TradeEvent>())
-        val updatedBooks2 = mockk<Books>()
-        val updatedEvents2 = List.of<Event<BookId, Books>>(mockk<TradeEvent>())
-
-        every {
-            matchAndPlaceEntry(bookEntry, books)
-        } returns Transaction(aggregate = updatedBooks, events = updatedEvents)
-
-        every {
-            matchAndPlaceEntry(bookEntry2, updatedBooks)
-        } returns Transaction(aggregate = updatedBooks2, events = updatedEvents2)
-
-        matchAndPlaceEntries(
-            bookEntries = List.of(bookEntry, bookEntry2),
-            transaction = Transaction(aggregate = books, events = List.empty())
-        ) shouldBe Transaction(aggregate = updatedBooks2, events = updatedEvents.appendAll(updatedEvents2))
-    }
-})
-
 internal class MatchAndPlaceEntryTest : StringSpec({
     mockkStatic("jasition.matching.domain.trade.MatchingKt")
 

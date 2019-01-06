@@ -3,7 +3,7 @@ package jasition.matching.domain.book
 import io.vavr.collection.Seq
 import io.vavr.collection.TreeMap
 import jasition.matching.domain.book.entry.*
-import jasition.matching.domain.trade.event.TradeSideEntry
+import java.util.function.Function
 
 data class LimitBook(val entries: TreeMap<BookEntryKey, BookEntry>) {
     constructor(side: Side) : this(
@@ -20,22 +20,15 @@ data class LimitBook(val entries: TreeMap<BookEntryKey, BookEntry>) {
     fun removeAll(toBeRemoved: Seq<BookEntry>): LimitBook =
         copy(entries = entries.removeAll(toBeRemoved.map { it.key }))
 
-    fun update(entry: TradeSideEntry): LimitBook {
-        val bookEntryKey = entry.toBookEntryKey()
+    fun remove(bookEntryKey: BookEntryKey) : LimitBook {
+        return copy(entries = entries.remove(bookEntryKey))
+    }
 
-        // TODO Refactor to use EntriesRemoveFromBookEvent to remove an entry
-        // TODO Refactor to use EntryUpdatedEvent to update an entry
+    fun update(bookEntryKey: BookEntryKey, updateFunction: Function<BookEntry, BookEntry>): LimitBook {
         return copy(
-            entries =
-            if (entry.sizes.available <= 0)
-                entries.remove(bookEntryKey)
-            else
-                entries.computeIfPresent(bookEntryKey) { _: BookEntryKey, existingEntry: BookEntry ->
-                    existingEntry.copy(
-                        sizes = entry.sizes,
-                        status = entry.status
-                    )
-                }._2()
+            entries = entries.computeIfPresent(bookEntryKey) { _: BookEntryKey, existingEntry: BookEntry ->
+                updateFunction.apply(existingEntry)
+            }._2()
         )
     }
 }

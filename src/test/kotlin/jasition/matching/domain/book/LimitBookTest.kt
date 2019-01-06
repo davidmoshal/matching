@@ -11,6 +11,7 @@ import jasition.matching.domain.book.entry.Price
 import jasition.matching.domain.book.entry.Side
 import jasition.matching.domain.randomPrice
 import java.time.Instant
+import java.util.function.Function
 
 internal class LimitBookTest : StringSpec({
     "Prioritises BUY entry of higher prices over lower prices"{
@@ -83,34 +84,33 @@ internal class LimitBookTest : StringSpec({
 
         newBook.entries.values() shouldBe List.of(entry2)
     }
-    "Updates partial fill entry on the book"{
-        val original = aBookEntry(
+    "Updates an entry from the book by given key"{
+        val entry1 = aBookEntry(
             side = Side.SELL,
             price = Price(10),
-            sizes = EntrySizes(available = 15, traded = 0, cancelled = 0),
-            status = EntryStatus.NEW
+            sizes = EntrySizes(available = 0, traded = 15, cancelled = 0),
+            status = EntryStatus.FILLED
         )
-        val updatedSizes = EntrySizes(available = 3, traded = 12, cancelled = 0)
-        val updated = original.copy(sizes = updatedSizes).toTradeSideEntry()
-        val newBook = LimitBook(Side.SELL).add(original).update(updated)
+        val entry2 = entry1.copy(status = EntryStatus.CANCELLED)
+        val newBook = LimitBook(Side.SELL)
+            .add(entry1)
+            .update(entry1.key, Function { it.copy(status = EntryStatus.CANCELLED)})
 
-        newBook.entries.values() shouldBe List.of(
-            original.copy(
-                sizes = updatedSizes,
-                status = EntryStatus.PARTIAL_FILL
-            )
-        )
+        newBook.entries.values() shouldBe List.of(entry2)
     }
-    "Removes filled entry from the book"{
-        val original = aBookEntry(
+    "Removes an entry from the book by given key"{
+        val entry1 = aBookEntry(
             side = Side.SELL,
             price = Price(10),
             sizes = EntrySizes(available = 0, traded = 15, cancelled = 0)
         )
-        val updated = original.toTradeSideEntry()
-        val newBook = LimitBook(Side.SELL).add(original).update(updated)
+        val entry2 = entry1.withKey(price = randomPrice())
+        val newBook = LimitBook(Side.SELL)
+            .add(entry1)
+            .add(entry2)
+            .remove(entry1.key)
 
-        newBook.entries.size() shouldBe 0
+        newBook.entries.values() shouldBe List.of(entry2)
     }
     "Removes all entries from the book"{
         val entry1 = aBookEntry(

@@ -13,7 +13,7 @@ import jasition.matching.domain.client.Client
 import jasition.matching.domain.quote.QuoteEntry
 import jasition.matching.domain.quote.QuoteModelType
 import jasition.matching.domain.quote.cancelExistingQuotes
-import jasition.matching.domain.trade.matchAndPlaceEntries
+import jasition.matching.domain.trade.matchAndPlaceEntry
 import java.time.Instant
 
 data class MassQuotePlacedEvent(
@@ -33,10 +33,9 @@ data class MassQuotePlacedEvent(
     override fun play(aggregate: Books): Transaction<BookId, Books> {
         val newTransaction = cancelQuotesIfRequired(aggregate.copy(lastEventId = aggregate.verifyEventId(eventId)))
 
-        return matchAndPlaceEntries(
-            bookEntries = toBookEntries(),
-            transaction = newTransaction
-        )
+        return toBookEntries().fold(newTransaction) { txn, entry ->
+            txn.append(matchAndPlaceEntry(entry, txn.aggregate))
+        }
     }
 
     private fun cancelQuotesIfRequired(books: Books): Transaction<BookId, Books> {

@@ -115,7 +115,5 @@ fun cancelExistingQuotes(
         whenHappened = whenHappened
     )
 
-    return Transaction(books)
-        .append(entriesRemovedToBookEvent)
-        .append(entriesRemovedToBookEvent.play(books))
+    return entriesRemovedToBookEvent.playAndAppend(books)
 }

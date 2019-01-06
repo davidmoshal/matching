@@ -12,13 +12,6 @@ import jasition.matching.domain.book.entry.Price
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.trade.event.TradeEvent
 
-fun matchAndPlaceEntries(
-    bookEntries: Seq<BookEntry>,
-    transaction: Transaction<BookId, Books>
-): Transaction<BookId, Books> = bookEntries.fold(transaction) { txn, entry ->
-    txn.append(matchAndPlaceEntry(entry, txn.aggregate))
-}
-
 fun matchAndPlaceEntry(
     bookEntry: BookEntry,
     books: Books
@@ -28,18 +21,14 @@ fun matchAndPlaceEntry(
         books = books
     )
 
-    if (aggressor.timeInForce.canStayOnBook(aggressor.sizes)) {
-        val newBooks = transaction.aggregate
-        val entryAddedToBookEvent = aggressor.toEntryAddedToBookEvent(
-            eventId = newBooks.lastEventId.next(),
-            bookId = books.bookId
+    return if (aggressor.timeInForce.canStayOnBook(aggressor.sizes))
+        transaction.thenPlay(
+            aggressor.toEntryAddedToBookEvent(
+                eventId = transaction.aggregate.lastEventId.next(),
+                bookId = books.bookId
+            )
         )
-
-        return transaction
-            .append(entryAddedToBookEvent)
-            .append(entryAddedToBookEvent.play(newBooks))
-    }
-    return transaction
+    else transaction
 }
 
 fun match(
