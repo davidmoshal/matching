@@ -7,8 +7,6 @@ import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import jasition.cqrs.EventId
 import jasition.matching.domain.aBookEntry
-import jasition.matching.domain.aBookId
-import jasition.matching.domain.book.event.EntryAddedToBookEvent
 import jasition.matching.domain.randomPrice
 import jasition.matching.domain.trade.event.TradeSideEntry
 import java.time.Instant
@@ -18,7 +16,6 @@ internal class BookEntryTest : StringSpec({
     val entry = aBookEntry(
         sizes = EntrySizes(available = 23, traded = 2, cancelled = 0)
     )
-    val bookId = aBookId()
 
     "Mutates to another BookEntry with given key" {
         val price = randomPrice()
@@ -26,23 +23,6 @@ internal class BookEntryTest : StringSpec({
         val eventId = EventId(Random.nextLong(0, 100000))
         entry.withKey(price = price, whenSubmitted = whenSubmitted, eventId = eventId) shouldBe entry.copy(
             key = entry.key.copy(price = price, whenSubmitted = whenSubmitted, eventId = eventId)
-        )
-    }
-    "Converts to EntryAddedToBookEvent" {
-        entry.toEntryAddedToBookEvent(bookId) shouldBe EntryAddedToBookEvent(
-            eventId = entry.key.eventId,
-            bookId = bookId,
-            entry = entry,
-            whenHappened = entry.key.whenSubmitted
-        )
-    }
-    "Converts to EntryAddedToBookEvent with given Event ID" {
-        val eventId = EventId(4)
-        entry.toEntryAddedToBookEvent(bookId, eventId) shouldBe EntryAddedToBookEvent(
-            eventId = eventId,
-            bookId = bookId,
-            entry = entry.copy(key = entry.key.copy(eventId = eventId)),
-            whenHappened = entry.key.whenSubmitted
         )
     }
     "Converts to TradeSideEntry" {

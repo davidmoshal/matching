@@ -1,33 +1,19 @@
 package jasition.matching.domain
 
 import jasition.cqrs.EventId
-import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.BookEntry
 import jasition.matching.domain.book.entry.EntrySizes
 import jasition.matching.domain.book.entry.EntryStatus
 import jasition.matching.domain.book.entry.Side
-import jasition.matching.domain.book.event.EntryAddedToBookEvent
 import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.order.event.OrderPlacedEvent
 import jasition.matching.domain.quote.QuoteEntry
 import jasition.matching.domain.quote.event.MassQuotePlacedEvent
 import jasition.matching.domain.trade.event.TradeSideEntry
 
-fun expectedEntryAddedToBookEvent(
-    event: OrderPlacedEvent,
-    books: Books,
-    expectedBookEntry: BookEntry
-): EntryAddedToBookEvent =
-    EntryAddedToBookEvent(
-        eventId = event.eventId.next(),
-        bookId = books.bookId,
-        entry = expectedBookEntry,
-        whenHappened = event.whenHappened
-    )
-
 fun expectedBookEntry(
     event: OrderPlacedEvent,
-    eventId: EventId = event.eventId.next(),
+    eventId: EventId = event.eventId,
     status: EntryStatus = event.status,
     sizes: EntrySizes = event.sizes
 ) = BookEntry(
@@ -46,20 +32,20 @@ fun expectedBookEntry(
 
 fun expectedBookEntry(
     event: MassQuotePlacedEvent,
-    entry: QuoteEntry,
+    quoteEntry: QuoteEntry,
     side: Side,
     eventId: EventId = event.eventId,
-    sizes: EntrySizes = EntrySizes(side.size(entry)!!),
+    sizes: EntrySizes = EntrySizes(side.size(quoteEntry)!!),
     status: EntryStatus = EntryStatus.NEW
 ): BookEntry =
     BookEntry(
-        price = side.price(entry),
+        price = side.price(quoteEntry),
         whenSubmitted = event.whenHappened,
         eventId = eventId,
-        requestId = expectedClientRequestId(event, entry),
+        requestId = expectedClientRequestId(event, quoteEntry),
         whoRequested = event.whoRequested,
         isQuote = true,
-        entryType = entry.entryType,
+        entryType = quoteEntry.entryType,
         side = side,
         timeInForce = event.timeInForce,
         sizes = sizes,
@@ -68,20 +54,20 @@ fun expectedBookEntry(
 
 fun expectedTradeSideEntry(
     event: MassQuotePlacedEvent,
-    entry: QuoteEntry,
+    quoteEntry: QuoteEntry,
     side: Side,
     eventId: EventId = event.eventId,
     sizes: EntrySizes,
     status: EntryStatus
 ): TradeSideEntry {
     return TradeSideEntry(
-        requestId = expectedClientRequestId(event, entry),
+        requestId = expectedClientRequestId(event, quoteEntry),
         whoRequested = event.whoRequested,
         isQuote = true,
-        entryType = entry.entryType,
+        entryType = quoteEntry.entryType,
         sizes = sizes,
         side = side,
-        price = side.price(entry),
+        price = side.price(quoteEntry),
         timeInForce = event.timeInForce,
         whenSubmitted = event.whenHappened,
         eventId = eventId,
@@ -91,10 +77,10 @@ fun expectedTradeSideEntry(
 
 fun expectedClientRequestId(
     event: MassQuotePlacedEvent,
-    entry: QuoteEntry
+    quoteEntry: QuoteEntry
 ): ClientRequestId = ClientRequestId(
-    current = entry.quoteEntryId,
-    collectionId = entry.quoteSetId,
+    current = quoteEntry.quoteEntryId,
+    collectionId = quoteEntry.quoteSetId,
     parentId = event.quoteId
 )
 
@@ -122,7 +108,7 @@ fun expectedTradeSideEntry(
 fun expectedTradeSideEntry(
     bookEntry: BookEntry,
     eventId: EventId = bookEntry.key.eventId,
-    size: EntrySizes,
+    sizes: EntrySizes,
     status: EntryStatus
 ): TradeSideEntry {
     return TradeSideEntry(
@@ -130,7 +116,7 @@ fun expectedTradeSideEntry(
         whoRequested = bookEntry.whoRequested,
         isQuote = bookEntry.isQuote,
         entryType = bookEntry.entryType,
-        sizes = size,
+        sizes = sizes,
         side = bookEntry.side,
         price = bookEntry.key.price,
         timeInForce = bookEntry.timeInForce,

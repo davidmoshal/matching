@@ -6,7 +6,6 @@ import io.vavr.collection.List
 import jasition.cqrs.EventId
 import jasition.matching.domain.*
 import jasition.matching.domain.book.entry.*
-import jasition.matching.domain.book.event.EntriesRemovedFromBookEvent
 import jasition.matching.domain.quote.QuoteModelType
 import java.time.Instant
 
@@ -44,10 +43,10 @@ internal class MassQuotePlacedEventPropertyTest : StringSpec({
     }
     "Converts to BookEntries" {
         event.toBookEntries() shouldBe List.of(
-            expectedBookEntry(entry = event.entries.get(0), side = Side.BUY, event = event),
-            expectedBookEntry(entry = event.entries.get(0), side = Side.SELL, event = event),
-            expectedBookEntry(entry = event.entries.get(1), side = Side.BUY, event = event),
-            expectedBookEntry(entry = event.entries.get(1), side = Side.SELL, event = event)
+            expectedBookEntry(quoteEntry = event.entries.get(0), side = Side.BUY, event = event),
+            expectedBookEntry(quoteEntry = event.entries.get(0), side = Side.SELL, event = event),
+            expectedBookEntry(quoteEntry = event.entries.get(1), side = Side.BUY, event = event),
+            expectedBookEntry(quoteEntry = event.entries.get(1), side = Side.SELL, event = event)
         )
     }
 })
@@ -73,57 +72,44 @@ internal class `Given a mass quote is placed on an empty book` : StringSpec({
         )
     )
     val result = event.play(books)
-    val expectedBidEntry1 = expectedBookEntry(
-        event = event,
-        eventId = EventId(2),
-        entry = event.entries.get(0),
-        side = Side.BUY,
-        sizes = EntrySizes(4),
-        status = EntryStatus.NEW
-    )
-    val expectedBidEntry2 = expectedBookEntry(
-        event = event,
-        eventId = EventId(4),
-        entry = event.entries.get(1),
-        side = Side.BUY,
-        sizes = EntrySizes(5),
-        status = EntryStatus.NEW
-    )
-    val expectedOfferEntry1 = expectedBookEntry(
-        event = event,
-        eventId = EventId(3),
-        entry = event.entries.get(0),
-        side = Side.SELL,
-        sizes = EntrySizes(4),
-        status = EntryStatus.NEW
-    )
-    val expectedOfferEntry2 = expectedBookEntry(
-        event = event,
-        eventId = EventId(5),
-        entry = event.entries.get(1),
-        side = Side.SELL,
-        sizes = EntrySizes(5),
-        status = EntryStatus.NEW
-    )
     "Then the BID entries exist in the BUY book" {
         result.aggregate.buyLimitBook.entries.values() shouldBe List.of(
-            expectedBidEntry1,
-            expectedBidEntry2
+            expectedBookEntry(
+                event = event,
+                quoteEntry = event.entries.get(0),
+                side = Side.BUY,
+                sizes = EntrySizes(4),
+                status = EntryStatus.NEW
+            ),
+            expectedBookEntry(
+                event = event,
+                quoteEntry = event.entries.get(1),
+                side = Side.BUY,
+                sizes = EntrySizes(5),
+                status = EntryStatus.NEW
+            )
         )
     }
     "Then the OFFER entries exist in the SELL book" {
         result.aggregate.sellLimitBook.entries.values() shouldBe List.of(
-            expectedOfferEntry1,
-            expectedOfferEntry2
+            expectedBookEntry(
+                event = event,
+                quoteEntry = event.entries.get(0),
+                side = Side.SELL,
+                sizes = EntrySizes(4),
+                status = EntryStatus.NEW
+            ),
+            expectedBookEntry(
+                event = event,
+                quoteEntry = event.entries.get(1),
+                side = Side.SELL,
+                sizes = EntrySizes(5),
+                status = EntryStatus.NEW
+            )
         )
     }
-    "Then all entries were added to the books" {
-        result.events shouldBe List.of(
-            expectedBidEntry1.toEntryAddedToBookEvent(books.bookId),
-            expectedOfferEntry1.toEntryAddedToBookEvent(books.bookId),
-            expectedBidEntry2.toEntryAddedToBookEvent(books.bookId),
-            expectedOfferEntry2.toEntryAddedToBookEvent(books.bookId)
-        )
+    "Then no side-effect event has happened" {
+        result.events.size() shouldBe 0
     }
 })
 
@@ -163,54 +149,46 @@ internal class `Given a mass quote is placed on a book with existing entries` : 
         )
     )
     val result = event.play(books)
-    val expectedBidEntry1 = expectedBookEntry(
-        event = event,
-        eventId = EventId(3),
-        entry = event.entries.get(0),
-        side = Side.BUY,
-        sizes = EntrySizes(4),
-        status = EntryStatus.NEW
-    )
-    val expectedBidEntry2 = expectedBookEntry(
-        event = event,
-        eventId = EventId(5),
-        entry = event.entries.get(1),
-        side = Side.BUY,
-        sizes = EntrySizes(5),
-        status = EntryStatus.NEW
-    )
-    val expectedOfferEntry1 = expectedBookEntry(
-        event = event,
-        eventId = EventId(4),
-        entry = event.entries.get(0),
-        side = Side.SELL,
-        sizes = EntrySizes(4),
-        status = EntryStatus.NEW
-    )
-    val expectedOfferEntry2 = expectedBookEntry(
-        event = event,
-        eventId = EventId(6),
-        entry = event.entries.get(1),
-        side = Side.SELL,
-        sizes = EntrySizes(5),
-        status = EntryStatus.NEW
-    )
     "Then the BID entries exist in the BUY book" {
         result.aggregate.buyLimitBook.entries.values() shouldBe List.of(
-            expectedBidEntry1,
-            expectedBidEntry2
+            expectedBookEntry(
+                event = event,
+                quoteEntry = event.entries.get(0),
+                side = Side.BUY,
+                sizes = EntrySizes(4),
+                status = EntryStatus.NEW
+            ),
+            expectedBookEntry(
+                event = event,
+                quoteEntry = event.entries.get(1),
+                side = Side.BUY,
+                sizes = EntrySizes(5),
+                status = EntryStatus.NEW
+            )
         )
     }
     "Then the OFFER entries and the previous order exist in the SELL book" {
         result.aggregate.sellLimitBook.entries.values() shouldBe List.of(
-            expectedOfferEntry1,
-            expectedOfferEntry2,
+            expectedBookEntry(
+                event = event,
+                quoteEntry = event.entries.get(0),
+                side = Side.SELL,
+                sizes = EntrySizes(4),
+                status = EntryStatus.NEW
+            ),
+            expectedBookEntry(
+                event = event,
+                quoteEntry = event.entries.get(1),
+                side = Side.SELL,
+                sizes = EntrySizes(5),
+                status = EntryStatus.NEW
+            ),
             existingEntry
         )
     }
-    "Then all entries from the mass quote were added to the books" {
+    "Then the previous mass quote is cancelled" {
         result.events shouldBe List.of(
-            EntriesRemovedFromBookEvent(
+            MassQuoteCancelledEvent(
                 eventId = EventId(2),
                 entries = List.of(
                     removedEntry.copy(
@@ -222,13 +200,11 @@ internal class `Given a mass quote is placed on a book with existing entries` : 
                         )
                     )
                 ),
+                primary = false,
+                whoRequested = event.whoRequested,
                 whenHappened = event.whenHappened,
                 bookId = books.bookId
-            ),
-            expectedBidEntry1.toEntryAddedToBookEvent(books.bookId),
-            expectedOfferEntry1.toEntryAddedToBookEvent(books.bookId),
-            expectedBidEntry2.toEntryAddedToBookEvent(books.bookId),
-            expectedOfferEntry2.toEntryAddedToBookEvent(books.bookId)
+            )
         )
     }
 })

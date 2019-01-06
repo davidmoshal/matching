@@ -28,8 +28,7 @@ internal class `Given the book is empty` : FeatureSpec({
 
             val result = orderPlacedEvent.play(books)
 
-            val expectedBookEntry = expectedBookEntry(orderPlacedEvent)
-            result.events shouldBe List.of(expectedBookEntry.toEntryAddedToBookEvent(bookId))
+            result.events.size() shouldBe 0
             result.aggregate.buyLimitBook.entries.values() shouldBe List.of(expectedBookEntry(orderPlacedEvent))
             result.aggregate.sellLimitBook.entries.size() shouldBe 0
         }
@@ -42,10 +41,9 @@ internal class `Given the book is empty` : FeatureSpec({
             )
             val result = orderPlacedEvent.play(books)
 
-            val expectedBookEntry = expectedBookEntry(orderPlacedEvent)
-            result.events shouldBe List.of(expectedBookEntry.toEntryAddedToBookEvent(bookId))
+            result.events.size() shouldBe 0
             result.aggregate.buyLimitBook.entries.size() shouldBe 0
-            result.aggregate.sellLimitBook.entries.values() shouldBe List.of(expectedBookEntry)
+            result.aggregate.sellLimitBook.entries.values() shouldBe List.of(expectedBookEntry(orderPlacedEvent))
         }
     }
     feature(addQuotesToEmptyBookFeature) {
@@ -70,47 +68,37 @@ internal class `Given the book is empty` : FeatureSpec({
             )
             val result = massQuotePlacedEvent.play(books)
 
-            val expectedBuyEntry1 = expectedBookEntry(
-                event = massQuotePlacedEvent,
-                eventId = EventId(2),
-                entry = massQuotePlacedEvent.entries.get(0),
-                side = Side.BUY,
-                sizes = EntrySizes(4),
-                status = EntryStatus.NEW
+            result.events.size() shouldBe 0
+            result.aggregate.buyLimitBook.entries.values() shouldBe List.of(
+                expectedBookEntry(
+                    event = massQuotePlacedEvent,
+                    quoteEntry = massQuotePlacedEvent.entries.get(0),
+                    side = Side.BUY,
+                    sizes = EntrySizes(4),
+                    status = EntryStatus.NEW
+                ), expectedBookEntry(
+                    event = massQuotePlacedEvent,
+                    quoteEntry = massQuotePlacedEvent.entries.get(1),
+                    side = Side.BUY,
+                    sizes = EntrySizes(5),
+                    status = EntryStatus.NEW
+                )
             )
-            val expectedSellEntry1 = expectedBookEntry(
-                event = massQuotePlacedEvent,
-                eventId = EventId(3),
-                entry = massQuotePlacedEvent.entries.get(0),
-                side = Side.SELL,
-                sizes = EntrySizes(4),
-                status = EntryStatus.NEW
+            result.aggregate.sellLimitBook.entries.values() shouldBe List.of(
+                expectedBookEntry(
+                    event = massQuotePlacedEvent,
+                    quoteEntry = massQuotePlacedEvent.entries.get(0),
+                    side = Side.SELL,
+                    sizes = EntrySizes(4),
+                    status = EntryStatus.NEW
+                ), expectedBookEntry(
+                    event = massQuotePlacedEvent,
+                    quoteEntry = massQuotePlacedEvent.entries.get(1),
+                    side = Side.SELL,
+                    sizes = EntrySizes(5),
+                    status = EntryStatus.NEW
+                )
             )
-            val expectedBuyEntry2 = expectedBookEntry(
-                event = massQuotePlacedEvent,
-                eventId = EventId(4),
-                entry = massQuotePlacedEvent.entries.get(1),
-                side = Side.BUY,
-                sizes = EntrySizes(5),
-                status = EntryStatus.NEW
-            )
-            val expectedSellEntry2 = expectedBookEntry(
-                event = massQuotePlacedEvent,
-                eventId = EventId(5),
-                entry = massQuotePlacedEvent.entries.get(1),
-                side = Side.SELL,
-                sizes = EntrySizes(5),
-                status = EntryStatus.NEW
-            )
-
-            result.events shouldBe List.of(
-                expectedBuyEntry1.toEntryAddedToBookEvent(bookId),
-                expectedSellEntry1.toEntryAddedToBookEvent(bookId),
-                expectedBuyEntry2.toEntryAddedToBookEvent(bookId),
-                expectedSellEntry2.toEntryAddedToBookEvent(bookId)
-            )
-            result.aggregate.buyLimitBook.entries.values() shouldBe List.of(expectedBuyEntry1, expectedBuyEntry2)
-            result.aggregate.sellLimitBook.entries.values() shouldBe List.of(expectedSellEntry1, expectedSellEntry2)
         }
     }
 })

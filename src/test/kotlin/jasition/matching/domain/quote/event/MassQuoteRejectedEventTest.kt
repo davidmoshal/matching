@@ -6,7 +6,6 @@ import io.vavr.collection.List
 import jasition.cqrs.EventId
 import jasition.matching.domain.*
 import jasition.matching.domain.book.entry.*
-import jasition.matching.domain.book.event.EntriesRemovedFromBookEvent
 import jasition.matching.domain.quote.QuoteModelType
 import java.time.Instant
 
@@ -128,7 +127,7 @@ internal class `Given a mass quote is rejected by a book with existing entries` 
     }
     "Then the existing quote entry is removed and no new entries were added" {
         result.events shouldBe List.of(
-            EntriesRemovedFromBookEvent(
+            MassQuoteCancelledEvent(
                 eventId = EventId(2),
                 entries = List.of(
                     removedEntry.copy(
@@ -140,6 +139,8 @@ internal class `Given a mass quote is rejected by a book with existing entries` 
                         )
                     )
                 ),
+                primary = false,
+                whoRequested = event.whoRequested,
                 whenHappened = event.whenHappened,
                 bookId = books.bookId
             )

@@ -7,9 +7,9 @@ import jasition.cqrs.Transaction
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.*
-import jasition.matching.domain.book.event.EntriesRemovedFromBookEvent
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
+import jasition.matching.domain.quote.event.MassQuoteCancelledEvent
 import java.time.Instant
 import java.util.function.Predicate
 
@@ -108,10 +108,12 @@ fun cancelExistingQuotes(
         return Transaction(books)
     }
 
-    val entriesRemovedToBookEvent = EntriesRemovedFromBookEvent(
+    val entriesRemovedToBookEvent = MassQuoteCancelledEvent(
         eventId = eventId.next(),
         entries = toBeRemoved.map(BookEntry::cancelled),
         bookId = books.bookId,
+        primary = false,
+        whoRequested = whoRequested,
         whenHappened = whenHappened
     )
 

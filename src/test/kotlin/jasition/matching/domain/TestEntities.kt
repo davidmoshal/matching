@@ -30,7 +30,7 @@ fun aBooksWithEntities(
     )
 
 fun aBooksWithEntity(books: Books, bookEntry: BookEntry): Books =
-    bookEntry.toEntryAddedToBookEvent(books.bookId).play(books).aggregate
+    books.addBookEntry(bookEntry)
 
 
 fun anOrderPlacedEvent(

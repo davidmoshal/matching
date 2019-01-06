@@ -13,7 +13,6 @@ import jasition.matching.domain.*
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.*
-import jasition.matching.domain.book.event.EntryAddedToBookEvent
 import jasition.matching.domain.order.event.OrderPlacedEvent
 import jasition.matching.domain.trade.event.TradeEvent
 
@@ -46,18 +45,13 @@ internal class MatchAndPlaceEntryTest : StringSpec({
     } returns MatchResult(aggressorAfterMatch, Transaction(booksUpdatedByMatch, List.of(existingEventBeforeMatch)))
 
     "Entry is added to book if time in force allows" {
-        val entryAddedToBookEvent = mockk<EntryAddedToBookEvent>()
-        val entryAddedToBookSideEffectEvent = mockk<Event<BookId, Books>>()
 
         every { timeInForce.canStayOnBook(entrySizes) } returns true
-        every { aggressorAfterMatch.toEntryAddedToBookEvent(bookId, EventId(5))} returns entryAddedToBookEvent
-        every {entryAddedToBookEvent.play(booksUpdatedByMatch)} returns Transaction(booksUpdatedByEntryAdded,
-            List.of(entryAddedToBookSideEffectEvent)
-        )
+        every {booksUpdatedByMatch.addBookEntry(aggressorAfterMatch)} returns booksUpdatedByEntryAdded
 
         matchAndPlaceEntry(
             aggressorBeforeMatch, booksBeforeMatch
-        ) shouldBe Transaction(aggregate = booksUpdatedByEntryAdded, events = List.of(existingEventBeforeMatch, entryAddedToBookEvent, entryAddedToBookSideEffectEvent))
+        ) shouldBe Transaction(aggregate = booksUpdatedByEntryAdded, events = List.of(existingEventBeforeMatch))
     }
     "Entry is not added to book if time in force disallows" {
         every { timeInForce.canStayOnBook(entrySizes) } returns false

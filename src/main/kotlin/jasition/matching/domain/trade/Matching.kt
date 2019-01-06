@@ -15,19 +15,14 @@ import jasition.matching.domain.trade.event.TradeEvent
 fun matchAndPlaceEntry(
     bookEntry: BookEntry,
     books: Books
-): Transaction<BookId, Books> {
+) : Transaction<BookId, Books> {
     val (aggressor, transaction) = match(
         aggressor = bookEntry,
         books = books
     )
 
     return if (aggressor.timeInForce.canStayOnBook(aggressor.sizes))
-        transaction.thenPlay(
-            aggressor.toEntryAddedToBookEvent(
-                eventId = transaction.aggregate.lastEventId.next(),
-                bookId = books.bookId
-            )
-        )
+        transaction.copy(aggregate = transaction.aggregate.addBookEntry(aggressor))
     else transaction
 }
 

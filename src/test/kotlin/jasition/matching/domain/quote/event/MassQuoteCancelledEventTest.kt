@@ -1,4 +1,4 @@
-package jasition.matching.domain.book.event
+package jasition.matching.domain.quote.event
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
@@ -7,17 +7,20 @@ import io.mockk.spyk
 import io.vavr.collection.List
 import jasition.matching.domain.aBookEntry
 import jasition.matching.domain.aBookId
+import jasition.matching.domain.aFirmWithoutClient
 import jasition.matching.domain.anEventId
 import jasition.matching.domain.book.Books
 import java.time.Instant
 
-internal class EntriesRemovedFromBookEventPropertyTest : StringSpec({
+internal class MassQuoteCancelledEventPropertyTest : StringSpec({
     val eventId = anEventId()
     val bookId = aBookId()
-    val event = EntriesRemovedFromBookEvent(
+    val event = MassQuoteCancelledEvent(
         bookId = bookId,
         whenHappened = Instant.now(),
         eventId = eventId,
+        primary = false,
+        whoRequested = aFirmWithoutClient(),
         entries = List.of(aBookEntry(eventId = eventId, isQuote = true))
     )
     "Has Book ID as Aggregate ID" {
@@ -26,8 +29,11 @@ internal class EntriesRemovedFromBookEventPropertyTest : StringSpec({
     "Has Event ID as Event ID" {
         event.eventId() shouldBe eventId
     }
-    "Is a Side-effect event" {
-        event.isPrimary() shouldBe false
+    "Is a Primary event if specified" {
+        event.copy(primary = true).isPrimary() shouldBe true
+    }
+    "Is a Side-effect event if specified" {
+        event.copy(primary = false).isPrimary() shouldBe false
     }
 })
 

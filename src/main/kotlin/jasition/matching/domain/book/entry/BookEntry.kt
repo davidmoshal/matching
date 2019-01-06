@@ -1,8 +1,6 @@
 package jasition.matching.domain.book.entry
 
 import jasition.cqrs.EventId
-import jasition.matching.domain.book.BookId
-import jasition.matching.domain.book.event.EntryAddedToBookEvent
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.trade.event.TradeSideEntry
@@ -42,22 +40,6 @@ data class BookEntry(
         sizes = sizes,
         status = status
     )
-
-    fun toEntryAddedToBookEvent(bookId: BookId): EntryAddedToBookEvent =
-        EntryAddedToBookEvent(
-            eventId = key.eventId,
-            bookId = bookId,
-            entry = this,
-            whenHappened = key.whenSubmitted
-        )
-
-    fun toEntryAddedToBookEvent(bookId: BookId, eventId: EventId): EntryAddedToBookEvent =
-        EntryAddedToBookEvent(
-            eventId = eventId,
-            bookId = bookId,
-            entry = withKey(eventId = eventId),
-            whenHappened = key.whenSubmitted
-        )
 
     fun toTradeSideEntry(): TradeSideEntry = TradeSideEntry(
         requestId = requestId,
