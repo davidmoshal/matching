@@ -1,15 +1,14 @@
 package jasition.cqrs
 
 import io.vavr.collection.List
-import java.util.function.BiFunction
 
 data class Transaction<K, A : Aggregate<K>>(val aggregate: A, val events: List<Event<K, A>> = List.empty()) {
+
     fun append(
-        other: Transaction<K, A>,
-        mergeFunction: BiFunction<A, A, A> = BiFunction { _, right -> right }
+        other: Transaction<K, A>
     ): Transaction<K, A> =
         Transaction(
-            aggregate = mergeFunction.apply(aggregate, other.aggregate),
+            aggregate = other.aggregate,
             events = events.appendAll(other.events)
         )
 
@@ -17,4 +16,14 @@ data class Transaction<K, A : Aggregate<K>>(val aggregate: A, val events: List<E
         aggregate = aggregate,
         events = events.appendAll(event.asList())
     )
+
+    fun thenPlay(
+        event: Event<K, A>
+    ): Transaction<K, A> {
+        val other = event.play(aggregate)
+        return Transaction(
+            aggregate = other.aggregate,
+            events = events.append(event).appendAll(other.events)
+        )
+    }
 }

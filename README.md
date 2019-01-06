@@ -45,7 +45,7 @@ Determines when the Order is in effect.
 * Order - an instruction of Buy or Sell given quantity of the unit. It may or may not have a price.
 * Mass Quote - a collection of pairs of Buy and Sell prices with given quantities of units.
 * Trade - an agreed transaction between a Buy and a Sell instruction
-* Book and Book Entry - *Orders* and *Mass Quotes* are transformed into *Entries* that are sorted by the matching priorties and put together as a *Book*
+* Book and Book Entry - *Orders* and *Mass Quotes* are transformed into *Entries* that are sorted by the matching priorities and put together as a *Book*
 
 ### Aggregate
 The *Book* is the [Aggregate Root](https://martinfowler.com/bliki/DDD_Aggregate.html) that guarantees that each update is the result of one transaction.

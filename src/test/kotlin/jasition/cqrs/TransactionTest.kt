@@ -3,7 +3,7 @@ package jasition.cqrs
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import io.vavr.collection.List
-import java.util.function.BiFunction
+import jasition.matching.domain.anEventId
 
 internal class TransactionTest : StringSpec({
     val event1 = TestEvent(eventId = EventId(1))
@@ -16,30 +16,28 @@ internal class TransactionTest : StringSpec({
     val originalTransaction = Transaction(originalAggregate, originalEvents)
 
     "Appends new events after the original" {
-        val newTransaction = originalTransaction.append(event3, event4)
-
-        val newEvents: List<Event<Int, TestAggregate>> = List.of(event1, event2, event3, event4)
-        newTransaction shouldBe Transaction(originalAggregate, newEvents)
+        originalTransaction.append(event3, event4) shouldBe Transaction(
+            originalAggregate,
+            List.of<Event<Int, TestAggregate>>(event1, event2, event3, event4)
+        )
     }
-    "Uses new aggregate and appends new events after original with default merger" {
+    "When appending transaction, uses new aggregate and appends new events after original events" {
         val newAggregate = TestAggregate(value = "new")
         val newEvents: List<Event<Int, TestAggregate>> = List.of(event3, event4)
 
-        val finalTransaction = originalTransaction.append(Transaction(newAggregate, newEvents))
-
-        val finalEvents: List<Event<Int, TestAggregate>> = List.of(event1, event2, event3, event4)
-        finalTransaction shouldBe Transaction(newAggregate, finalEvents)
+        originalTransaction.append(Transaction(newAggregate, newEvents)) shouldBe Transaction(
+            newAggregate,
+            List.of<Event<Int, TestAggregate>>(event1, event2, event3, event4)
+        )
     }
-    "Uses old aggregate and appends new events after original with custom merger" {
+    "Playing an event after a transaction uses new aggregate and appends new events after the event played after the original events" {
         val newAggregate = TestAggregate(value = "new")
-        val newEvents: List<Event<Int, TestAggregate>> = List.of(event3, event4)
+        val event = TestPrimaryEvent2(
+            updatedAggregate = newAggregate,
+            sideEffectEvent = event3, eventId = anEventId()
+        )
 
-        val finalTransaction = originalTransaction.append(
-            Transaction(newAggregate, newEvents),
-            BiFunction { original, _ -> original })
-
-        val finalEvents: List<Event<Int, TestAggregate>> = List.of(event1, event2, event3, event4)
-        finalTransaction shouldBe Transaction(originalAggregate, finalEvents)
+        originalTransaction.thenPlay(event) shouldBe Transaction(newAggregate, originalEvents.append(event).append(event3))
     }
 })
 

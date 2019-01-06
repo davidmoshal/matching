@@ -5,4 +5,5 @@ enum class EntryStatus {
 
     fun traded(newSizes: EntrySizes): EntryStatus =
         if (newSizes.available == 0) FILLED else PARTIAL_FILL
+
 }

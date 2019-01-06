@@ -2,42 +2,54 @@ package jasition.matching.domain.scenario.recovery
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.FeatureSpec
-import jasition.cqrs.Transaction
 import jasition.cqrs.recovery.replay
-import jasition.matching.domain.aBookId
-import jasition.matching.domain.aBooks
+import jasition.matching.domain.*
 import jasition.matching.domain.book.TradingStatus
 import jasition.matching.domain.book.command.CreateBooksCommand
-import jasition.matching.domain.countEventsByClass
-import jasition.matching.domain.randomPlaceOrderCommand
 import kotlin.random.Random
 
 internal class `Recover books from replaying events only` : FeatureSpec({
     val bookId = aBookId()
-    val initial = Transaction(aBooks(bookId))
-    val initialBooks = initial.aggregate
+    val initialBooks = aBooks(bookId)
 
     val booksCreatedEvent = CreateBooksCommand(
         bookId = bookId,
         defaultTradingStatus = TradingStatus.OPEN_FOR_TRADING
     ).validate()
 
-    var latest = initial
-        .append(booksCreatedEvent)
-        .append(booksCreatedEvent.play(initialBooks))
+    var latest = booksCreatedEvent.playAndAppend(initialBooks)
 
-    val commandCount = Random.nextInt(1000, 2000)
-    for (i in 0 until commandCount) {
-        randomPlaceOrderCommand(bookId = bookId)
-            .validate(latest.aggregate)
-            .fold({ rejected ->
-                latest = latest.append(rejected).append(rejected.play(latest.aggregate))
-            }, { placed ->
-                latest = latest.append(placed).append(placed.play(latest.aggregate))
-            })
+    var orderCommandCount = 0
+    var massQuoteCommandCount = 0
+
+    println("About to start validating the commands and playing the events to create the book state")
+
+    for (i in 0 until Random.nextInt(50, 100)) {
+        val orderOrQuote = Random.nextBoolean()
+        if (orderOrQuote) {
+            orderCommandCount++
+            randomPlaceOrderCommand(bookId = bookId, size = randomSize(from = -5, until = 30))
+                .validate(latest.aggregate)
+                .fold({ rejected ->
+                    latest = latest.thenPlay(rejected)
+                }, { placed ->
+                    latest = latest.thenPlay(placed)
+                })
+        } else {
+            massQuoteCommandCount++
+            randomPlaceMassQuoteCommand(bookId = bookId, whoRequested = aFirmWithoutClient())
+                .validate(latest.aggregate)
+                .fold({ rejected ->
+                    latest = latest.thenPlay(rejected)
+                }, { placed ->
+                    latest = latest.thenPlay(placed)
+                })
+        }
     }
+    println("Book state created. noOfEvents=${latest.events.size()}")
+
     feature("Recover from event re-playing") {
-        scenario("Recover the books that was created by $commandCount PlaceOrderCommands with random values (Placed, Rejected and Trade)") {
+        scenario("Recover the books that was created by $orderCommandCount orders and $massQuoteCommandCount mass quotes with random values (Placed, Rejected and Trade)") {
 
             val (aggregate, events) = latest
 

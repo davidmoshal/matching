@@ -3,6 +3,8 @@ package jasition.matching.domain.book
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import io.mockk.mockk
+import jasition.matching.domain.order.command.PlaceOrderCommand
+import jasition.matching.domain.quote.command.PlaceMassQuoteCommand
 
 internal class TradingStatusesTest : StringSpec({
     "Prioritises manual status over fast market"{
@@ -35,15 +37,27 @@ internal class TradingStatusesTest : StringSpec({
 
 internal class TradingStatusTest : StringSpec({
     "Open-for-trading allows PlaceOrderCommand"{
-        TradingStatus.OPEN_FOR_TRADING.allows(mockk()) shouldBe true
+        TradingStatus.OPEN_FOR_TRADING.allows(mockk<PlaceOrderCommand>()) shouldBe true
+    }
+    "Open-for-trading allows PlaceMassQuoteCommand"{
+        TradingStatus.OPEN_FOR_TRADING.allows(mockk<PlaceMassQuoteCommand>()) shouldBe true
     }
     "Halted disallows PlaceOrderCommand"{
-        TradingStatus.HALTED.allows(mockk()) shouldBe false
+        TradingStatus.HALTED.allows(mockk<PlaceOrderCommand>()) shouldBe false
+    }
+    "Halted disallows PlaceMassQuoteCommand"{
+        TradingStatus.HALTED.allows(mockk<PlaceMassQuoteCommand>()) shouldBe false
     }
     "Not-available-for-trading disallows PlaceOrderCommand"{
-        TradingStatus.NOT_AVAILABLE_FOR_TRADING.allows(mockk()) shouldBe false
+        TradingStatus.NOT_AVAILABLE_FOR_TRADING.allows(mockk<PlaceOrderCommand>()) shouldBe false
+    }
+    "Not-available-for-trading disallows PlaceMassQuoteCommand"{
+        TradingStatus.NOT_AVAILABLE_FOR_TRADING.allows(mockk<PlaceMassQuoteCommand>()) shouldBe false
     }
     "Pre-open disallows PlaceOrderCommand"{
-        TradingStatus.PRE_OPEN.allows(mockk()) shouldBe false
+        TradingStatus.PRE_OPEN.allows(mockk<PlaceOrderCommand>()) shouldBe false
+    }
+    "Pre-open allows PlaceMassQuoteCommand"{
+        TradingStatus.PRE_OPEN.allows(mockk<PlaceMassQuoteCommand>()) shouldBe true
     }
 })

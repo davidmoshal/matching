@@ -27,6 +27,7 @@ internal class TradeEventPropertyTest : StringSpec({
         aggressor = TradeSideEntry(
             requestId = aClientRequestId(),
             whoRequested = aFirmWithClient(),
+            isQuote = false,
             entryType = EntryType.LIMIT,
             side = Side.BUY,
             sizes = anEntrySizes(),
@@ -39,6 +40,7 @@ internal class TradeEventPropertyTest : StringSpec({
         passive = TradeSideEntry(
             requestId = anotherClientRequestId(),
             whoRequested = anotherFirmWithClient(),
+            isQuote = true,
             entryType = EntryType.LIMIT,
             side = Side.SELL,
             sizes = anEntrySizes(),
@@ -65,6 +67,7 @@ internal class TradeSideEntryTest : StringSpec({
         val entry = TradeSideEntry(
             requestId = ClientRequestId("req1"),
             whoRequested = Client(firmId = "firm1", firmClientId = "client1"),
+            isQuote = false,
             entryType = EntryType.LIMIT,
             side = Side.BUY,
             sizes = EntrySizes(10, traded = 10, cancelled = 0),
@@ -89,6 +92,7 @@ internal class `When a trade has happened between an aggressor and a passive ent
     val aggressor = TradeSideEntry(
         requestId = ClientRequestId("req1"),
         whoRequested = Client(firmId = "firm1", firmClientId = "client1"),
+        isQuote = false,
         entryType = EntryType.LIMIT,
         side = Side.BUY,
         sizes = EntrySizes(10, traded = 10, cancelled = 0),
@@ -116,16 +120,13 @@ internal class `When a trade has happened between an aggressor and a passive ent
     )
     val originalBooks = spyk(Books(bookId))
     val booksWithEventIdVerified = spyk(Books(bookId))
-    val booksWithAggressorUpdated = spyk(Books(bookId))
     val booksWithPassiveUpdated = spyk(Books(bookId))
 
     every { originalBooks.verifyEventId(eventId) } returns eventId
     every { originalBooks.copy(lastEventId = eventId) } returns booksWithEventIdVerified
-    every { booksWithEventIdVerified.traded(aggressor) } returns booksWithAggressorUpdated
-    every { booksWithPassiveUpdated.traded(passive) } returns booksWithPassiveUpdated
 
     "Then both the aggressor, the passive and the last event ID of the book are updated" {
-        event.play(originalBooks) shouldBe Transaction<BookId, Books>(
+        event.play(originalBooks) shouldBe Transaction(
             aggregate = booksWithPassiveUpdated,
             events = List.empty()
         )

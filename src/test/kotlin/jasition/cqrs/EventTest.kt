@@ -5,6 +5,27 @@ import io.kotlintest.shouldBe
 import io.kotlintest.shouldThrow
 import io.kotlintest.specs.StringSpec
 import io.kotlintest.tables.row
+import io.mockk.mockk
+import io.vavr.collection.List
+import jasition.matching.domain.anEventId
+
+internal class EventTest : StringSpec({
+    "Play-n-append put the played event in front of side-effect events" {
+        val sideEffectEvent = mockk<TestEvent>()
+        val aggregate = mockk<TestAggregate>()
+        val updatedAggregate = mockk<TestAggregate>()
+        val primaryEvent = TestPrimaryEvent2(
+            eventId = anEventId(),
+            updatedAggregate = updatedAggregate,
+            sideEffectEvent = sideEffectEvent
+        )
+
+        primaryEvent.playAndAppend(aggregate) shouldBe Transaction(
+            aggregate = updatedAggregate,
+            events = List.of(primaryEvent, sideEffectEvent)
+        )
+    }
+})
 
 internal class EventIdTest : StringSpec({
     "Cannot be negative"{

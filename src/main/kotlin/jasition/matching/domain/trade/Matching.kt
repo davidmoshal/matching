@@ -12,6 +12,20 @@ import jasition.matching.domain.book.entry.Price
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.trade.event.TradeEvent
 
+fun matchAndPlaceEntry(
+    bookEntry: BookEntry,
+    books: Books
+) : Transaction<BookId, Books> {
+    val (aggressor, transaction) = match(
+        aggressor = bookEntry,
+        books = books
+    )
+
+    return if (aggressor.timeInForce.canStayOnBook(aggressor.sizes))
+        transaction.copy(aggregate = transaction.aggregate.addBookEntry(aggressor))
+    else transaction
+}
+
 fun match(
     aggressor: BookEntry,
     books: Books,
@@ -55,6 +69,7 @@ fun findNextMatch(
     return findPassive(passives, offset)?.let { passive ->
         if (cannotMatchTheseTwoPrices(aggressor.key.price, passive.key.price)
             || cannotMatchTheseTwoClients(aggressor.whoRequested, passive.whoRequested)
+            || cannotMatchTheseTwoEntries(aggressor.isQuote, passive.isQuote)
         ) return findNextMatch(
             aggressor = aggressor,
             passives = passives,
@@ -77,10 +92,13 @@ private fun cannotMatchAnyFurther(aggressor: BookEntry, limitBook: LimitBook) =
 private fun cannotMatchTheseTwoClients(aggressor: Client, passive: Client): Boolean =
     sameFirmAndSameFirmClient(aggressor, passive) || sameFirmButPossibleFirmAgainstClient(aggressor, passive)
 
+private fun cannotMatchTheseTwoEntries(aggressorIsQuote: Boolean, passiveIsQuote: Boolean): Boolean =
+    aggressorIsQuote && passiveIsQuote
+
 private fun cannotMatchTheseTwoPrices(aggressor: Price?, passive: Price?): Boolean =
     aggressor == null && passive == null
 
-private fun findPassive(passives: Seq<BookEntry>, offset: Int = 0): BookEntry? =
+private fun findPassive(passives: Seq<BookEntry>, offset: Int): BookEntry? =
     if (offset < passives.size()) passives.get(offset) else null
 
 data class Match(val passive: BookEntry, val tradePrice: Price)

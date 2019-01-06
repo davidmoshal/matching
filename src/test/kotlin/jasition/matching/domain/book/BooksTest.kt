@@ -7,11 +7,13 @@ import io.kotlintest.specs.StringSpec
 import io.kotlintest.tables.row
 import io.mockk.every
 import io.mockk.spyk
+import io.vavr.collection.List
 import jasition.cqrs.EventId
-import jasition.matching.domain.aBookEntry
-import jasition.matching.domain.aBookId
-import jasition.matching.domain.aTradingStatuses
+import jasition.matching.domain.*
+import jasition.matching.domain.book.entry.EntryStatus
 import jasition.matching.domain.book.entry.Side
+import java.util.function.Function
+import java.util.function.Predicate
 
 
 internal class BooksTest : StringSpec({
@@ -20,15 +22,13 @@ internal class BooksTest : StringSpec({
         side = Side.BUY
     )
     val sellEntry = buyEntry.copy(side = Side.SELL)
-    val tradeBuySideEntry = buyEntry.toTradeSideEntry()
-    val tradeSellSideEntry = sellEntry.toTradeSideEntry()
+    val excludedEntry =
+        sellEntry.copy(key = sellEntry.key.copy(price = randomPrice()), whoRequested = anotherFirmWithClient())
 
     val buyLimitBook = spyk(LimitBook(Side.BUY))
     val sellLimitBook = spyk(LimitBook(Side.SELL))
     val newBuyLimitBook = spyk(LimitBook(Side.BUY))
     val newSellLimitBook = spyk(LimitBook(Side.SELL))
-    val tradedBuyLimitBook = spyk(LimitBook(Side.BUY))
-    val tradedSellLimitBook = spyk(LimitBook(Side.SELL))
     val books = Books(
         bookId = aBookId(),
         buyLimitBook = buyLimitBook,
@@ -36,11 +36,10 @@ internal class BooksTest : StringSpec({
         tradingStatuses = aTradingStatuses(),
         lastEventId = EventId(0)
     )
+    val newEventId = EventId(10)
 
     every { buyLimitBook.add(buyEntry) } returns newBuyLimitBook
     every { sellLimitBook.add(sellEntry) } returns newSellLimitBook
-    every { buyLimitBook.update(tradeBuySideEntry) } returns tradedBuyLimitBook
-    every { sellLimitBook.update(tradeSellSideEntry) } returns tradedSellLimitBook
 
     "Aggregate ID of a Books is the Book ID" {
         books.aggregateId() shouldBe books.bookId
@@ -58,12 +57,6 @@ internal class BooksTest : StringSpec({
             lastEventId = sellEntry.key.eventId
         )
     }
-    "Updating BUY trade entry updates the SELL Limit Book only" {
-        books.traded(tradeBuySideEntry) shouldBe books.copy(buyLimitBook = newBuyLimitBook)
-    }
-    "Updating SELL trade entry updates the SELL Limit Book only" {
-        books.traded(tradeSellSideEntry) shouldBe books.copy(sellLimitBook = newSellLimitBook)
-    }
     "Accepts event ID (last event ID + 1)" {
         books.copy(lastEventId = EventId(4))
             .verifyEventId(eventId = EventId(5)) shouldBe EventId(5)
@@ -79,5 +72,72 @@ internal class BooksTest : StringSpec({
         ) { nextEventId ->
             shouldThrow<IllegalArgumentException> { newBooks.verifyEventId(EventId(nextEventId)) }
         }
+    }
+    "Able to find the entries fulfilling the predicate" {
+
+        Books(aBookId())
+            .addBookEntry(buyEntry)
+            .addBookEntry(sellEntry)
+            .addBookEntry(excludedEntry)
+            .findBookEntries(
+                Predicate { sellEntry.whoRequested == it.whoRequested }
+            ) shouldBe List.of(
+            buyEntry, sellEntry
+        )
+    }
+    "Updating BUY does not affect SELL side" {
+        Books(aBookId())
+            .addBookEntry(buyEntry)
+            .addBookEntry(sellEntry)
+            .updateBookEntry(newEventId, buyEntry.side, buyEntry.key, Function {
+                it.copy(status = EntryStatus.CANCELLED)
+            }) shouldBe books.copy(
+            buyLimitBook = LimitBook(Side.BUY).add(buyEntry.copy(status = EntryStatus.CANCELLED)),
+            sellLimitBook = LimitBook(Side.SELL).add(sellEntry),
+            lastEventId = newEventId
+        )
+    }
+    "Updating SELL does not affect BUY side" {
+        Books(aBookId())
+            .addBookEntry(buyEntry)
+            .addBookEntry(sellEntry)
+            .updateBookEntry(newEventId, sellEntry.side, sellEntry.key, Function {
+                it.copy(status = EntryStatus.CANCELLED)
+            }) shouldBe books.copy(
+            buyLimitBook = LimitBook(Side.BUY).add(buyEntry),
+            sellLimitBook = LimitBook(Side.SELL).add(sellEntry.copy(status = EntryStatus.CANCELLED)),
+            lastEventId = newEventId
+        )
+    }
+    "Removing BUY does not affect SELL side" {
+        Books(aBookId())
+            .addBookEntry(buyEntry)
+            .addBookEntry(sellEntry)
+            .removeBookEntry(newEventId, buyEntry.side, buyEntry.key) shouldBe books.copy(
+            buyLimitBook = LimitBook(Side.BUY),
+            sellLimitBook = LimitBook(Side.SELL).add(sellEntry),
+            lastEventId = newEventId
+        )
+    }
+    "Removing SELL does not affect BUY side" {
+        Books(aBookId())
+            .addBookEntry(buyEntry)
+            .addBookEntry(sellEntry)
+            .removeBookEntry(newEventId, sellEntry.side, sellEntry.key) shouldBe books.copy(
+            buyLimitBook = LimitBook(Side.BUY).add(buyEntry),
+            sellLimitBook = LimitBook(Side.SELL),
+            lastEventId = newEventId
+        )
+    }
+    "Removing BUY and SELL entries in one go" {
+        Books(aBookId())
+            .addBookEntry(buyEntry)
+            .addBookEntry(sellEntry)
+            .addBookEntry(excludedEntry)
+            .removeBookEntries(excludedEntry.key.eventId, List.of(buyEntry, sellEntry)) shouldBe books.copy(
+            buyLimitBook = LimitBook(Side.BUY),
+            sellLimitBook = LimitBook(Side.SELL).add(excludedEntry),
+            lastEventId = excludedEntry.key.eventId
+        )
     }
 })

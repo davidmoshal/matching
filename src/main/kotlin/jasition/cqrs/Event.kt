@@ -1,10 +1,17 @@
 package jasition.cqrs
 
+import io.vavr.collection.List
+
 interface Event<K, A : Aggregate<K>> {
     fun aggregateId(): K
     fun eventId(): EventId
     fun isPrimary(): Boolean
     fun play(aggregate: A): Transaction<K, A>
+
+    fun playAndAppend(aggregate: A): Transaction<K, A> {
+        val transaction = play(aggregate)
+        return transaction.copy(events = List.of(this).appendAll(transaction.events))
+    }
 }
 
 data class EventId(val value: Long) : Comparable<EventId> {

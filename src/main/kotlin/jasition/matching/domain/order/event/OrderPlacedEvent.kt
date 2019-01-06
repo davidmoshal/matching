@@ -8,7 +8,7 @@ import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
-import jasition.matching.domain.trade.match
+import jasition.matching.domain.trade.matchAndPlaceEntry
 import java.time.Instant
 
 data class OrderPlacedEvent(
@@ -29,24 +29,10 @@ data class OrderPlacedEvent(
     override fun isPrimary(): Boolean = true
 
     override fun play(aggregate: Books): Transaction<BookId, Books> {
-        val (aggressor, transaction) = match(
-            aggressor = toBookEntry(),
+        return matchAndPlaceEntry(
+            bookEntry = toBookEntry(),
             books = aggregate.copy(lastEventId = aggregate.verifyEventId(eventId))
         )
-
-        if (aggressor.timeInForce.canStayOnBook(aggressor.sizes)) {
-            val newBooks = transaction.aggregate
-            val nextEventId = newBooks.lastEventId.next()
-            val entryAddedToBookEvent = aggressor.toEntryAddedToBookEvent(
-                eventId = nextEventId,
-                bookId = aggregate.bookId
-            )
-
-            return transaction
-                .append(entryAddedToBookEvent)
-                .append(entryAddedToBookEvent.play(newBooks))
-        }
-        return transaction
     }
 
     fun toBookEntry(): BookEntry = BookEntry(
@@ -55,6 +41,7 @@ data class OrderPlacedEvent(
         eventId = eventId,
         requestId = requestId,
         whoRequested = whoRequested,
+        isQuote = false,
         entryType = entryType,
         side = side,
         timeInForce = timeInForce,

@@ -2,23 +2,71 @@ package jasition.matching.domain.trade
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import io.vavr.collection.List
+import jasition.cqrs.Event
 import jasition.cqrs.EventId
 import jasition.cqrs.Transaction
 import jasition.matching.domain.*
-import jasition.matching.domain.book.entry.EntrySizes
-import jasition.matching.domain.book.entry.Price
-import jasition.matching.domain.book.entry.Side
+import jasition.matching.domain.book.BookId
+import jasition.matching.domain.book.Books
+import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.order.event.OrderPlacedEvent
 import jasition.matching.domain.trade.event.TradeEvent
+
+internal class MatchAndPlaceEntryTest : StringSpec({
+    mockkStatic("jasition.matching.domain.trade.MatchingKt")
+
+    val bookId = aBookId()
+
+    val aggressorBeforeMatch = mockk<BookEntry>()
+    val aggressorAfterMatch = mockk<BookEntry>()
+    val existingEventBeforeMatch = mockk<Event<BookId, Books>>()
+
+    val booksBeforeMatch = mockk<Books>()
+    val booksUpdatedByMatch = mockk<Books>()
+    val booksUpdatedByEntryAdded = mockk<Books>()
+
+    val timeInForce = mockk<TimeInForce>()
+    val entrySizes = mockk<EntrySizes>()
+    val lastEventId = EventId(4)
+
+    every { aggressorBeforeMatch.timeInForce } returns timeInForce
+    every { aggressorAfterMatch.timeInForce } returns timeInForce
+    every { aggressorAfterMatch.sizes } returns entrySizes
+    every { booksUpdatedByMatch.lastEventId } returns lastEventId
+    every { booksUpdatedByMatch.bookId } returns bookId
+    every { booksBeforeMatch.bookId } returns bookId
+
+    every {
+        match(aggressor = aggressorBeforeMatch, books = booksBeforeMatch)
+    } returns MatchResult(aggressorAfterMatch, Transaction(booksUpdatedByMatch, List.of(existingEventBeforeMatch)))
+
+    "Entry is added to book if time in force allows" {
+
+        every { timeInForce.canStayOnBook(entrySizes) } returns true
+        every {booksUpdatedByMatch.addBookEntry(aggressorAfterMatch)} returns booksUpdatedByEntryAdded
+
+        matchAndPlaceEntry(
+            aggressorBeforeMatch, booksBeforeMatch
+        ) shouldBe Transaction(aggregate = booksUpdatedByEntryAdded, events = List.of(existingEventBeforeMatch))
+    }
+    "Entry is not added to book if time in force disallows" {
+        every { timeInForce.canStayOnBook(entrySizes) } returns false
+
+        matchAndPlaceEntry(
+            aggressorBeforeMatch, booksBeforeMatch
+        ) shouldBe Transaction(aggregate = booksUpdatedByMatch, events = List.of(existingEventBeforeMatch))
+    }
+})
 
 internal class MatchingTest : StringSpec({
     val bookId = aBookId()
     val client = aFirmWithClient()
     val otherClient = anotherFirmWithClient()
     val existingEvents = List.of(mockk<OrderPlacedEvent>(), mockk<TradeEvent>())
-
     "Stop matching when there is no available sizes in the aggressor" {
         val books = aBooks(bookId, List.of(aBookEntry(side = Side.SELL, whoRequested = client)))
         val aggressor = aBookEntry(side = Side.BUY, whoRequested = otherClient, sizes = EntrySizes(0))

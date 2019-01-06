@@ -7,38 +7,29 @@ import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import jasition.cqrs.EventId
 import jasition.matching.domain.aBookEntry
-import jasition.matching.domain.aBookId
-import jasition.matching.domain.book.event.EntryAddedToBookEvent
+import jasition.matching.domain.randomPrice
 import jasition.matching.domain.trade.event.TradeSideEntry
 import java.time.Instant
+import kotlin.random.Random
 
 internal class BookEntryTest : StringSpec({
     val entry = aBookEntry(
         sizes = EntrySizes(available = 23, traded = 2, cancelled = 0)
     )
-    val bookId = aBookId()
 
-    "Converts to EntryAddedToBookEvent" {
-        entry.toEntryAddedToBookEvent(bookId) shouldBe EntryAddedToBookEvent(
-            eventId = entry.key.eventId,
-            bookId = bookId,
-            entry = entry,
-            whenHappened = entry.key.whenSubmitted
-        )
-    }
-    "Converts to EntryAddedToBookEvent with given Event ID" {
-        val eventId = EventId(4)
-        entry.toEntryAddedToBookEvent(bookId, eventId) shouldBe EntryAddedToBookEvent(
-            eventId = eventId,
-            bookId = bookId,
-            entry = entry.copy(key = entry.key.copy(eventId = eventId)),
-            whenHappened = entry.key.whenSubmitted
+    "Mutates to another BookEntry with given key" {
+        val price = randomPrice()
+        val whenSubmitted = Instant.now()
+        val eventId = EventId(Random.nextLong(0, 100000))
+        entry.withKey(price = price, whenSubmitted = whenSubmitted, eventId = eventId) shouldBe entry.copy(
+            key = entry.key.copy(price = price, whenSubmitted = whenSubmitted, eventId = eventId)
         )
     }
     "Converts to TradeSideEntry" {
         entry.toTradeSideEntry() shouldBe TradeSideEntry(
             requestId = entry.requestId,
             whoRequested = entry.whoRequested,
+            isQuote = entry.isQuote,
             entryType = entry.entryType,
             side = entry.side,
             sizes = EntrySizes(available = 23, traded = 2, cancelled = 0),
@@ -53,6 +44,12 @@ internal class BookEntryTest : StringSpec({
         entry.traded(23) shouldBe entry.copy(
             sizes = EntrySizes(available = 0, traded = 25, cancelled = 0),
             status = EntryStatus.FILLED
+        )
+    }
+    "Updates sizes and status when cancelled" {
+        entry.cancelled() shouldBe entry.copy(
+            sizes = EntrySizes(available = 0, traded = 2, cancelled = 23),
+            status = EntryStatus.CANCELLED
         )
     }
 })

@@ -41,6 +41,7 @@ internal class OrderPlacedEventPropertyTest : StringSpec({
             eventId = eventId,
             requestId = event.requestId,
             whoRequested = event.whoRequested,
+            isQuote = false,
             entryType = event.entryType,
             side = event.side,
             timeInForce = event.timeInForce,
@@ -52,7 +53,7 @@ internal class OrderPlacedEventPropertyTest : StringSpec({
 
 internal class `Given an order is placed on an empty book` : StringSpec({
     val books = aBooks(aBookId())
-    val orderPlacedEvent = OrderPlacedEvent(
+    val event = OrderPlacedEvent(
         requestId = aClientRequestId(),
         whoRequested = aFirmWithClient(),
         bookId = books.bookId,
@@ -65,17 +66,16 @@ internal class `Given an order is placed on an empty book` : StringSpec({
         sizes = anEntrySizes()
     )
 
-    val actual = orderPlacedEvent.play(books)
-    val expectedBookEntry = expectedBookEntry(orderPlacedEvent)
+    val actual = event.play(books)
 
     "The opposite-side book is not affected" {
         actual.aggregate.sellLimitBook.entries.size() shouldBe 0
     }
-    "The entry is added to the book" {
-        actual.events shouldBe List.of(expectedEntryAddedToBookEvent(orderPlacedEvent, books, expectedBookEntry))
+    "No side-effect has happened" {
+        actual.events.size() shouldBe 0
     }
     "The entry exists in the same-side book" {
-        actual.aggregate.buyLimitBook.entries.values() shouldBe List.of(expectedBookEntry)
+        actual.aggregate.buyLimitBook.entries.values() shouldBe List.of(expectedBookEntry(event))
     }
 })
 

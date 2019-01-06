@@ -1,8 +1,9 @@
 package jasition.matching.domain.book
 
+import io.vavr.collection.Seq
 import io.vavr.collection.TreeMap
 import jasition.matching.domain.book.entry.*
-import jasition.matching.domain.trade.event.TradeSideEntry
+import java.util.function.Function
 
 data class LimitBook(val entries: TreeMap<BookEntryKey, BookEntry>) {
     constructor(side: Side) : this(
@@ -14,27 +15,20 @@ data class LimitBook(val entries: TreeMap<BookEntryKey, BookEntry>) {
     )
 
     fun add(entry: BookEntry): LimitBook =
-        LimitBook(entries.put(entry.key, entry))
+        copy(entries = entries.put(entry.key, entry))
 
-    fun update(entry: TradeSideEntry): LimitBook {
-        val bookEntryKey = entry.toBookEntryKey()
+    fun removeAll(toBeRemoved: Seq<BookEntry>): LimitBook =
+        copy(entries = entries.removeAll(toBeRemoved.map { it.key }))
 
-        return LimitBook(
-            if (entry.sizes.available <= 0)
-                entries.remove(bookEntryKey)
-            else
-                entries.computeIfPresent(bookEntryKey) { existingKey: BookEntryKey, existingEntry: BookEntry ->
-                    BookEntry(
-                        key = existingKey,
-                        requestId = existingEntry.requestId,
-                        whoRequested = existingEntry.whoRequested,
-                        entryType = existingEntry.entryType,
-                        side = existingEntry.side,
-                        timeInForce = existingEntry.timeInForce,
-                        sizes = entry.sizes,
-                        status = entry.status
-                    )
-                }._2()
+    fun remove(bookEntryKey: BookEntryKey) : LimitBook {
+        return copy(entries = entries.remove(bookEntryKey))
+    }
+
+    fun update(bookEntryKey: BookEntryKey, updateFunction: Function<BookEntry, BookEntry>): LimitBook {
+        return copy(
+            entries = entries.computeIfPresent(bookEntryKey) { _: BookEntryKey, existingEntry: BookEntry ->
+                updateFunction.apply(existingEntry)
+            }._2()
         )
     }
 }

@@ -1,8 +1,6 @@
 package jasition.matching.domain.book.entry
 
 import jasition.cqrs.EventId
-import jasition.matching.domain.book.BookId
-import jasition.matching.domain.book.event.EntryAddedToBookEvent
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.trade.event.TradeSideEntry
@@ -12,6 +10,7 @@ data class BookEntry(
     val key: BookEntryKey,
     val requestId: ClientRequestId,
     val whoRequested: Client,
+    val isQuote: Boolean,
     val entryType: EntryType,
     val side: Side,
     val timeInForce: TimeInForce,
@@ -24,6 +23,7 @@ data class BookEntry(
         eventId: EventId,
         requestId: ClientRequestId,
         whoRequested: Client,
+        isQuote: Boolean,
         entryType: EntryType,
         side: Side,
         timeInForce: TimeInForce,
@@ -33,6 +33,7 @@ data class BookEntry(
         key = BookEntryKey(price = price, whenSubmitted = whenSubmitted, eventId = eventId),
         requestId = requestId,
         whoRequested = whoRequested,
+        isQuote = isQuote,
         entryType = entryType,
         side = side,
         timeInForce = timeInForce,
@@ -40,25 +41,10 @@ data class BookEntry(
         status = status
     )
 
-    fun toEntryAddedToBookEvent(bookId: BookId): EntryAddedToBookEvent =
-        EntryAddedToBookEvent(
-            eventId = key.eventId,
-            bookId = bookId,
-            entry = this,
-            whenHappened = key.whenSubmitted
-        )
-
-    fun toEntryAddedToBookEvent(bookId: BookId, eventId: EventId): EntryAddedToBookEvent =
-        EntryAddedToBookEvent(
-            eventId = eventId,
-            bookId = bookId,
-            entry = copy(key = key.copy(eventId = eventId)),
-            whenHappened = key.whenSubmitted
-        )
-
     fun toTradeSideEntry(): TradeSideEntry = TradeSideEntry(
         requestId = requestId,
         whoRequested = whoRequested,
+        isQuote = isQuote,
         entryType = entryType,
         side = side,
         sizes = sizes,
@@ -77,6 +63,24 @@ data class BookEntry(
             status = status.traded(newSizes)
         )
     }
+
+    fun cancelled(): BookEntry = copy(
+        sizes = sizes.cancelled(),
+        status = EntryStatus.CANCELLED
+    )
+
+    fun withKey(
+        price: Price? = key.price,
+        whenSubmitted: Instant = key.whenSubmitted,
+        eventId: EventId = key.eventId
+    ): BookEntry =
+        copy(
+            key = key.copy(
+                price = price,
+                whenSubmitted = whenSubmitted,
+                eventId = eventId
+            )
+        )
 }
 
 data class BookEntryKey(

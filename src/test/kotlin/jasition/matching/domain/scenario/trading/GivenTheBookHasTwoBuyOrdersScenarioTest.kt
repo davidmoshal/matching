@@ -50,17 +50,16 @@ internal class `Given the book has one BUY Limit GTC Order 5 at 10 and one 3 at 
                 side = Side.BUY,
                 price = Price(9),
                 timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-                whenHappened = now,
+                whenRequested = now,
                 eventId = EventId(3),
                 sizes = EntrySizes(5)
             )
             val result = orderPlacedEvent.play(books)
 
-            val expectedBookEntry = expectedBookEntry(orderPlacedEvent)
-            result.events shouldBe List.of(expectedBookEntry.toEntryAddedToBookEvent(bookId))
+            result.events.size() shouldBe 0
             result.aggregate.buyLimitBook.entries.values() shouldBe List.of(
                 existingEntry,
-                expectedBookEntry,
+                expectedBookEntry(orderPlacedEvent),
                 existingEntry2
             )
             result.aggregate.sellLimitBook.entries.size() shouldBe 0
@@ -75,19 +74,12 @@ internal class `Given the book has one BUY Limit GTC Order 5 at 10 and one 3 at 
                 side = Side.SELL,
                 price = Price(9),
                 timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-                whenHappened = now,
+                whenRequested = now,
                 eventId = EventId(3),
                 sizes = EntrySizes(7)
             )
 
             val result = orderPlacedEvent.play(books)
-
-            val expectedBookEntry = expectedBookEntry(
-                orderPlacedEvent = orderPlacedEvent,
-                eventId = EventId(5),
-                status = EntryStatus.PARTIAL_FILL,
-                sizes = EntrySizes(available = 2, traded = 5, cancelled = 0)
-            )
 
             result.events shouldBe List.of(
                 TradeEvent(
@@ -97,21 +89,25 @@ internal class `Given the book has one BUY Limit GTC Order 5 at 10 and one 3 at 
                     price = Price(10),
                     whenHappened = now,
                     aggressor = expectedTradeSideEntry(
-                        orderPlacedEvent = orderPlacedEvent,
-                        eventId = orderPlacedEvent.eventId,
+                        event = orderPlacedEvent,
                         sizes = EntrySizes(available = 2, traded = 5, cancelled = 0),
                         status = EntryStatus.PARTIAL_FILL
                     ),
                     passive = expectedTradeSideEntry(
-                        existingEntry,
-                        existingEntry.key.eventId,
-                        EntrySizes(available = 0, traded = 5, cancelled = 0),
-                        EntryStatus.FILLED
+                        bookEntry = existingEntry,
+                        sizes = EntrySizes(available = 0, traded = 5, cancelled = 0),
+                        status = EntryStatus.FILLED
                     )
-                ), expectedBookEntry.toEntryAddedToBookEvent(bookId)
+                )
             )
             result.aggregate.buyLimitBook.entries.values() shouldBe List.of(existingEntry2)
-            result.aggregate.sellLimitBook.entries.values() shouldBe List.of(expectedBookEntry)
+            result.aggregate.sellLimitBook.entries.values() shouldBe List.of(
+                expectedBookEntry(
+                    event = orderPlacedEvent,
+                    status = EntryStatus.PARTIAL_FILL,
+                    sizes = EntrySizes(available = 2, traded = 5, cancelled = 0)
+                )
+            )
         }
     }
 
@@ -123,7 +119,7 @@ internal class `Given the book has one BUY Limit GTC Order 5 at 10 and one 3 at 
                 side = Side.SELL,
                 price = Price(8),
                 timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-                whenHappened = now,
+                whenRequested = now,
                 eventId = EventId(3),
                 sizes = EntrySizes(7)
             )
@@ -138,7 +134,7 @@ internal class `Given the book has one BUY Limit GTC Order 5 at 10 and one 3 at 
                     price = Price(10),
                     whenHappened = now,
                     aggressor = expectedTradeSideEntry(
-                        orderPlacedEvent = orderPlacedEvent,
+                        event = orderPlacedEvent,
                         eventId = orderPlacedEvent.eventId,
                         sizes = EntrySizes(available = 2, traded = 5, cancelled = 0),
                         status = EntryStatus.PARTIAL_FILL
@@ -157,7 +153,7 @@ internal class `Given the book has one BUY Limit GTC Order 5 at 10 and one 3 at 
                     price = Price(8),
                     whenHappened = now,
                     aggressor = expectedTradeSideEntry(
-                        orderPlacedEvent = orderPlacedEvent,
+                        event = orderPlacedEvent,
                         eventId = orderPlacedEvent.eventId,
                         sizes = EntrySizes(available = 0, traded = 7, cancelled = 0),
                         status = EntryStatus.FILLED
@@ -176,7 +172,7 @@ internal class `Given the book has one BUY Limit GTC Order 5 at 10 and one 3 at 
                     sizes = EntrySizes(available = 1, traded = 2, cancelled = 0)
                 )
             )
-            result.aggregate.sellLimitBook.entries.values().size() shouldBe 0
+            result.aggregate.sellLimitBook.entries.size() shouldBe 0
         }
         scenario(aggressorMatchMultiplePassives + "When a SELL Limit GTC Order 11 at 8 is placed, then 5 at 10 is traded and 3 at 8 is traded and the SELL entry 3 at 8 is added and the all BUY entries removed") {
             val orderPlacedEvent = anOrderPlacedEvent(
@@ -185,19 +181,13 @@ internal class `Given the book has one BUY Limit GTC Order 5 at 10 and one 3 at 
                 side = Side.SELL,
                 price = Price(8),
                 timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-                whenHappened = now,
+                whenRequested = now,
                 eventId = EventId(3),
                 sizes = EntrySizes(11)
             )
 
             val result = orderPlacedEvent.play(books)
 
-            val expectedBookEntry = expectedBookEntry(
-                orderPlacedEvent = orderPlacedEvent,
-                eventId = EventId(6),
-                status = EntryStatus.PARTIAL_FILL,
-                sizes = EntrySizes(available = 3, traded = 8, cancelled = 0)
-            )
             result.events shouldBe List.of(
                 TradeEvent(
                     eventId = EventId(4),
@@ -206,7 +196,7 @@ internal class `Given the book has one BUY Limit GTC Order 5 at 10 and one 3 at 
                     price = Price(10),
                     whenHappened = now,
                     aggressor = expectedTradeSideEntry(
-                        orderPlacedEvent = orderPlacedEvent,
+                        event = orderPlacedEvent,
                         eventId = orderPlacedEvent.eventId,
                         sizes = EntrySizes(available = 6, traded = 5, cancelled = 0),
                         status = EntryStatus.PARTIAL_FILL
@@ -224,7 +214,7 @@ internal class `Given the book has one BUY Limit GTC Order 5 at 10 and one 3 at 
                     price = Price(8),
                     whenHappened = now,
                     aggressor = expectedTradeSideEntry(
-                        orderPlacedEvent = orderPlacedEvent,
+                        event = orderPlacedEvent,
                         eventId = orderPlacedEvent.eventId,
                         sizes = EntrySizes(available = 3, traded = 8, cancelled = 0),
                         status = EntryStatus.PARTIAL_FILL
@@ -235,10 +225,16 @@ internal class `Given the book has one BUY Limit GTC Order 5 at 10 and one 3 at 
                         EntrySizes(available = 0, traded = 3, cancelled = 0),
                         EntryStatus.FILLED
                     )
-                ), expectedBookEntry.toEntryAddedToBookEvent(bookId)
+                )
             )
-            result.aggregate.buyLimitBook.entries.values().size() shouldBe 0
-            result.aggregate.sellLimitBook.entries.values() shouldBe List.of(expectedBookEntry)
+            result.aggregate.buyLimitBook.entries.size() shouldBe 0
+            result.aggregate.sellLimitBook.entries.values() shouldBe List.of(
+                expectedBookEntry(
+                    event = orderPlacedEvent,
+                    status = EntryStatus.PARTIAL_FILL,
+                    sizes = EntrySizes(available = 3, traded = 8, cancelled = 0)
+                )
+            )
         }
     }
 })
