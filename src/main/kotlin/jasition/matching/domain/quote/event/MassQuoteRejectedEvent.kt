@@ -34,7 +34,8 @@ data class MassQuoteRejectedEvent(
             books = aggregate.copy(lastEventId = aggregate.verifyEventId(eventId)),
             eventId = eventId,
             whoRequested = whoRequested,
-            whenHappened = whenHappened
+            whenHappened = whenHappened,
+            primary = false
         )
     }
 }

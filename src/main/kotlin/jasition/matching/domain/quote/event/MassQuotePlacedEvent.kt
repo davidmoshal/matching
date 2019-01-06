@@ -44,7 +44,8 @@ data class MassQuotePlacedEvent(
                 books = books,
                 eventId = eventId,
                 whoRequested = whoRequested,
-                whenHappened = whenHappened
+                whenHappened = whenHappened,
+                primary = false
             )
         }
         return Transaction(books)
