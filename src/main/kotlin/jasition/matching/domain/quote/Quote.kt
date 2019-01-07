@@ -89,11 +89,7 @@ data class QuoteEntry(
 }
 
 enum class QuoteModelType {
-    QUOTE_ENTRY {
-        override fun shouldCancelPreviousQuotes(): Boolean = true
-    };
-
-    abstract fun shouldCancelPreviousQuotes(): Boolean
+    QUOTE_ENTRY
 }
 
 fun cancelExistingQuotes(
@@ -103,12 +99,14 @@ fun cancelExistingQuotes(
     whenHappened: Instant,
     primary: Boolean
 ): Transaction<BookId, Books> {
-    val toBeRemoved = books.findBookEntries(Predicate { p -> p.whoRequested == whoRequested && p.isQuote })
+    val toBeRemoved = books
+        .findBookEntries(Predicate { p -> p.whoRequested == whoRequested && p.isQuote })
+        .map(BookEntry::cancelled)
 
     return if (toBeRemoved.isEmpty) Transaction(books)
     else MassQuoteCancelledEvent(
         eventId = eventId.next(),
-        entries = toBeRemoved.map(BookEntry::cancelled),
+        entries = toBeRemoved,
         bookId = books.bookId,
         primary = primary,
         whoRequested = whoRequested,

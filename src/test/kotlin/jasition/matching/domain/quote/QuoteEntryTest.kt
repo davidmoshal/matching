@@ -93,9 +93,3 @@ internal class QuoteEntryTest : StringSpec({
         )
     }
 })
-
-internal class QuoteModelTypePropertyTest : StringSpec({
-    "Quote Entry Model should cancel previous quotes" {
-        QuoteModelType.QUOTE_ENTRY.shouldCancelPreviousQuotes() shouldBe true
-    }
-})

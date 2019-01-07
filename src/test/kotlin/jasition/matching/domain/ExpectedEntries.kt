@@ -35,11 +35,11 @@ fun expectedBookEntry(
     quoteEntry: QuoteEntry,
     side: Side,
     eventId: EventId = event.eventId,
-    sizes: EntrySizes = EntrySizes(side.size(quoteEntry)!!),
+    sizes: EntrySizes = EntrySizes(side.priceWithSize(quoteEntry)!!.size),
     status: EntryStatus = EntryStatus.NEW
 ): BookEntry =
     BookEntry(
-        price = side.price(quoteEntry),
+        price = side.priceWithSize(quoteEntry)?.price,
         whenSubmitted = event.whenHappened,
         eventId = eventId,
         requestId = expectedClientRequestId(event, quoteEntry),
@@ -67,7 +67,7 @@ fun expectedTradeSideEntry(
         entryType = quoteEntry.entryType,
         sizes = sizes,
         side = side,
-        price = side.price(quoteEntry),
+        price = side.priceWithSize(quoteEntry)?.price,
         timeInForce = event.timeInForce,
         whenSubmitted = event.whenHappened,
         eventId = eventId,

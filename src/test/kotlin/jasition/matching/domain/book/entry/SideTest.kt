@@ -29,21 +29,8 @@ internal class SideTest : StringSpec({
             )
         ) shouldBe PriceWithSize(price = price, size = size)
     }
-    "Returns the BID price of a quote entry" {
-        val price = randomPrice()
-        Side.BUY.price(
-            aQuoteEntry(
-                bid = PriceWithSize(price = price, size = randomSize())
-            )
-        ) shouldBe price
-    }
-    "Returns the BID size of a quote entry" {
-        val size = randomSize()
-        Side.BUY.size(
-            aQuoteEntry(
-                bid = PriceWithSize(price = randomPrice(), size = size)
-            )
-        ) shouldBe size
+    "Returns null if the BID side is absent in a quote entry" {
+        Side.BUY.priceWithSize(aQuoteEntry(bid = null)) shouldBe null
     }
     "SELL side has 1 as the comparator multiplier"{
         Side.SELL.comparatorMultiplier() shouldBe 1
@@ -57,26 +44,10 @@ internal class SideTest : StringSpec({
     "Returns the OFFER side of a quote entry" {
         val price = randomPrice()
         val size = randomSize()
-        Side.SELL.priceWithSize(
-            aQuoteEntry(
-                offer = PriceWithSize(price = price, size = size)
-            )
+        Side.SELL.priceWithSize(aQuoteEntry(offer = PriceWithSize(price = price, size = size))
         ) shouldBe PriceWithSize(price = price, size = size)
     }
-    "Returns the OFFER price of a quote entry" {
-        val price = randomPrice()
-        Side.SELL.price(
-            aQuoteEntry(
-                offer = PriceWithSize(price = price, size = randomSize())
-            )
-        ) shouldBe price
-    }
-    "Returns the OFFER size of a quote entry" {
-        val size = randomSize()
-        Side.SELL.size(
-            aQuoteEntry(
-                offer = PriceWithSize(price = randomPrice(), size = size)
-            )
-        ) shouldBe size
+    "Returns null if the OFFER side is absent in a quote entry" {
+        Side.SELL.priceWithSize(aQuoteEntry(offer = null)) shouldBe null
     }
 })

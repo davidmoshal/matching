@@ -31,24 +31,17 @@ data class MassQuotePlacedEvent(
     override fun isPrimary(): Boolean = true
 
     override fun play(aggregate: Books): Transaction<BookId, Books> {
-        val newTransaction = cancelQuotesIfRequired(aggregate.copy(lastEventId = aggregate.verifyEventId(eventId)))
+        val newTransaction = cancelExistingQuotes(
+            books = aggregate.copy(lastEventId = aggregate.verifyEventId(eventId)),
+            eventId = eventId,
+            whoRequested = whoRequested,
+            whenHappened = whenHappened,
+            primary = false
+        )
 
         return toBookEntries().fold(newTransaction) { txn, entry ->
             txn.append(matchAndPlaceEntry(entry, txn.aggregate))
         }
-    }
-
-    private fun cancelQuotesIfRequired(books: Books): Transaction<BookId, Books> {
-        if (quoteModelType.shouldCancelPreviousQuotes()) {
-            return cancelExistingQuotes(
-                books = books,
-                eventId = eventId,
-                whoRequested = whoRequested,
-                whenHappened = whenHappened,
-                primary = false
-            )
-        }
-        return Transaction(books)
     }
 
     fun toBookEntries(
