@@ -103,20 +103,15 @@ fun cancelExistingQuotes(
     whenHappened: Instant,
     primary: Boolean
 ): Transaction<BookId, Books> {
-    val toBeRemoved = books.findBookEntries(Predicate { p -> p.whoRequested == whoRequested && p.isQuote})
+    val toBeRemoved = books.findBookEntries(Predicate { p -> p.whoRequested == whoRequested && p.isQuote })
 
-    if (toBeRemoved.isEmpty) {
-        return Transaction(books)
-    }
-
-    val massQuoteCancelledEvent = MassQuoteCancelledEvent(
+    return if (toBeRemoved.isEmpty) Transaction(books)
+    else MassQuoteCancelledEvent(
         eventId = eventId.next(),
         entries = toBeRemoved.map(BookEntry::cancelled),
         bookId = books.bookId,
         primary = primary,
         whoRequested = whoRequested,
         whenHappened = whenHappened
-    )
-
-    return massQuoteCancelledEvent.playAndAppend(books)
+    ).playAndAppend(books)
 }

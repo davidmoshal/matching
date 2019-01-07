@@ -51,7 +51,7 @@ internal class EventIdTest : StringSpec({
         }
     }
     "Recognises that Event ID 0 is the next value of the maximum Long value"{
-        EventId(0).isNextOf(EventId(Long.MAX_VALUE)) shouldBe true
+        EventId(0L).isNextOf(EventId(Long.MAX_VALUE)) shouldBe true
     }
     "Evaluates that bigger Event ID is after smaller"{
         forall(
@@ -66,9 +66,9 @@ internal class EventIdTest : StringSpec({
         EventId(8).compareTo(EventId(6)) shouldBe 1
     }
     "Evaluates that Event ID Long.MAX_VALUE is before 0"{
-        EventId(Long.MAX_VALUE).compareTo(EventId(0)) shouldBe -1
+        EventId(Long.MAX_VALUE).compareTo(EventId(0L)) shouldBe -1
     }
     "Evaluates that Event ID 0 is after Long.MAX_VALUE"{
-        EventId(0).compareTo(EventId(Long.MAX_VALUE)) shouldBe 1
+        EventId(0L).compareTo(EventId(Long.MAX_VALUE)) shouldBe 1
     }
 })

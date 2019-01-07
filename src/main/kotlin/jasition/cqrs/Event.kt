@@ -22,7 +22,8 @@ data class EventId(val value: Long) : Comparable<EventId> {
     fun next(): EventId = EventId(if (value == Long.MAX_VALUE) 0 else value + 1)
 
     fun isNextOf(other: EventId): Boolean =
-        if (value == 0L && other.value == Long.MAX_VALUE) true else (value == other.value + 1)
+        if (value == 0L && other.value == Long.MAX_VALUE) true
+        else (value == other.value + 1)
 
     override fun compareTo(other: EventId): Int =
         if (value == Long.MAX_VALUE && other.value == 0L) -1
