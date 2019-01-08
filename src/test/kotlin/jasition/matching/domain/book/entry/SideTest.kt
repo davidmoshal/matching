@@ -44,7 +44,8 @@ internal class SideTest : StringSpec({
     "Returns the OFFER side of a quote entry" {
         val price = randomPrice()
         val size = randomSize()
-        Side.SELL.priceWithSize(aQuoteEntry(offer = PriceWithSize(price = price, size = size))
+        Side.SELL.priceWithSize(
+            aQuoteEntry(offer = PriceWithSize(price = price, size = size))
         ) shouldBe PriceWithSize(price = price, size = size)
     }
     "Returns null if the OFFER side is absent in a quote entry" {

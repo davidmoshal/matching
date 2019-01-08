@@ -10,7 +10,6 @@ import jasition.matching.domain.*
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.TradingStatus
 import jasition.matching.domain.book.TradingStatuses
-import jasition.matching.domain.book.entry.Price
 import jasition.matching.domain.book.entry.PriceWithSize
 import jasition.matching.domain.book.entry.TimeInForce
 import jasition.matching.domain.quote.QuoteModelType
@@ -32,6 +31,10 @@ internal class `Given there is a request to place a mass quote` : StringSpec({
             aQuoteEntry(
                 bid = PriceWithSize(randomPrice(from = 10, until = 12), randomSize()),
                 offer = PriceWithSize(randomPrice(from = 13, until = 15), randomSize())
+            ),
+            aQuoteEntry(
+                bid = PriceWithSize(randomPrice(from = 10, until = 12), randomSize()),
+                offer = PriceWithSize(randomPrice(from = 13, until = 15), randomSize())
             )
         ), whenRequested = Instant.now()
     )
@@ -45,6 +48,40 @@ internal class `Given there is a request to place a mass quote` : StringSpec({
                 quoteModelType = command.quoteModelType,
                 timeInForce = command.timeInForce,
                 entries = command.entries,
+                whenHappened = command.whenRequested
+            )
+        )
+    }
+    "Single-sided quoting on the BID side is allowed" {
+        val newEntries = List.of(aQuoteEntry(offerSize = null, bidPrice = 10))
+        command.copy(
+            entries = newEntries
+        ).validate(books) shouldBe Either.right(
+            MassQuotePlacedEvent(
+                eventId = books.lastEventId.next(),
+                quoteId = command.quoteId,
+                whoRequested = command.whoRequested,
+                bookId = bookId,
+                quoteModelType = command.quoteModelType,
+                timeInForce = command.timeInForce,
+                entries = newEntries,
+                whenHappened = command.whenRequested
+            )
+        )
+    }
+    "Single-sided quoting on the OFFER side is allowed" {
+        val newEntries = List.of(aQuoteEntry(bidSize = null, offerPrice = 10))
+        command.copy(
+            entries = newEntries
+        ).validate(books) shouldBe Either.right(
+            MassQuotePlacedEvent(
+                eventId = books.lastEventId.next(),
+                quoteId = command.quoteId,
+                whoRequested = command.whoRequested,
+                bookId = bookId,
+                quoteModelType = command.quoteModelType,
+                timeInForce = command.timeInForce,
+                entries = newEntries,
                 whenHappened = command.whenRequested
             )
         )
@@ -67,16 +104,20 @@ internal class `Given there is a request to place a mass quote` : StringSpec({
         )
     }
     forall(
-        row(0),
-        row(randomSize(from = -10, until = -1)),
-        row(randomSize(from = -20, until = -11))
-    ) { negativeSize ->
+        row(0, 2),
+        row(2, 0),
+        row(randomSize(from = -10, until = -1), 4),
+        row(7, randomSize(from = -20, until = -11)),
+        row(-15, -15)
+    ) { bidSize, offerSize ->
 
-        "When the request has non-positive sizes $negativeSize, the mass quote is rejected" {
+
+        val min = minOf(bidSize, offerSize)
+        "When the request has non-positive sizes (bid=$bidSize, offer=$offerSize), the mass quote is rejected" {
             val newEntries = List.of(
                 aQuoteEntry(
-                    bid = PriceWithSize(randomPrice(from = 10, until = 12), negativeSize),
-                    offer = PriceWithSize(randomPrice(from = 13, until = 15), randomSize())
+                    bid = PriceWithSize(randomPrice(from = 10, until = 12), bidSize),
+                    offer = PriceWithSize(randomPrice(from = 13, until = 15), offerSize)
                 )
             )
             command.copy(
@@ -92,22 +133,21 @@ internal class `Given there is a request to place a mass quote` : StringSpec({
                     entries = newEntries,
                     whenHappened = command.whenRequested,
                     quoteRejectReason = QuoteRejectReason.INVALID_QUANTITY,
-                    quoteRejectText = "Quote sizes must be positive : $negativeSize"
+                    quoteRejectText = "Quote sizes must be positive : $min"
                 )
             )
         }
     }
     forall(
-        row(Price(14), Price(14)),
-        row(randomPrice(from = 10, until = 20), randomPrice(from = 1, until = 10))
-    ) { maxBuy, minSell ->
-        "When the request has crossed prices maxBuy=$maxBuy and minSell=$minSell, the mass quote is rejected" {
-            val newEntries = List.of(
-                aQuoteEntry(
-                    bid = PriceWithSize(maxBuy, randomSize()),
-                    offer = PriceWithSize(minSell, randomSize())
-                )
-            )
+        row(List.of(aQuoteEntry(bidPrice = 14, offerPrice = 14)), 14, 14),
+        row(
+            List.of(aQuoteEntry(bidSize = null, offerPrice = 12), aQuoteEntry(bidPrice = 13, offerSize = null)),
+            12,
+            13
+        ),
+        row(List.of(aQuoteEntry(bidPrice = 14, offerPrice = 12), aQuoteEntry(bidPrice = 13, offerPrice = 13)), 12, 14)
+    ) { newEntries, minSell, maxBuy ->
+        "When the request has crossed prices (minSell=$minSell, maxBuy=$maxBuy), the mass quote is rejected" {
             command.copy(
                 entries = newEntries
             ).validate(books) shouldBe Either.left(
@@ -121,7 +161,7 @@ internal class `Given there is a request to place a mass quote` : StringSpec({
                     entries = newEntries,
                     whenHappened = command.whenRequested,
                     quoteRejectReason = QuoteRejectReason.INVALID_BID_ASK_SPREAD,
-                    quoteRejectText = "Quote prices must not cross within a mass quote: lowestSellPrice=${minSell.value}, highestBuyPrice=${maxBuy.value}"
+                    quoteRejectText = "Quote prices must not cross within a mass quote: lowestSellPrice=$minSell, highestBuyPrice=$maxBuy"
                 )
             )
         }

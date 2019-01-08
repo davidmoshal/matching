@@ -82,17 +82,16 @@ data class PlaceMassQuoteCommand(
             }
 
     private fun lowestSellPrice(): Long? =
-        entries.filter { it.offer?.price != null }
-            .map { it.offer?.price?.value }
+        entries.map { it.offer }
+            .filterNotNull()
+            .map { it.price.value }
             .min()
-            .orNull
 
     private fun highestBuyPrice(): Long? =
-        entries.filter { it.bid?.price != null }
-            .map { it.bid?.price?.value }
+        entries.map { it.bid }
+            .filterNotNull()
+            .map { it.price.value }
             .max()
-            .orNull
-
 
     private fun findNonPositiveSize(it: QuoteEntry): Int? =
         it.bid?.let { b -> if (b.size <= 0) b.size else null }

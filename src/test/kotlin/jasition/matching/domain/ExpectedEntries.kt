@@ -1,10 +1,7 @@
 package jasition.matching.domain
 
 import jasition.cqrs.EventId
-import jasition.matching.domain.book.entry.BookEntry
-import jasition.matching.domain.book.entry.EntrySizes
-import jasition.matching.domain.book.entry.EntryStatus
-import jasition.matching.domain.book.entry.Side
+import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.order.event.OrderPlacedEvent
 import jasition.matching.domain.quote.QuoteEntry
@@ -45,7 +42,7 @@ fun expectedBookEntry(
         requestId = expectedClientRequestId(event, quoteEntry),
         whoRequested = event.whoRequested,
         isQuote = true,
-        entryType = quoteEntry.entryType,
+        entryType = EntryType.LIMIT,
         side = side,
         timeInForce = event.timeInForce,
         sizes = sizes,
@@ -64,7 +61,7 @@ fun expectedTradeSideEntry(
         requestId = expectedClientRequestId(event, quoteEntry),
         whoRequested = event.whoRequested,
         isQuote = true,
-        entryType = quoteEntry.entryType,
+        entryType = EntryType.LIMIT,
         sizes = sizes,
         side = side,
         price = side.priceWithSize(quoteEntry)?.price,

@@ -17,7 +17,6 @@ import java.util.function.Predicate
 data class QuoteEntry(
     val quoteEntryId: String,
     val quoteSetId: String,
-    val entryType: EntryType,
     val bid: PriceWithSize?,
     val offer: PriceWithSize?
 ) {
@@ -80,7 +79,7 @@ data class QuoteEntry(
         requestId = toClientRequestId(quoteId = quoteId),
         whoRequested = whoRequested,
         isQuote = true,
-        entryType = entryType,
+        entryType = EntryType.LIMIT,
         side = side,
         sizes = EntrySizes(size),
         price = price,
