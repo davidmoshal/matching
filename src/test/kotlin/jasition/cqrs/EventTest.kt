@@ -20,7 +20,7 @@ internal class EventTest : StringSpec({
             sideEffectEvent = sideEffectEvent
         )
 
-        primaryEvent.playAndAppend(aggregate) shouldBe Transaction(
+        primaryEvent playAndAppend aggregate shouldBe Transaction(
             aggregate = updatedAggregate,
             events = List.of(primaryEvent, sideEffectEvent)
         )

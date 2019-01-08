@@ -16,14 +16,14 @@ data class Transaction<K, A : Aggregate<K>>(val aggregate: A, val events: List<E
         aggregate = aggregate,
         events = events.appendAll(event.asList())
     )
+}
 
-    fun thenPlay(
-        event: Event<K, A>
-    ): Transaction<K, A> {
-        val other = event.play(aggregate)
-        return Transaction(
-            aggregate = other.aggregate,
-            events = events.append(event).appendAll(other.events)
-        )
-    }
+infix fun <K, A : Aggregate<K>> Transaction<K, A>.thenPlay(
+    event: Event<K, A>
+): Transaction<K, A> {
+    val other = event.play(aggregate)
+    return Transaction(
+        aggregate = other.aggregate,
+        events = events.append(event).appendAll(other.events)
+    )
 }

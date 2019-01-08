@@ -2,7 +2,9 @@ package jasition.matching.domain.scenario.recovery
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.FeatureSpec
+import jasition.cqrs.playAndAppend
 import jasition.cqrs.recovery.replay
+import jasition.cqrs.thenPlay
 import jasition.matching.domain.*
 import jasition.matching.domain.book.TradingStatus
 import jasition.matching.domain.book.command.CreateBooksCommand
@@ -17,7 +19,7 @@ internal class `Recover books from replaying events only` : FeatureSpec({
         defaultTradingStatus = TradingStatus.OPEN_FOR_TRADING
     ).validate()
 
-    var latest = booksCreatedEvent.playAndAppend(initialBooks)
+    var latest = booksCreatedEvent playAndAppend initialBooks
 
     var orderCommandCount = 0
     var massQuoteCommandCount = 0
@@ -31,18 +33,18 @@ internal class `Recover books from replaying events only` : FeatureSpec({
             randomPlaceOrderCommand(bookId = bookId, size = randomSize(from = -5, until = 30))
                 .validate(latest.aggregate)
                 .fold({ rejected ->
-                    latest = latest.thenPlay(rejected)
+                    latest = latest thenPlay rejected
                 }, { placed ->
-                    latest = latest.thenPlay(placed)
+                    latest = latest thenPlay placed
                 })
         } else {
             massQuoteCommandCount++
             randomPlaceMassQuoteCommand(bookId = bookId, whoRequested = aFirmWithoutClient())
                 .validate(latest.aggregate)
                 .fold({ rejected ->
-                    latest = latest.thenPlay(rejected)
+                    latest = latest thenPlay rejected
                 }, { placed ->
-                    latest = latest.thenPlay(placed)
+                    latest = latest thenPlay placed
                 })
         }
     }

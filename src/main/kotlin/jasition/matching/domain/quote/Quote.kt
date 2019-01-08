@@ -4,6 +4,7 @@ import io.vavr.collection.List
 import io.vavr.collection.Seq
 import jasition.cqrs.EventId
 import jasition.cqrs.Transaction
+import jasition.cqrs.playAndAppend
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.*
@@ -111,5 +112,5 @@ fun cancelExistingQuotes(
         primary = primary,
         whoRequested = whoRequested,
         whenHappened = whenHappened
-    ).playAndAppend(books)
+    ) playAndAppend books
 }

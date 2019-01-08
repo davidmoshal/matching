@@ -7,12 +7,13 @@ interface Event<K, A : Aggregate<K>> {
     fun eventId(): EventId
     fun isPrimary(): Boolean
     fun play(aggregate: A): Transaction<K, A>
-
-    fun playAndAppend(aggregate: A): Transaction<K, A> {
-        val transaction = play(aggregate)
-        return transaction.copy(events = List.of(this).appendAll(transaction.events))
-    }
 }
+
+infix fun <K, A : Aggregate<K>> Event<K, A>.playAndAppend(aggregate: A): Transaction<K, A> {
+    val transaction = play(aggregate)
+    return transaction.copy(events = List.of(this).appendAll(transaction.events))
+}
+
 
 data class EventId(val value: Long) : Comparable<EventId> {
     init {
