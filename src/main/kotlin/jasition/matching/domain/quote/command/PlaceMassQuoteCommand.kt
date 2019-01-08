@@ -5,6 +5,7 @@ import io.vavr.collection.Seq
 import jasition.cqrs.Command
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
+import jasition.matching.domain.book.entry.PriceWithSize
 import jasition.matching.domain.book.entry.TimeInForce
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.quote.QuoteEntry
@@ -93,10 +94,11 @@ data class PlaceMassQuoteCommand(
             .map { it.price.value }
             .max()
 
-    private fun findNonPositiveSize(it: QuoteEntry): Int? =
-        it.bid?.let { b -> if (b.size <= 0) b.size else null }
-            ?: it.offer?.let { o -> if (o.size <= 0) o.size else null }
+    private fun findNonPositiveSize(quoteEntry: QuoteEntry): Int? =
+        findNonPositiveSize(quoteEntry.bid) ?: findNonPositiveSize(quoteEntry.offer)
 
+    private fun findNonPositiveSize(priceWithSize: PriceWithSize?): Int? =
+        priceWithSize?.let { if (it.size <= 0) it.size else null }
 
     private fun toRejectedEvent(
         books: Books,

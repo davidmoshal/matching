@@ -4,6 +4,7 @@ import io.vavr.collection.Seq
 import jasition.cqrs.Event
 import jasition.cqrs.EventId
 import jasition.cqrs.Transaction
+import jasition.cqrs.playAndAppend
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.TimeInForce
@@ -30,13 +31,22 @@ data class MassQuoteRejectedEvent(
     override fun isPrimary(): Boolean = true
 
     override fun play(aggregate: Books): Transaction<BookId, Books> {
-        return cancelExistingQuotes(
-            books = aggregate.copy(lastEventId = aggregate.verifyEventId(eventId)),
+        val books = aggregate.copy(lastEventId = aggregate.verifyEventId(eventId))
+        val event = cancelExistingQuotes(
+            books = books,
             eventId = eventId,
             whoRequested = whoRequested,
             whenHappened = whenHappened,
             primary = false
         )
+
+        return if (event != null) {
+            event playAndAppend books
+        } else
+            Transaction(books)
+
+// TODO: revise for newer Jacoco version - Below is equivalence to above but Jacoco cannot reach 100% coverage with the let function
+//        return event?.let { it playAndAppend books } ?: Transaction(books)
     }
 }
 

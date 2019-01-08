@@ -3,9 +3,6 @@ package jasition.matching.domain.quote
 import io.vavr.collection.List
 import io.vavr.collection.Seq
 import jasition.cqrs.EventId
-import jasition.cqrs.Transaction
-import jasition.cqrs.playAndAppend
-import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.client.Client
@@ -98,18 +95,20 @@ fun cancelExistingQuotes(
     whoRequested: Client,
     whenHappened: Instant,
     primary: Boolean
-): Transaction<BookId, Books> {
+): MassQuoteCancelledEvent? {
     val toBeRemoved = books
         .findBookEntries(Predicate { p -> p.whoRequested == whoRequested && p.isQuote })
-        .map(BookEntry::cancelled)
 
-    return if (toBeRemoved.isEmpty) Transaction(books)
-    else MassQuoteCancelledEvent(
+    if (toBeRemoved.isEmpty) return null
+
+    return MassQuoteCancelledEvent(
         eventId = eventId.next(),
-        entries = toBeRemoved,
+        entries = toBeRemoved.map { it.cancelled() },
+        // TODO: revise for newer Jacoco version - Below is equivalence to above but Jacoco cannot reach 100% coverage with the function reference
+//        entries = toBeRemoved.map(BookEntry::cancelled),
         bookId = books.bookId,
         primary = primary,
         whoRequested = whoRequested,
         whenHappened = whenHappened
-    ) playAndAppend books
+    )
 }

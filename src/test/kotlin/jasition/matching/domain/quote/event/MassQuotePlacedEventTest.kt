@@ -124,7 +124,15 @@ internal class `Given a mass quote is placed on a book with existing entries` : 
     val removedEntry = aBookEntry(
         eventId = EventId(0),
         side = Side.SELL,
+        price = Price(10),
         whoRequested = aFirmWithoutClient(),
+        isQuote = true
+    )
+    aBookEntry(
+        eventId = EventId(0),
+        side = Side.SELL,
+        price = Price(11),
+        whoRequested = anotherFirmWithoutClient(),
         isQuote = true
     )
     val books = aBooks(aBookId()).addBookEntry(existingEntry).addBookEntry(
