@@ -41,14 +41,10 @@ data class MassQuotePlacedEvent(
             primary = false
         )
 
-        val initial =
-            if (event != null) {
-                event playAndAppend books
-            } else
-                Transaction(books)
+        val initial = if (event != null) event playAndAppend books else Transaction(books)
 
 // TODO: revise for newer Jacoco version - Below is equivalence to above but Jacoco cannot reach 100% coverage with the let function
-//        val initial = event?.let { it playAndAppend books } ?: Transaction(books)
+//        val initial = event?.playAndAppend(books) ?: Transaction(books)
 
         return toBookEntries().fold(initial) { txn, entry ->
             txn.append(matchAndPlaceEntry(entry, txn.aggregate))

@@ -40,13 +40,10 @@ data class MassQuoteRejectedEvent(
             primary = false
         )
 
-        return if (event != null) {
-            event playAndAppend books
-        } else
-            Transaction(books)
+        return if (event != null) event playAndAppend books else Transaction(books)
 
 // TODO: revise for newer Jacoco version - Below is equivalence to above but Jacoco cannot reach 100% coverage with the let function
-//        return event?.let { it playAndAppend books } ?: Transaction(books)
+//        return event?.playAndAppend(books) ?: Transaction(books)
     }
 }
 
