@@ -90,20 +90,22 @@ internal class FindNextMatchTest : StringSpec({
             )
         ) shouldBe Match(passive, Price(10))
     }
-    "Skipped the first passive entry due to same firm (no whoRequested) and found the second as the next matched" {
+    "Skipped the first passive entry due to both are quote and found the second as the next matched" {
         val passive = entry.copy(
             side = Side.SELL,
             key = entryKey.copy(price = Price(10)),
-            whoRequested = otherFirmClient
+            whoRequested = otherFirmClient,
+            isQuote = false
         )
         findNextMatch(
             aggressor = entry.copy(
                 side = Side.BUY,
                 key = entryKey.copy(price = Price(10)),
-                whoRequested = entry.whoRequested.copy(firmClientId = null)
+                whoRequested = entry.whoRequested,
+                isQuote = true
             ),
             passives = List.of(
-                passive.copy(whoRequested = entry.whoRequested.copy(firmClientId = null)),
+                passive.copy(isQuote = true),
                 passive
             )
         ) shouldBe Match(passive, Price(10))
