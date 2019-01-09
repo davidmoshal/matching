@@ -111,3 +111,4 @@ jacocoTestCoverageVerification {
 }
 
 check.dependsOn jacocoTestCoverageVerification
+build.dependsOn jacocoTestReport
