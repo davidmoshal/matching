@@ -98,9 +98,16 @@ jacocoTestReport {
 jacocoTestCoverageVerification {
     violationRules {
         rule {
+            element = 'CLASS'
             limit {
                 minimum = 1
             }
+            excludes = [
+                    "*.scneario.*",
+                    "*.benchmark.*"
+            ]
         }
     }
 }
+
+check.dependsOn jacocoTestCoverageVerification
