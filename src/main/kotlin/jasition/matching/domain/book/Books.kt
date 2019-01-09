@@ -61,10 +61,10 @@ data class Books(
 
     fun findBookEntries(predicate: Predicate<BookEntry>): List<BookEntry> =
         List.ofAll(
-            buyLimitBook.entries
-                .filterValues(predicate)
-                .values()
-                .appendAll(sellLimitBook.entries.filterValues(predicate).values())
+            buyLimitBook.entries.filterValues(predicate).values()
+                .appendAll(
+                    sellLimitBook.entries.filterValues(predicate).values()
+                )
         )
 
     fun verifyEventId(eventId: EventId): EventId =

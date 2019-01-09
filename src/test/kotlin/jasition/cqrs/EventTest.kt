@@ -20,7 +20,7 @@ internal class EventTest : StringSpec({
             sideEffectEvent = sideEffectEvent
         )
 
-        primaryEvent.playAndAppend(aggregate) shouldBe Transaction(
+        primaryEvent playAndAppend aggregate shouldBe Transaction(
             aggregate = updatedAggregate,
             events = List.of(primaryEvent, sideEffectEvent)
         )
@@ -45,30 +45,40 @@ internal class EventIdTest : StringSpec({
             row(8L, 7L, true),
             row(8L, 8L, false),
             row(8L, 9L, false),
-            row(8L, 10L, false)
+            row(8L, 10L, false),
+            row(0L, Long.MAX_VALUE - 1, false),
+            row(0L, Long.MAX_VALUE, true),
+            row(0L, 0L, false),
+            row(0L, 1L, false),
+            row(0L, 2L, false),
+            row(1L, Long.MAX_VALUE, false),
+            row(1L, 0L, true),
+            row(1L, 1L, false),
+            row(1L, 2L, false),
+            row(1L, 3L, false)
         ) { a, b, result ->
             EventId(a).isNextOf(EventId(b)) shouldBe result
         }
     }
     "Recognises that Event ID 0 is the next value of the maximum Long value"{
-        EventId(0).isNextOf(EventId(Long.MAX_VALUE)) shouldBe true
+        EventId(0L).isNextOf(EventId(Long.MAX_VALUE)) shouldBe true
     }
-    "Evaluates that bigger Event ID is after smaller"{
+    "Evaluates that bigger Event ID is after smaller except 0 is the next of Long.MAX_VALUE"{
         forall(
             row(8L, 6L, 1),
             row(8L, 7L, 1),
             row(8L, 8L, 0),
             row(8L, 9L, -1),
-            row(8L, 10L, -1)
+            row(8L, 10L, -1),
+            row(Long.MAX_VALUE, 0L, -1),
+            row(0L, Long.MAX_VALUE, 1),
+            row(Long.MAX_VALUE, 1L, 1),
+            row(1L, Long.MAX_VALUE, -1),
+            row(Long.MAX_VALUE - 1, 0L, 1),
+            row(0L, Long.MAX_VALUE - 1, -1)
         ) { a, b, result ->
             EventId(a).compareTo(EventId(b)) shouldBe result
         }
         EventId(8).compareTo(EventId(6)) shouldBe 1
-    }
-    "Evaluates that Event ID Long.MAX_VALUE is before 0"{
-        EventId(Long.MAX_VALUE).compareTo(EventId(0)) shouldBe -1
-    }
-    "Evaluates that Event ID 0 is after Long.MAX_VALUE"{
-        EventId(0).compareTo(EventId(Long.MAX_VALUE)) shouldBe 1
     }
 })

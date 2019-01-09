@@ -37,7 +37,7 @@ internal class TransactionTest : StringSpec({
             sideEffectEvent = event3, eventId = anEventId()
         )
 
-        originalTransaction.thenPlay(event) shouldBe Transaction(newAggregate, originalEvents.append(event).append(event3))
+        originalTransaction thenPlay event shouldBe Transaction(newAggregate, originalEvents.append(event).append(event3))
     }
 })
 

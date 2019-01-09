@@ -14,6 +14,7 @@ import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.order.event.OrderPlacedEvent
 import jasition.matching.domain.quote.QuoteEntry
 import java.time.Instant
+import kotlin.random.Random
 
 fun aBooks(bookId: BookId, bookEntries: Seq<BookEntry> = List.empty()): Books =
     aBooksWithEntities(Books(bookId), bookEntries)
@@ -159,13 +160,22 @@ fun countEventsByClass(events: Seq<Event<BookId, Books>>) =
 fun aQuoteEntry(
     quoteEntryId: String = randomId(),
     quoteSetId: String = "1",
-    entryType: EntryType = EntryType.LIMIT,
     bid: PriceWithSize? = null,
     offer: PriceWithSize? = null
 ): QuoteEntry = QuoteEntry(
     quoteEntryId = quoteEntryId,
     quoteSetId = quoteSetId,
-    entryType = entryType,
     bid = bid,
     offer = offer
 )
+
+fun aQuoteEntry(
+    bidPrice: Long = Random.nextLong(),
+    bidSize: Int? = randomSize(),
+    offerPrice: Long = Random.nextLong(),
+    offerSize: Int? = randomSize()
+): QuoteEntry = aQuoteEntry(
+    bid = bidSize?.let { PriceWithSize(Price(bidPrice), it) },
+    offer = offerSize?.let { PriceWithSize(Price(offerPrice), it) }
+)
+

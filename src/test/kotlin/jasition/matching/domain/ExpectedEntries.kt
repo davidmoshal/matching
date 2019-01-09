@@ -1,10 +1,7 @@
 package jasition.matching.domain
 
 import jasition.cqrs.EventId
-import jasition.matching.domain.book.entry.BookEntry
-import jasition.matching.domain.book.entry.EntrySizes
-import jasition.matching.domain.book.entry.EntryStatus
-import jasition.matching.domain.book.entry.Side
+import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.order.event.OrderPlacedEvent
 import jasition.matching.domain.quote.QuoteEntry
@@ -35,17 +32,17 @@ fun expectedBookEntry(
     quoteEntry: QuoteEntry,
     side: Side,
     eventId: EventId = event.eventId,
-    sizes: EntrySizes = EntrySizes(side.size(quoteEntry)!!),
+    sizes: EntrySizes = EntrySizes(side.priceWithSize(quoteEntry)!!.size),
     status: EntryStatus = EntryStatus.NEW
 ): BookEntry =
     BookEntry(
-        price = side.price(quoteEntry),
+        price = side.priceWithSize(quoteEntry)?.price,
         whenSubmitted = event.whenHappened,
         eventId = eventId,
         requestId = expectedClientRequestId(event, quoteEntry),
         whoRequested = event.whoRequested,
         isQuote = true,
-        entryType = quoteEntry.entryType,
+        entryType = EntryType.LIMIT,
         side = side,
         timeInForce = event.timeInForce,
         sizes = sizes,
@@ -64,10 +61,10 @@ fun expectedTradeSideEntry(
         requestId = expectedClientRequestId(event, quoteEntry),
         whoRequested = event.whoRequested,
         isQuote = true,
-        entryType = quoteEntry.entryType,
+        entryType = EntryType.LIMIT,
         sizes = sizes,
         side = side,
-        price = side.price(quoteEntry),
+        price = side.priceWithSize(quoteEntry)?.price,
         timeInForce = event.timeInForce,
         whenSubmitted = event.whenHappened,
         eventId = eventId,

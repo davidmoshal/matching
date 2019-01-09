@@ -10,7 +10,7 @@ import java.time.Instant
 
 internal class QuoteEntryTest : StringSpec({
     val quoteId = "quoteId"
-    val quoteEntry = aQuoteEntry()
+    val quoteEntry = aQuoteEntry(quoteEntryId = randomId())
     val whoRequested = aFirmWithClient()
     val whenHappened = Instant.now()
     val eventId = anEventId()
@@ -29,7 +29,7 @@ internal class QuoteEntryTest : StringSpec({
             parentId = quoteId
         ),
         isQuote = true,
-        entryType = quoteEntry.entryType,
+        entryType = EntryType.LIMIT,
         side = Side.BUY,
         timeInForce = timeInForce,
         sizes = EntrySizes(bid.size),
@@ -91,11 +91,5 @@ internal class QuoteEntryTest : StringSpec({
             expectedBuyEntry,
             expectedSellEntry
         )
-    }
-})
-
-internal class QuoteModelTypePropertyTest : StringSpec({
-    "Quote Entry Model should cancel previous quotes" {
-        QuoteModelType.QUOTE_ENTRY.shouldCancelPreviousQuotes() shouldBe true
     }
 })

@@ -4,6 +4,18 @@ import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 
 internal class EntryStatusTest : StringSpec({
+    "NEW Status is not final" {
+        EntryStatus.NEW.isFinal() shouldBe false
+    }
+    "PARTIAL_FILL Status is not final" {
+        EntryStatus.PARTIAL_FILL.isFinal() shouldBe false
+    }
+    "FILLED Status is final" {
+        EntryStatus.FILLED.isFinal() shouldBe true
+    }
+    "CANCELLED Status is final" {
+        EntryStatus.CANCELLED.isFinal() shouldBe true
+    }
     "Positive available sizes is partial fill"{
         EntryStatus.PARTIAL_FILL.traded(
             EntrySizes(

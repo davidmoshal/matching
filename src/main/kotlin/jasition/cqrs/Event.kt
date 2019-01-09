@@ -7,12 +7,13 @@ interface Event<K, A : Aggregate<K>> {
     fun eventId(): EventId
     fun isPrimary(): Boolean
     fun play(aggregate: A): Transaction<K, A>
-
-    fun playAndAppend(aggregate: A): Transaction<K, A> {
-        val transaction = play(aggregate)
-        return transaction.copy(events = List.of(this).appendAll(transaction.events))
-    }
 }
+
+infix fun <K, A : Aggregate<K>> Event<K, A>.playAndAppend(aggregate: A): Transaction<K, A> {
+    val transaction = play(aggregate)
+    return transaction.copy(events = List.of(this).appendAll(transaction.events))
+}
+
 
 data class EventId(val value: Long) : Comparable<EventId> {
     init {
@@ -22,7 +23,8 @@ data class EventId(val value: Long) : Comparable<EventId> {
     fun next(): EventId = EventId(if (value == Long.MAX_VALUE) 0 else value + 1)
 
     fun isNextOf(other: EventId): Boolean =
-        if (value == 0L && other.value == Long.MAX_VALUE) true else (value == other.value + 1)
+        if (value == 0L && other.value == Long.MAX_VALUE) true
+        else (value == other.value + 1)
 
     override fun compareTo(other: EventId): Int =
         if (value == Long.MAX_VALUE && other.value == 0L) -1

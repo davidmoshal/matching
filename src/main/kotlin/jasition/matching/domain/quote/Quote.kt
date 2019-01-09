@@ -3,8 +3,6 @@ package jasition.matching.domain.quote
 import io.vavr.collection.List
 import io.vavr.collection.Seq
 import jasition.cqrs.EventId
-import jasition.cqrs.Transaction
-import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.client.Client
@@ -16,7 +14,6 @@ import java.util.function.Predicate
 data class QuoteEntry(
     val quoteEntryId: String,
     val quoteSetId: String,
-    val entryType: EntryType,
     val bid: PriceWithSize?,
     val offer: PriceWithSize?
 ) {
@@ -79,7 +76,7 @@ data class QuoteEntry(
         requestId = toClientRequestId(quoteId = quoteId),
         whoRequested = whoRequested,
         isQuote = true,
-        entryType = entryType,
+        entryType = EntryType.LIMIT,
         side = side,
         sizes = EntrySizes(size),
         price = price,
@@ -89,11 +86,7 @@ data class QuoteEntry(
 }
 
 enum class QuoteModelType {
-    QUOTE_ENTRY {
-        override fun shouldCancelPreviousQuotes(): Boolean = true
-    };
-
-    abstract fun shouldCancelPreviousQuotes(): Boolean
+    QUOTE_ENTRY
 }
 
 fun cancelExistingQuotes(
@@ -102,21 +95,20 @@ fun cancelExistingQuotes(
     whoRequested: Client,
     whenHappened: Instant,
     primary: Boolean
-): Transaction<BookId, Books> {
-    val toBeRemoved = books.findBookEntries(Predicate { p -> p.whoRequested == whoRequested && p.isQuote})
+): MassQuoteCancelledEvent? {
+    val toBeRemoved = books
+        .findBookEntries(Predicate { p -> p.whoRequested == whoRequested && p.isQuote })
 
-    if (toBeRemoved.isEmpty) {
-        return Transaction(books)
-    }
+    if (toBeRemoved.isEmpty) return null
 
-    val massQuoteCancelledEvent = MassQuoteCancelledEvent(
+    return MassQuoteCancelledEvent(
         eventId = eventId.next(),
-        entries = toBeRemoved.map(BookEntry::cancelled),
+        entries = toBeRemoved.map { it.cancelled() },
+        // TODO: revise for newer Jacoco version - Below is equivalence to above but Jacoco cannot reach 100% coverage with the function reference
+//        entries = toBeRemoved.map(BookEntry::cancelled),
         bookId = books.bookId,
         primary = primary,
         whoRequested = whoRequested,
         whenHappened = whenHappened
     )
-
-    return massQuoteCancelledEvent.playAndAppend(books)
 }
