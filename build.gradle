@@ -1,7 +1,8 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.3.11'
     id 'jacoco' // Code coverage
-    id 'nl.fabianm.kotlin.plugin.generated' version '1.3.0' // Exclude Kotlin generated code in code coverage
+    id 'nl.fabianm.kotlin.plugin.generated' version '1.3.0' // Exclude Kotlin
+    id 'idea'// generated code in code coverage
 }
 
 group 'jasition'
@@ -12,6 +13,34 @@ repositories {
     jcenter()
     maven {
         url "https://plugins.gradle.org/m2/"
+    }
+}
+
+sourceSets {
+    scenarioTest {
+        kotlin {
+            srcDir file('src/scenario-test/kotlin')
+            outputDir = file('out/scenario-test/kotlin')
+            compileClasspath += sourceSets.main.output + configurations.testCompile
+            runtimeClasspath += output + compileClasspath + configurations.testRuntime
+        }
+    }
+    benchmarkTest {
+        kotlin {
+            srcDir file('src/benchmark-test/kotlin')
+            outputDir = file('out/benchmark-test/kotlin')
+            compileClasspath += sourceSets.main.output + configurations.testCompile
+            runtimeClasspath += output + compileClasspath + configurations.testRuntime
+        }
+    }
+}
+
+idea {
+    module {
+        testSourceDirs += sourceSets.scenarioTest.kotlin.srcDirs
+        testSourceDirs += sourceSets.benchmarkTest.kotlin.srcDirs
+        scopes.TEST.plus += [configurations.scenarioTestCompile]
+        scopes.TEST.plus += [configurations.benchmarkTestCompile]
     }
 }
 
@@ -40,13 +69,27 @@ dependencies {
     testImplementation('io.mockk:mockk:1.8.13') {
         exclude group: 'io.kotlintest'
     }
+
+    scenarioTestCompile sourceSets.main.output
+    scenarioTestCompile sourceSets.test.output
+    scenarioTestRuntime configurations.compile
+    scenarioTestRuntime configurations.testCompile
+    scenarioTestRuntime configurations.runtime
+    scenarioTestRuntime configurations.testRuntime
+
+    benchmarkTestCompile sourceSets.main.output
+    benchmarkTestCompile sourceSets.test.output
+    benchmarkTestCompile configurations.compile
+    benchmarkTestCompile configurations.testCompile
+    benchmarkTestRuntime configurations.runtime
+    benchmarkTestRuntime configurations.testRuntime
 }
 
 test {
     failFast = true
 
     useJUnitPlatform {
-        includeEngines 'spek', 'junit-jupiter', 'kotlintest'
+        includeEngines 'kotlintest'
     }
     testLogging {
         events "passed", "skipped", "failed"
@@ -64,11 +107,19 @@ test {
         destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
         classDumpDir = file("$buildDir/jacoco/classpathdumps")
     }
+    reports.html.setDestination(file("$buildDir/reports/unit-tests"))
+
 }
 compileKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
 compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+compileScenarioTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+compileBenchmarkTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
 
@@ -81,7 +132,7 @@ jacocoTestReport {
     reports {
         xml.enabled false
         csv.enabled false
-        html.destination file("${buildDir}/reports/coverage/html")
+        html.destination file("${buildDir}/reports/coverage")
     }
 
     afterEvaluate {
@@ -112,3 +163,54 @@ jacocoTestCoverageVerification {
 
 check.dependsOn jacocoTestCoverageVerification
 build.dependsOn jacocoTestReport
+
+task scenarioTest(type: Test) {
+    useJUnitPlatform {
+        includeEngines 'kotlintest'
+    }
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+    afterSuite { desc, result ->
+        if (!desc.parent) {
+            println "\nScenario Test results: ${result.resultType} " +
+                    "(${result.testCount} tests completed, " +
+                    "${result.successfulTestCount} succeeded, " +
+                    "${result.failedTestCount} failed, " +
+                    "${result.skippedTestCount} skipped)"
+        }
+    }
+
+    description = 'Runs the scenario tests.'
+    group = 'verification'
+    testClassesDirs = sourceSets.scenarioTest.output.classesDirs
+    classpath = sourceSets.scenarioTest.runtimeClasspath
+    mustRunAfter test
+    reports.html.setDestination(file("$buildDir/reports/scenario-tests"))
+}
+check.dependsOn scenarioTest
+
+task benchmarkTest(type: Test) {
+    useJUnitPlatform {
+        includeEngines 'kotlintest'
+    }
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+    afterSuite { desc, result ->
+        if (!desc.parent) {
+            println "\nBenchmark Test results: ${result.resultType} " +
+                    "(${result.testCount} tests completed, " +
+                    "${result.successfulTestCount} succeeded, " +
+                    "${result.failedTestCount} failed, " +
+                    "${result.skippedTestCount} skipped)"
+        }
+    }
+
+    description = 'Runs the benchmark tests.'
+    group = 'verification'
+    testClassesDirs = sourceSets.benchmarkTest.output.classesDirs
+    classpath = sourceSets.benchmarkTest.runtimeClasspath
+    mustRunAfter scenarioTest
+    reports.html.setDestination(file("$buildDir/reports/benchmark-tests"))
+}
