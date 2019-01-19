@@ -58,6 +58,24 @@ The *Book* contains
 * Trading Status - The shortcut representation of trading rule enforcement. Certain commands are not allowed under certain *Trading Status*.
 * Last Event ID - The last Event ID the results in the current *Book* state. 
 
+## How-to build and test
+### Build the project
+The project is built with the following option:
+`gradle build test`
+
+And the test reports can be found under
+* Unit tests -  `/build/reports/unit-tests/index.html`
+* Scenario tests - `/build/reports/scenario-tests/index.html`
+* Coverage - `/build/reports/coverage/index.html`
+
+### Run benchmarking
+Benchmarking is run under the following option:
+`gradle --no-daemon clean jmh`
+
+Somehow changing the annotation @Benchmark did not affect the generated JMS source. The issue was reported [here](https://github.com/melix/jmh-gradle-plugin/issues/132).
+
+And the report can be found under `/build/reports/jmh/results.json`
+
 ## Application Semantics
 ### Functional programming
 There are two basic constructs:

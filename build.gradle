@@ -1,8 +1,9 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.3.11'
     id 'jacoco' // Code coverage
-    id 'nl.fabianm.kotlin.plugin.generated' version '1.3.0' // Exclude Kotlin
-    id 'idea'// generated code in code coverage
+    id 'nl.fabianm.kotlin.plugin.generated' version '1.3.0' // Exclude Kotlin generated code in code coverage
+    id 'idea'
+    id "me.champeau.gradle.jmh" version "0.4.8" // Benchmarking
 }
 
 group 'jasition'
@@ -25,22 +26,13 @@ sourceSets {
             runtimeClasspath += output + compileClasspath + configurations.testRuntime
         }
     }
-    benchmarkTest {
-        kotlin {
-            srcDir file('src/benchmark-test/kotlin')
-            outputDir = file('out/benchmark-test/kotlin')
-            compileClasspath += sourceSets.main.output + configurations.testCompile
-            runtimeClasspath += output + compileClasspath + configurations.testRuntime
-        }
-    }
 }
 
 idea {
     module {
         testSourceDirs += sourceSets.scenarioTest.kotlin.srcDirs
-        testSourceDirs += sourceSets.benchmarkTest.kotlin.srcDirs
+        testSourceDirs += sourceSets.jmh.kotlin.srcDirs
         scopes.TEST.plus += [configurations.scenarioTestCompile]
-        scopes.TEST.plus += [configurations.benchmarkTestCompile]
     }
 }
 
@@ -76,13 +68,6 @@ dependencies {
     scenarioTestRuntime configurations.testCompile
     scenarioTestRuntime configurations.runtime
     scenarioTestRuntime configurations.testRuntime
-
-    benchmarkTestCompile sourceSets.main.output
-    benchmarkTestCompile sourceSets.test.output
-    benchmarkTestCompile configurations.compile
-    benchmarkTestCompile configurations.testCompile
-    benchmarkTestRuntime configurations.runtime
-    benchmarkTestRuntime configurations.testRuntime
 }
 
 test {
@@ -117,9 +102,6 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
 compileScenarioTestKotlin {
-    kotlinOptions.jvmTarget = "1.8"
-}
-compileBenchmarkTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
 
@@ -190,27 +172,9 @@ task scenarioTest(type: Test) {
 }
 check.dependsOn scenarioTest
 
-task benchmarkTest(type: Test) {
-    useJUnitPlatform {
-        includeEngines 'kotlintest'
-    }
-    testLogging {
-        events "passed", "skipped", "failed"
-    }
-    afterSuite { desc, result ->
-        if (!desc.parent) {
-            println "\nBenchmark Test results: ${result.resultType} " +
-                    "(${result.testCount} tests completed, " +
-                    "${result.successfulTestCount} succeeded, " +
-                    "${result.failedTestCount} failed, " +
-                    "${result.skippedTestCount} skipped)"
-        }
-    }
-
-    description = 'Runs the benchmark tests.'
-    group = 'verification'
-    testClassesDirs = sourceSets.benchmarkTest.output.classesDirs
-    classpath = sourceSets.benchmarkTest.runtimeClasspath
-    mustRunAfter scenarioTest
-    reports.html.setDestination(file("$buildDir/reports/benchmark-tests"))
+jmh {
+    include = 'jasition.matching.domain.benchmark.*BenchmarkTest.*'
+    warmupIterations = 1
+    iterations = 1
+    resultFormat = 'JSON'
 }

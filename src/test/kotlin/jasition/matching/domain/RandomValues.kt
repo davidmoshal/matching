@@ -1,3 +1,4 @@
+@file:JvmName("RandomValues")
 package jasition.matching.domain
 
 import io.vavr.collection.Array
