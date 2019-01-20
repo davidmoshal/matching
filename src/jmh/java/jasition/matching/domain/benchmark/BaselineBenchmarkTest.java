@@ -35,7 +35,7 @@ public class BaselineBenchmarkTest {
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
-    public void baseline() {
+    public void doNothing() {
         // do nothing to test the infrastructure overhead
     }
 }

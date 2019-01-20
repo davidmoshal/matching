@@ -20,8 +20,8 @@ fun randomSize(from: Int = 10, until: Int = 30): Int = Random.nextInt(from, unti
 fun randomPrice(from: Long = 20, until: Long = 30): Price = Price(Random.nextLong(from = from, until = until))
 
 fun randomFirmWithClient(): Client = Client(
-    firmId = randomId(prefix = "firm", from = 1, to = 5),
-    firmClientId = randomId(prefix = "client", from = 1, to = 5)
+    firmId = randomId(prefix = "firm", from = 1, to = 1000),
+    firmClientId = randomId(prefix = "client", from = 1, to = 1000)
 )
 
 fun randomPlaceOrderCommand(
