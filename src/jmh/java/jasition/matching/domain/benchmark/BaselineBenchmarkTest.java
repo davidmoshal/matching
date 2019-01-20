@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
 
 public class BaselineBenchmarkTest {
     @Benchmark
-    @BenchmarkMode(Mode.AverageTime)
+    @BenchmarkMode(Mode.SampleTime)
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void doNothing() {
         // do nothing to test the infrastructure overhead
