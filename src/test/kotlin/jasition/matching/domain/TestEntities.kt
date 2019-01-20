@@ -1,3 +1,4 @@
+@file:JvmName("TestEntities")
 package jasition.matching.domain
 
 import io.vavr.collection.List

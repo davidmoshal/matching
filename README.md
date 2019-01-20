@@ -58,6 +58,24 @@ The *Book* contains
 * Trading Status - The shortcut representation of trading rule enforcement. Certain commands are not allowed under certain *Trading Status*.
 * Last Event ID - The last Event ID the results in the current *Book* state. 
 
+## How-to build and test
+### Build the project
+The project is built with the following option:
+`gradle build test`
+
+And the test reports can be found under
+* Unit tests -  `/build/reports/unit-tests/index.html`
+* Scenario tests - `/build/reports/scenario-tests/index.html`
+* Coverage - `/build/reports/coverage/index.html`
+
+### Run benchmarking
+Benchmarking is run under the following option:
+`gradle --no-daemon clean jmh`
+
+Somehow changing the annotation @Benchmark did not affect the generated JMS source. The issue was reported [here](https://github.com/melix/jmh-gradle-plugin/issues/132).
+
+And the report can be found under `/build/reports/jmh/results.json`
+
 ## Application Semantics
 ### Functional programming
 There are two basic constructs:
@@ -128,7 +146,10 @@ Boundary needs to be set up around the domain in order to ensure the domain inte
 I purposefully do not use floating-point numbers or `BigDecimal` as prices. Long is used to represent a price throughout the project and it is not going to change. The reason is that floating-point numbers are not accurate and `BigDecimal` is very slow. Moreover, there is no real need for matching engine to work with either of them. As long as the incoming orders or quotes have their prices normalised to a fixed decimal place and keep the precision somewhere else, the actual price can always be translated from the price as long in this domain. There is an alternative of `BigDecimal` (The [Money](http://java-performance.info/high-performance-money-class/) class) which is so much faster. But still Long will be used as the data type of price values in this project.
 
 ## Performance
-I plan on benchmarking of each command and potentially resolving any performance deficiency. My initial choice of tool is [JMH](https://openjdk.java.net/projects/code-tools/jmh/) as JetBrains also used it in [Kotlin Benchmarking](https://github.com/JetBrains/kotlin-benchmarks). 
+I benchmark the command validation and event playing to potentially resolve any performance deficiency. My choice of tool is [JMH](https://openjdk.java.net/projects/code-tools/jmh/) as JetBrains also used it in [Kotlin Benchmarking](https://github.com/JetBrains/kotlin-benchmarks).
+
+## Code coverage
+I aim to achieve 100% code coverage because this is pure domain code and there should be no excuse of not testing all the code and branches. Also if I cannot achieve 100% I would consider the implementation or API not fluent enough in this project.
 
 ## Dependencies
 I intend to use as few dependencies as possible. However, I need support for Functional Programming and a fluent assertion framework as a minimum.
@@ -140,6 +161,9 @@ Production
 Testing
 * [Kotlintest](https://github.com/kotlintest/kotlintest) - Test framework, fluent DSL assertions. I have tried [Spek](https://spekframework.org/), [Strikt](https://strikt.io/) and [JUnit 5](https://junit.org/junit5/), but Kotlintest is far more superior in terms of flexibility, fluency and neat organisation of test cases. I used to be a fan of [AssertJ](http://joel-costigliola.github.io/assertj/) but I feel it should belong to the Java world as Kotlin-specific frameworks offer better readability.
 * [MockK](https://github.com/mockk/mockk) - Mocking framework for Kotlin. [Mockito](https://site.mockito.org/) is more suitable to Java than to Kotlin, because of the default final classes and lack of usable Kotlin-specific features like backticks and infixes.
+* [Jacoco](https://www.eclemma.org/jacoco/) - Code coverage tool
+* [nl.fabianm.kotlin.plugin.generated](https://plugins.gradle.org/plugin/nl.fabianm.kotlin.plugin.generated) - Exclude Kotlin-generated code from the code coverage
+* [JMH](https://openjdk.java.net/projects/code-tools/jmh/) - Micro-benchmarking tool
 
 ## Why am I doing this?
 This project was started as a pet project for myself to learn Kotlin only. 
