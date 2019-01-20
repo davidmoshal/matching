@@ -1,5 +1,6 @@
 # Change log
 
+* **2019-01-20 - Added Micro-benchmarking**
 * **2019-01-09 - Added Code Coverage check**
 * **2019-01-06 - Added Mass Quote**
     * Mass Quote contains at least one level of bid and offer prices and sizes

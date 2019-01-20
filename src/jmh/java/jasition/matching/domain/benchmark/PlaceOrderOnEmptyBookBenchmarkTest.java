@@ -48,6 +48,4 @@ public class PlaceOrderOnEmptyBookBenchmarkTest {
     public void orderPlacedOnEmptyBook(Precondition precondition) {
         validateAndPlay(precondition.command, precondition.book);
     }
-
-
 }
