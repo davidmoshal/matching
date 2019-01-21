@@ -1,8 +1,10 @@
 package jasition.matching.domain
 
 import jasition.cqrs.EventId
+import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.client.ClientRequestId
+import jasition.matching.domain.order.event.OrderCancelledByExchangeEvent
 import jasition.matching.domain.order.event.OrderPlacedEvent
 import jasition.matching.domain.quote.QuoteEntry
 import jasition.matching.domain.quote.event.MassQuotePlacedEvent
@@ -120,5 +122,56 @@ fun expectedTradeSideEntry(
         whenSubmitted = bookEntry.key.whenSubmitted,
         eventId = eventId,
         status = status
+    )
+}
+
+fun expectedOrderCancelledByExchangeEvent(
+    event: OrderPlacedEvent,
+    eventId : EventId = event.eventId.next(),
+    tradedSize: Int = event.sizes.traded,
+    cancelledSize: Int = event.sizes.available + event.sizes.cancelled
+): OrderCancelledByExchangeEvent {
+    return OrderCancelledByExchangeEvent(
+        eventId = eventId,
+        requestId = event.requestId,
+        whoRequested = event.whoRequested,
+        bookId = event.bookId,
+        entryType = event.entryType,
+        side = event.side,
+        sizes = EntrySizes(
+            available = 0,
+            traded = tradedSize,
+            cancelled = cancelledSize
+        ),
+        price = event.price,
+        timeInForce = event.timeInForce,
+        status = EntryStatus.CANCELLED,
+        whenHappened = event.whenHappened
+    )
+}
+
+fun expectedOrderCancelledByExchangeEvent(
+    entry: BookEntry,
+    eventId : EventId,
+    bookId : BookId,
+    tradedSize: Int = entry.sizes.traded,
+    cancelledSize: Int = entry.sizes.available + entry.sizes.cancelled
+): OrderCancelledByExchangeEvent {
+    return OrderCancelledByExchangeEvent(
+        eventId = eventId,
+        requestId = entry.requestId,
+        whoRequested = entry.whoRequested,
+        bookId = bookId,
+        entryType = entry.entryType,
+        side = entry.side,
+        sizes = EntrySizes(
+            available = 0,
+            traded = tradedSize,
+            cancelled = cancelledSize
+        ),
+        price = entry.key.price,
+        timeInForce = entry.timeInForce,
+        status = EntryStatus.CANCELLED,
+        whenHappened = entry.key.whenSubmitted
     )
 }

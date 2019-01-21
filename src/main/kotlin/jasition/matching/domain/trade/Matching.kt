@@ -12,33 +12,31 @@ import jasition.matching.domain.book.entry.Price
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.trade.event.TradeEvent
 
-fun matchAndPlaceEntry(
+fun matchAndFinalise(
     bookEntry: BookEntry,
     books: Books
-) : Transaction<BookId, Books> {
-    val (aggressor, transaction) = match(
+): Transaction<BookId, Books> {
+    val result = match(
         aggressor = bookEntry,
         books = books
     )
 
-    return if (aggressor.timeInForce.canStayOnBook(aggressor.sizes))
-        transaction.copy(aggregate = transaction.aggregate.addBookEntry(aggressor))
-    else transaction
+    return result.aggressor.timeInForce.finalise(result)
 }
 
 fun match(
     aggressor: BookEntry,
     books: Books,
     events: List<Event<BookId, Books>> = List.empty()
-): MatchResult {
+): MatchingResult {
     val limitBook = aggressor.side.oppositeSideBook(books)
 
     if (cannotMatchAnyFurther(aggressor, limitBook)) {
-        return MatchResult(aggressor, Transaction(books, events))
+        return MatchingResult(aggressor, Transaction(books, events))
     }
 
     val nextMatch = findNextMatch(aggressor, limitBook.entries.values())
-        ?: return MatchResult(aggressor, Transaction(books, events))
+        ?: return MatchingResult(aggressor, Transaction(books, events))
 
     val tradeSize = getTradeSize(aggressor.sizes, nextMatch.passive.sizes)
     val tradedAggressor = aggressor.traded(tradeSize)
@@ -103,4 +101,4 @@ private fun findPassive(passives: Seq<BookEntry>, offset: Int): BookEntry? =
 
 data class Match(val passive: BookEntry, val tradePrice: Price)
 
-data class MatchResult(val aggressor: BookEntry, val transaction: Transaction<BookId, Books>)
+data class MatchingResult(val aggressor: BookEntry, val transaction: Transaction<BookId, Books>)

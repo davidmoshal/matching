@@ -12,6 +12,7 @@ import jasition.matching.domain.book.entry.Side
 import jasition.matching.domain.randomPrice
 import java.time.Instant
 import java.util.function.Function
+import java.util.function.Predicate
 
 internal class LimitBookTest : StringSpec({
     "Prioritises BUY entry of higher prices over lower prices"{
@@ -109,6 +110,27 @@ internal class LimitBookTest : StringSpec({
             .add(entry1)
             .add(entry2)
             .remove(entry1.key)
+
+        newBook.entries.values() shouldBe List.of(entry2)
+    }
+    "Removes an entry from the book by given predicate"{
+        val entry1 = aBookEntry(
+            side = Side.SELL,
+            price = Price(10),
+            sizes = EntrySizes(available = 0, traded = 15, cancelled = 0)
+        )
+        val entry2 = entry1.withKey(price = Price(9))
+        val entry3 = entry1.withKey(price = Price(11))
+        val added = LimitBook(Side.SELL)
+            .add(entry1)
+            .add(entry2)
+            .add(entry3)
+        val newBook = added
+            .removeAll(Predicate { val result = it.key.price?.run {
+                value >= 10
+            } ?: false
+                result
+            })
 
         newBook.entries.values() shouldBe List.of(entry2)
     }

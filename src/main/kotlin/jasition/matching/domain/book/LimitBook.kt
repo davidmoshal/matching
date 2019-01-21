@@ -4,6 +4,7 @@ import io.vavr.collection.Seq
 import io.vavr.collection.TreeMap
 import jasition.matching.domain.book.entry.*
 import java.util.function.Function
+import java.util.function.Predicate
 
 data class LimitBook(val entries: TreeMap<BookEntryKey, BookEntry>) {
     constructor(side: Side) : this(
@@ -19,6 +20,10 @@ data class LimitBook(val entries: TreeMap<BookEntryKey, BookEntry>) {
 
     fun removeAll(toBeRemoved: Seq<BookEntry>): LimitBook =
         copy(entries = entries.removeAll(toBeRemoved.map { it.key }))
+
+    fun removeAll(predicate: Predicate<BookEntry>): LimitBook =
+        copy(entries = entries.removeValues(predicate))
+
 
     fun remove(bookEntryKey: BookEntryKey) : LimitBook {
         return copy(entries = entries.remove(bookEntryKey))

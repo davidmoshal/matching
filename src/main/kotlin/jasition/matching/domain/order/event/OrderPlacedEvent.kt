@@ -8,7 +8,7 @@ import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
-import jasition.matching.domain.trade.matchAndPlaceEntry
+import jasition.matching.domain.trade.matchAndFinalise
 import java.time.Instant
 
 data class OrderPlacedEvent(
@@ -29,7 +29,7 @@ data class OrderPlacedEvent(
     override fun isPrimary(): Boolean = true
 
     override fun play(aggregate: Books): Transaction<BookId, Books> {
-        return matchAndPlaceEntry(
+        return matchAndFinalise(
             bookEntry = toBookEntry(),
             books = aggregate.copy(lastEventId = aggregate.verifyEventId(eventId))
         )

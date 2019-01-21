@@ -59,6 +59,16 @@ data class Books(
             lastEventId = eventId
         )
 
+    fun removeBookEntries(
+        eventId: EventId,
+        side: Side,
+        predicate: Predicate<BookEntry>): Books =
+        copy(
+            buyLimitBook = if (Side.BUY == side) buyLimitBook.removeAll(predicate) else buyLimitBook,
+            sellLimitBook = if (Side.SELL == side) sellLimitBook.removeAll(predicate) else sellLimitBook,
+            lastEventId = eventId
+        )
+
     fun findBookEntries(predicate: Predicate<BookEntry>): List<BookEntry> =
         List.ofAll(
             buyLimitBook.entries.filterValues(predicate).values()
