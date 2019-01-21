@@ -14,7 +14,7 @@ import jasition.matching.domain.client.Client
 import jasition.matching.domain.quote.QuoteEntry
 import jasition.matching.domain.quote.QuoteModelType
 import jasition.matching.domain.quote.cancelExistingQuotes
-import jasition.matching.domain.trade.matchAndPlaceEntry
+import jasition.matching.domain.trade.matchAndFinalise
 import java.time.Instant
 
 data class MassQuotePlacedEvent(
@@ -47,7 +47,7 @@ data class MassQuotePlacedEvent(
 //        val initial = event?.playAndAppend(books) ?: Transaction(books)
 
         return toBookEntries().fold(initial) { txn, entry ->
-            txn.append(matchAndPlaceEntry(entry, txn.aggregate))
+            txn.append(matchAndFinalise(entry, txn.aggregate))
         }
     }
 

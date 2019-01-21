@@ -140,4 +140,24 @@ internal class BooksTest : StringSpec({
             lastEventId = excludedEntry.key.eventId
         )
     }
+    "Removing BUY entries by a predicate" {
+        Books(aBookId())
+            .addBookEntry(buyEntry)
+            .addBookEntry(sellEntry)
+            .removeBookEntries(sellEntry.key.eventId, Side.BUY, Predicate { true }) shouldBe books.copy(
+            buyLimitBook = LimitBook(Side.BUY),
+            sellLimitBook = LimitBook(Side.SELL).add(sellEntry),
+            lastEventId = sellEntry.key.eventId
+        )
+    }
+    "Removing SELL entries by a predicate" {
+        Books(aBookId())
+            .addBookEntry(buyEntry)
+            .addBookEntry(sellEntry)
+            .removeBookEntries(sellEntry.key.eventId, Side.SELL, Predicate { true }) shouldBe books.copy(
+            buyLimitBook = LimitBook(Side.BUY).add(buyEntry),
+            sellLimitBook = LimitBook(Side.SELL),
+            lastEventId = sellEntry.key.eventId
+        )
+    }
 })

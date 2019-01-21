@@ -1,8 +1,10 @@
 package jasition.matching.domain.book.entry
 
 import jasition.cqrs.EventId
+import jasition.matching.domain.book.BookId
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
+import jasition.matching.domain.order.event.OrderCancelledByExchangeEvent
 import jasition.matching.domain.trade.event.TradeSideEntry
 import java.time.Instant
 
@@ -53,6 +55,24 @@ data class BookEntry(
         whenSubmitted = key.whenSubmitted,
         eventId = key.eventId,
         status = status.traded(sizes)
+    )
+
+    fun toOrderCancelledByExchangeEvent(
+        eventId: EventId,
+        bookId: BookId,
+        whenHappened: Instant = key.whenSubmitted
+    ): OrderCancelledByExchangeEvent = OrderCancelledByExchangeEvent(
+        eventId = eventId,
+        requestId = requestId,
+        whoRequested = whoRequested,
+        bookId = bookId,
+        entryType = entryType,
+        side = side,
+        sizes = sizes.cancelled(),
+        price = key.price,
+        timeInForce = timeInForce,
+        status = EntryStatus.CANCELLED,
+        whenHappened = whenHappened
     )
 
     fun traded(tradeSize: Int): BookEntry {

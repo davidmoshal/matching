@@ -7,6 +7,9 @@ import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import jasition.cqrs.EventId
 import jasition.matching.domain.aBookEntry
+import jasition.matching.domain.aBookId
+import jasition.matching.domain.anEventId
+import jasition.matching.domain.order.event.OrderCancelledByExchangeEvent
 import jasition.matching.domain.randomPrice
 import jasition.matching.domain.trade.event.TradeSideEntry
 import java.time.Instant
@@ -38,6 +41,25 @@ internal class BookEntryTest : StringSpec({
             whenSubmitted = entry.key.whenSubmitted,
             eventId = entry.key.eventId,
             status = EntryStatus.PARTIAL_FILL
+        )
+    }
+    "Converts to OrderCancelledByExchangeEvent" {
+        val eventId = anEventId()
+        val bookId = aBookId()
+        val whenHappened = Instant.now()
+        entry.toOrderCancelledByExchangeEvent(eventId = eventId,
+            bookId = bookId, whenHappened = whenHappened) shouldBe OrderCancelledByExchangeEvent(
+            bookId = bookId,
+            requestId = entry.requestId,
+            whoRequested = entry.whoRequested,
+            entryType = entry.entryType,
+            side = entry.side,
+            sizes = EntrySizes(available = 0, traded = 2, cancelled = 23),
+            price = entry.key.price,
+            timeInForce = entry.timeInForce,
+            whenHappened = whenHappened,
+            eventId = eventId,
+            status = EntryStatus.CANCELLED
         )
     }
     "Updates sizes and status when traded" {

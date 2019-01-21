@@ -6,7 +6,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.vavr.collection.List
-import jasition.cqrs.Event
 import jasition.cqrs.EventId
 import jasition.cqrs.Transaction
 import jasition.matching.domain.*
@@ -16,49 +15,26 @@ import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.order.event.OrderPlacedEvent
 import jasition.matching.domain.trade.event.TradeEvent
 
-internal class MatchAndPlaceEntryTest : StringSpec({
+internal class MatchAndFinaliseTest : StringSpec({
     mockkStatic("jasition.matching.domain.trade.MatchingKt")
-
-    val bookId = aBookId()
 
     val aggressorBeforeMatch = mockk<BookEntry>()
     val aggressorAfterMatch = mockk<BookEntry>()
-    val existingEventBeforeMatch = mockk<Event<BookId, Books>>()
 
     val booksBeforeMatch = mockk<Books>()
-    val booksUpdatedByMatch = mockk<Books>()
-    val booksUpdatedByEntryAdded = mockk<Books>()
-
     val timeInForce = mockk<TimeInForce>()
-    val entrySizes = mockk<EntrySizes>()
-    val lastEventId = EventId(4)
+    val transaction = mockk<Transaction<BookId, Books>>()
+    val matchResult = mockk<MatchingResult>()
 
-    every { aggressorBeforeMatch.timeInForce } returns timeInForce
+    every { match(aggressorBeforeMatch, booksBeforeMatch) } returns matchResult
+    every { matchResult.aggressor } returns aggressorAfterMatch
     every { aggressorAfterMatch.timeInForce } returns timeInForce
-    every { aggressorAfterMatch.sizes } returns entrySizes
-    every { booksUpdatedByMatch.lastEventId } returns lastEventId
-    every { booksUpdatedByMatch.bookId } returns bookId
-    every { booksBeforeMatch.bookId } returns bookId
+    every { timeInForce.finalise(matchResult) } returns transaction
 
-    every {
-        match(aggressor = aggressorBeforeMatch, books = booksBeforeMatch)
-    } returns MatchResult(aggressorAfterMatch, Transaction(booksUpdatedByMatch, List.of(existingEventBeforeMatch)))
-
-    "Entry is added to book if time in force allows" {
-
-        every { timeInForce.canStayOnBook(entrySizes) } returns true
-        every {booksUpdatedByMatch.addBookEntry(aggressorAfterMatch)} returns booksUpdatedByEntryAdded
-
-        matchAndPlaceEntry(
+    "Time-in-force decides the final transaction after matching completed" {
+        matchAndFinalise(
             aggressorBeforeMatch, booksBeforeMatch
-        ) shouldBe Transaction(aggregate = booksUpdatedByEntryAdded, events = List.of(existingEventBeforeMatch))
-    }
-    "Entry is not added to book if time in force disallows" {
-        every { timeInForce.canStayOnBook(entrySizes) } returns false
-
-        matchAndPlaceEntry(
-            aggressorBeforeMatch, booksBeforeMatch
-        ) shouldBe Transaction(aggregate = booksUpdatedByMatch, events = List.of(existingEventBeforeMatch))
+        ) shouldBe transaction
     }
 })
 
@@ -74,7 +50,7 @@ internal class MatchingTest : StringSpec({
             aggressor = aggressor,
             books = books,
             events = existingEvents
-        ) shouldBe MatchResult(
+        ) shouldBe MatchingResult(
             aggressor = aggressor,
             transaction = Transaction(aggregate = books, events = existingEvents)
         )
@@ -86,7 +62,7 @@ internal class MatchingTest : StringSpec({
             aggressor = aggressor,
             books = books,
             events = existingEvents
-        ) shouldBe MatchResult(
+        ) shouldBe MatchingResult(
             aggressor = aggressor,
             transaction = Transaction(aggregate = books, events = existingEvents)
         )
@@ -98,7 +74,7 @@ internal class MatchingTest : StringSpec({
             aggressor = aggressor,
             books = books,
             events = existingEvents
-        ) shouldBe MatchResult(
+        ) shouldBe MatchingResult(
             aggressor = aggressor,
             transaction = Transaction(aggregate = books, events = existingEvents)
         )
@@ -125,7 +101,7 @@ internal class MatchingTest : StringSpec({
             aggressor = aggressor,
             books = books,
             events = existingEvents
-        ) shouldBe MatchResult(
+        ) shouldBe MatchingResult(
             aggressor = tradedAggressor,
             transaction = Transaction(
                 aggregate = aBooks(bookId).copy(lastEventId = EventId(2)),
@@ -165,7 +141,7 @@ internal class MatchingTest : StringSpec({
             aggressor = aggressor,
             books = books,
             events = existingEvents
-        ) shouldBe MatchResult(
+        ) shouldBe MatchingResult(
             aggressor = tradedAggressor,
             transaction = Transaction(
                 aggregate = aBooks(bookId)
@@ -214,7 +190,7 @@ internal class MatchingTest : StringSpec({
             aggressor = aggressor,
             books = books,
             events = existingEvents
-        ) shouldBe MatchResult(
+        ) shouldBe MatchingResult(
             aggressor = tradedAggressor2,
             transaction = Transaction(
                 aggregate = aBooks(bookId)

@@ -45,6 +45,34 @@ internal class `Given the book is empty` : FeatureSpec({
             result.aggregate.buyLimitBook.entries.size() shouldBe 0
             result.aggregate.sellLimitBook.entries.values() shouldBe List.of(expectedBookEntry(orderPlacedEvent))
         }
+        scenario(addOrderToEmptyBookFeature + "When a BUY Limit IOC Order is placed, then the order is cancelled") {
+            val orderPlacedEvent = anOrderPlacedEvent(
+                bookId = bookId,
+                entryType = EntryType.LIMIT,
+                side = Side.BUY,
+                timeInForce = TimeInForce.IMMEDIATE_OR_CANCEL
+            )
+
+            val result = orderPlacedEvent.play(books)
+
+            result.events shouldBe List.of(expectedOrderCancelledByExchangeEvent(orderPlacedEvent))
+            result.aggregate.buyLimitBook.entries.size() shouldBe 0
+            result.aggregate.sellLimitBook.entries.size() shouldBe 0
+        }
+        scenario(addOrderToEmptyBookFeature + "When a SELL Limit IOC Order is placed, then the order is cancelled") {
+            val orderPlacedEvent = anOrderPlacedEvent(
+                bookId = bookId,
+                entryType = EntryType.LIMIT,
+                side = Side.SELL,
+                timeInForce = TimeInForce.IMMEDIATE_OR_CANCEL
+            )
+
+            val result = orderPlacedEvent.play(books)
+
+            result.events shouldBe List.of(expectedOrderCancelledByExchangeEvent(orderPlacedEvent))
+            result.aggregate.buyLimitBook.entries.size() shouldBe 0
+            result.aggregate.sellLimitBook.entries.size() shouldBe 0
+        }
     }
     feature(addQuotesToEmptyBookFeature) {
         scenario(addQuotesToEmptyBookFeature + "When a Mass Quote of ((BUY 4 at 10 SELL 4 at 11), (BUY 5 at 9 SELL 5 at 12)) is placed, and all quote entries are added") {
@@ -102,3 +130,4 @@ internal class `Given the book is empty` : FeatureSpec({
         }
     }
 })
+

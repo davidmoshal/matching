@@ -1,5 +1,6 @@
 # Change log
 
+* **2019-01-21 - Added Immediate-or-cancel time-in-force**
 * **2019-01-20 - Added Micro-benchmarking**
 * **2019-01-09 - Added Code Coverage check**
 * **2019-01-06 - Added Mass Quote**
