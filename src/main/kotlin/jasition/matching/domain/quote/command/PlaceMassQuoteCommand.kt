@@ -1,18 +1,25 @@
 package jasition.matching.domain.quote.command
 
 import arrow.core.Either
+import io.vavr.collection.List
 import io.vavr.collection.Seq
 import jasition.cqrs.Command
+import jasition.cqrs.Command_2_
+import jasition.cqrs.Event
+import jasition.cqrs.Transaction_2_
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
+import jasition.matching.domain.book.BooksNotFoundException
 import jasition.matching.domain.book.entry.PriceWithSize
 import jasition.matching.domain.book.entry.TimeInForce
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.quote.QuoteEntry
 import jasition.matching.domain.quote.QuoteModelType
+import jasition.matching.domain.quote.cancelExistingQuotes
 import jasition.matching.domain.quote.event.MassQuotePlacedEvent
 import jasition.matching.domain.quote.event.MassQuoteRejectedEvent
 import jasition.matching.domain.quote.event.QuoteRejectReason
+import jasition.matching.domain.trade.matchAndFinalise_2_
 import java.time.Instant
 
 data class PlaceMassQuoteCommand(
@@ -23,7 +30,42 @@ data class PlaceMassQuoteCommand(
     val timeInForce: TimeInForce = TimeInForce.GOOD_TILL_CANCEL,
     val entries: Seq<QuoteEntry>,
     val whenRequested: Instant
-) : Command {
+) : Command, Command_2_<BookId, Books> {
+
+    override fun execute(aggregate: Books?): Either<Exception, Transaction_2_<BookId, Books>> {
+        if (aggregate == null) return Either.left(BooksNotFoundException("Books $bookId not found"))
+
+        val cancelledEvent = cancelExistingQuotes(
+            books = aggregate,
+            eventId = aggregate.lastEventId.next(),
+            whoRequested = whoRequested,
+            whenHappened = whenRequested,
+            primary = false
+        )
+
+        val events = cancelledEvent?.let {
+            List.of<Event<BookId, Books>>(it)
+        } ?: List.empty()
+
+        val cancelledBooks = cancelledEvent?.play_2_(aggregate) ?: aggregate
+
+        rejectDueToUnknownSymbol(aggregate)
+            ?: rejectDueToIncorrectSizes(aggregate)
+            ?: rejectDueToCrossedPrices(aggregate)
+            ?: rejectDueToExchangeClosed(aggregate)
+                ?.let {
+                    return Either.right(Transaction_2_(it.play_2_(cancelledBooks), events.append(it)))
+                }
+
+        val placedEvent = toPlacedEvent(cancelledBooks)
+        val placedBooks = placedEvent.play_2_(cancelledBooks)
+
+        val initial = Transaction_2_(placedBooks, events.append(placedEvent))
+
+        return Either.right(placedEvent.toBookEntries_2_().fold(initial) { txn, entry ->
+            txn.append(matchAndFinalise_2_(entry, txn.aggregate))
+        })
+    }
 
     fun validate(
         books: Books

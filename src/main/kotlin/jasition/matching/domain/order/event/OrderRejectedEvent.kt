@@ -31,6 +31,8 @@ data class OrderRejectedEvent(
     override fun eventId(): EventId = eventId
     override fun isPrimary(): Boolean = true
 
+    override fun play_2_(aggregate: Books): Books = aggregate.ofEventId(eventId)
+
     override fun play(aggregate: Books): Transaction<BookId, Books> =
         Transaction(aggregate.copy(lastEventId = aggregate.verifyEventId(eventId)))
 }

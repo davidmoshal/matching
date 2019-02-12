@@ -30,6 +30,10 @@ data class MassQuoteRejectedEvent(
     override fun eventId(): EventId = eventId
     override fun isPrimary(): Boolean = true
 
+    override fun play_2_(aggregate: Books): Books {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     override fun play(aggregate: Books): Transaction<BookId, Books> {
         val books = aggregate.copy(lastEventId = aggregate.verifyEventId(eventId))
         val event = cancelExistingQuotes(

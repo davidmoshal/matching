@@ -28,6 +28,8 @@ data class OrderPlacedEvent(
     override fun eventId(): EventId = eventId
     override fun isPrimary(): Boolean = true
 
+    override fun play_2_(aggregate: Books): Books = aggregate.ofEventId(eventId)
+
     override fun play(aggregate: Books): Transaction<BookId, Books> {
         return matchAndFinalise(
             bookEntry = toBookEntry(),

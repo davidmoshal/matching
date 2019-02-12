@@ -1,15 +1,20 @@
 package jasition.matching.domain.order.command
 
 import arrow.core.Either
+import io.vavr.collection.List
 import jasition.cqrs.Command
+import jasition.cqrs.Command_2_
+import jasition.cqrs.Transaction_2_
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
+import jasition.matching.domain.book.BooksNotFoundException
 import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.order.event.OrderPlacedEvent
 import jasition.matching.domain.order.event.OrderRejectReason
 import jasition.matching.domain.order.event.OrderRejectedEvent
+import jasition.matching.domain.trade.matchAndFinalise_2_
 import java.time.Instant
 
 data class PlaceOrderCommand(
@@ -22,7 +27,25 @@ data class PlaceOrderCommand(
     val price: Price?,
     val timeInForce: TimeInForce,
     val whenRequested: Instant
-) : Command {
+) : Command, Command_2_<BookId, Books> {
+    override fun execute(aggregate: Books?): Either<Exception, Transaction_2_<BookId, Books>> {
+        if (aggregate == null) return Either.left(BooksNotFoundException("Books $bookId not found"))
+
+        rejectDueToUnknownSymbol(aggregate)
+            ?: rejectDueToIncorrectSize(aggregate)
+            ?: rejectDueToExchangeClosed(aggregate)
+                ?.let {
+                    return Either.right(Transaction_2_<BookId, Books>(it.play_2_(aggregate), List.of(it)))
+                }
+
+        val placedEvent = toPlacedEvent(books = aggregate, currentTime = whenRequested)
+        val placedAggregate = placedEvent.play_2_(aggregate)
+
+        return Either.right(
+            Transaction_2_<BookId, Books>(placedAggregate, List.of(placedEvent))
+                .append(matchAndFinalise_2_(placedEvent.toBookEntry(), placedAggregate))
+        )
+    }
 
     fun validate(
         books: Books

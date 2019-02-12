@@ -9,6 +9,7 @@ import jasition.cqrs.playAndAppend
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.BookEntry
+import jasition.matching.domain.book.entry.Side
 import jasition.matching.domain.book.entry.TimeInForce
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.quote.QuoteEntry
@@ -30,6 +31,8 @@ data class MassQuotePlacedEvent(
     override fun aggregateId(): BookId = bookId
     override fun eventId(): EventId = eventId
     override fun isPrimary(): Boolean = true
+
+    override fun play_2_(aggregate: Books): Books = aggregate.ofEventId(eventId)
 
     override fun play(aggregate: Books): Transaction<BookId, Books> {
         val books = aggregate.copy(lastEventId = aggregate.verifyEventId(eventId))
@@ -69,4 +72,53 @@ data class MassQuotePlacedEvent(
                 )
             )
         )
+
+    fun toBookEntries_2_(
+        entryOffset: Int = 0,
+        eventIdOffset: Long = eventId.value,
+        bookEntries: Seq<BookEntry> = List.empty()
+    ): Seq<BookEntry> =
+        if (entryOffset >= entries.size())
+            bookEntries
+        else {
+            var eventId = eventIdOffset
+            val quoteEntry = entries.get(entryOffset)
+            var newBookEntries = List.empty<BookEntry>()
+
+            quoteEntry.bid?.let {
+                newBookEntries = newBookEntries.append(
+                    quoteEntry.toBookEntry(
+                        side = Side.BUY,
+                        size = it.size,
+                        price = it.price,
+                        whenHappened = whenHappened,
+                        eventId = EventId(++eventId),
+                        quoteId = quoteId,
+                        whoRequested = whoRequested,
+                        timeInForce = timeInForce
+                    )
+                )
+            }
+            quoteEntry.offer?.let {
+                newBookEntries = newBookEntries.append(
+                    quoteEntry.toBookEntry(
+                        side = Side.SELL,
+                        size = it.size,
+                        price = it.price,
+                        whenHappened = whenHappened,
+                        eventId = EventId(++eventId),
+                        quoteId = quoteId,
+                        whoRequested = whoRequested,
+                        timeInForce = timeInForce
+                    )
+                )
+            }
+            toBookEntries_2_(
+                entryOffset = entryOffset + 1,
+                eventIdOffset = eventId,
+                bookEntries = bookEntries.appendAll(
+                    newBookEntries
+                )
+            )
+        }
 }

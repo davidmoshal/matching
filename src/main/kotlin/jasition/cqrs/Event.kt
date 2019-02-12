@@ -6,7 +6,11 @@ interface Event<K, A : Aggregate<K>> {
     fun aggregateId(): K
     fun eventId(): EventId
     fun isPrimary(): Boolean
+
+    @Deprecated("Old CQRS semantics")
     fun play(aggregate: A): Transaction<K, A>
+
+    fun play_2_(aggregate: A): A
 }
 
 infix fun <K, A : Aggregate<K>> Event<K, A>.playAndAppend(aggregate: A): Transaction<K, A> {
@@ -21,6 +25,8 @@ data class EventId(val value: Long) : Comparable<EventId> {
     }
 
     fun next(): EventId = EventId(if (value == Long.MAX_VALUE) 0 else value + 1)
+
+    fun increment(delta : Int) : EventId = copy(value = value + delta)
 
     fun isNextOf(other: EventId): Boolean =
         if (value == 0L && other.value == Long.MAX_VALUE) true

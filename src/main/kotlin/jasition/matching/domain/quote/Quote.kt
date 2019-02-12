@@ -61,7 +61,46 @@ data class QuoteEntry(
         return entries
     }
 
-    private fun toBookEntry(
+    fun toBookEntries_2_(
+        whenHappened: Instant,
+        eventId: EventId,
+        quoteId: String,
+        whoRequested: Client,
+        timeInForce: TimeInForce
+    ): Seq<BookEntry> {
+        var entries = List.empty<BookEntry>()
+        bid?.let {
+            entries = entries.append(
+                toBookEntry(
+                    side = Side.BUY,
+                    size = it.size,
+                    price = it.price,
+                    whenHappened = whenHappened,
+                    eventId = eventId,
+                    quoteId = quoteId,
+                    whoRequested = whoRequested,
+                    timeInForce = timeInForce
+                )
+            )
+        }
+        offer?.let {
+            entries = entries.append(
+                toBookEntry(
+                    side = Side.SELL,
+                    size = it.size,
+                    price = it.price,
+                    whenHappened = whenHappened,
+                    eventId = eventId,
+                    quoteId = quoteId,
+                    whoRequested = whoRequested,
+                    timeInForce = timeInForce
+                )
+            )
+        }
+        return entries
+    }
+
+    fun toBookEntry(
         side: Side,
         size: Int,
         price: Price?,

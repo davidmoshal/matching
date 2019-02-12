@@ -24,6 +24,18 @@ fun matchAndFinalise(
     return result.aggressor.timeInForce.finalise(result)
 }
 
+fun matchAndFinalise_2_(
+    bookEntry: BookEntry,
+    books: Books
+): Transaction<BookId, Books> {
+    val result = match(
+        aggressor = bookEntry,
+        books = books
+    )
+
+    return result.aggressor.timeInForce.finalise_2_(result)
+}
+
 fun match(
     aggressor: BookEntry,
     books: Books,
@@ -84,8 +96,8 @@ fun findNextMatch(
     }
 }
 
-private fun cannotMatchAnyFurther(aggressor: BookEntry, limitBook: LimitBook) =
-    aggressor.sizes.available <= 0 || limitBook.entries.isEmpty
+private fun cannotMatchAnyFurther(aggressor: BookEntry, limitBook: LimitBook, offset: Int = 0) =
+    aggressor.sizes.available <= 0 || limitBook.entries.isEmpty || limitBook.entries.size() <= offset
 
 private fun cannotMatchTheseTwoClients(aggressor: Client, passive: Client): Boolean =
     sameFirmAndSameFirmClient(aggressor, passive) || sameFirmButPossibleFirmAgainstClient(aggressor, passive)
@@ -102,3 +114,4 @@ private fun findPassive(passives: Seq<BookEntry>, offset: Int): BookEntry? =
 data class Match(val passive: BookEntry, val tradePrice: Price)
 
 data class MatchingResult(val aggressor: BookEntry, val transaction: Transaction<BookId, Books>)
+

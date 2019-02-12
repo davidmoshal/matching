@@ -1,14 +1,16 @@
 @file:JvmName("TestEntities")
+
 package jasition.matching.domain
 
 import io.vavr.collection.List
 import io.vavr.collection.Seq
-import jasition.cqrs.Event
-import jasition.cqrs.EventId
+import jasition.cqrs.*
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.TradingStatus
+import jasition.matching.domain.book.TradingStatus.OPEN_FOR_TRADING
 import jasition.matching.domain.book.TradingStatuses
+import jasition.matching.domain.book.command.CreateBooksCommand
 import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
@@ -16,6 +18,18 @@ import jasition.matching.domain.order.event.OrderPlacedEvent
 import jasition.matching.domain.quote.QuoteEntry
 import java.time.Instant
 import kotlin.random.Random
+
+fun aRepoWithAnEmptyBook(
+    bookId: BookId,
+    defaultTradingStatus: TradingStatus = OPEN_FOR_TRADING
+): Repository<BookId, Books> {
+    val repository = ConcurrentRepository<BookId, Books>()
+
+    CreateBooksCommand(bookId = bookId, defaultTradingStatus = defaultTradingStatus)
+        .execute(null) commitOrThrow repository
+
+    return repository
+}
 
 fun aBooks(bookId: BookId, bookEntries: Seq<BookEntry> = List.empty()): Books =
     aBooksWithEntities(Books(bookId), bookEntries)
@@ -147,7 +161,7 @@ fun aTradingStatuses(
     manual: TradingStatus? = null,
     fastMarket: TradingStatus? = null,
     scheduled: TradingStatus? = null,
-    default: TradingStatus = TradingStatus.OPEN_FOR_TRADING
+    default: TradingStatus = OPEN_FOR_TRADING
 ): TradingStatuses = TradingStatuses(
     manual = manual,
     fastMarket = fastMarket,

@@ -18,6 +18,15 @@ data class BooksCreatedEvent(
     override fun eventId(): EventId = eventId
     override fun isPrimary(): Boolean = true
 
+    override fun play_2_(aggregate: Books): Books =
+        aggregate.copy(
+            bookId = bookId,
+            businessDate = businessDate,
+            tradingStatuses = tradingStatuses,
+            lastEventId = eventId
+        )
+
+
     override fun play(aggregate: Books): Transaction<BookId, Books> = Transaction(
         Books(
             bookId = bookId,
