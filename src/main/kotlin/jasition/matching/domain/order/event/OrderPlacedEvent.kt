@@ -37,6 +37,21 @@ data class OrderPlacedEvent(
         )
     }
 
+    fun toBookEntry_2_(): BookEntry = BookEntry(
+        price = price,
+        whenSubmitted = whenHappened,
+        eventId = eventId.next(),
+        requestId = requestId,
+        whoRequested = whoRequested,
+        isQuote = false,
+        entryType = entryType,
+        side = side,
+        timeInForce = timeInForce,
+        sizes = sizes,
+        status = status
+    )
+
+    @Deprecated("Old CQRS semantics")
     fun toBookEntry(): BookEntry = BookEntry(
         price = price,
         whenSubmitted = whenHappened,

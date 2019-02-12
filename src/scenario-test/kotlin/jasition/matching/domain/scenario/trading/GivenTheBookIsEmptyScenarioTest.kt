@@ -10,6 +10,7 @@ import jasition.matching.domain.quote.QuoteModelType
 import jasition.matching.domain.quote.event.MassQuotePlacedEvent
 import java.time.Instant
 
+@Deprecated("Old CQRS Semantics")
 internal class `Given the book is empty` : FeatureSpec({
     val addOrderToEmptyBookFeature = "[1 - Add order to empty book] "
     val addQuotesToEmptyBookFeature = "[2 - Add mass quote to empty book] "

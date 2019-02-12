@@ -36,6 +36,7 @@ infix fun <K, A : Aggregate<K>> Transaction<K, A>.thenPlay(
     )
 }
 
+//TODO: Unit test
 infix fun <K, A : Aggregate<K>> Transaction<K, A>.thenPlay_2_(event: Event<K, A>): Transaction<K, A> =
     Transaction(aggregate = event.play_2_(aggregate), events = events.append(event))
 
@@ -55,6 +56,7 @@ data class Transaction_2_<K, A : Aggregate<K>>(
      * Transaction. As a result, the [events] in the given Transaction are appended after the current list of [events].
      * Moreover the [updateFunction] of the given Transaction will overwrite the current [updateFunction].
      */
+    //TODO: Unit test
     fun append(other: Transaction_2_<K, A>): Transaction_2_<K, A> =
         Transaction_2_(
             aggregate = other.aggregate,
@@ -70,6 +72,7 @@ data class Transaction_2_<K, A : Aggregate<K>>(
         )
 }
 
+//TODO: Unit test
 infix fun <K, A : Aggregate<K>> Either<Exception, Transaction_2_<K, A>>.commitOrThrow(
     repository: Repository<K, A>
 ): Transaction_2_<K, A> = fold(

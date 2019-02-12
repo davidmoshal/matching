@@ -9,6 +9,7 @@ import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.trade.event.TradeEvent
 import java.time.Instant
 
+@Deprecated("Old CQRS Semantics")
 internal class `Given the book has one SELL Limit GTC Order 5 at 8 and one 3 at 10` : FeatureSpec({
     val lowerSellOverHigherFeature = "[1 - Lower SELL over higher] "
     val stopMatchingWhenPricesDoNotCrossFeature = "[2 - Stop matching when prices do not cross] "

@@ -19,16 +19,20 @@ enum class TimeInForce(val code: String) {
             }
         }
 
+        //TODO: Unit test
         override fun finalise_2_(result: MatchingResult): Transaction<BookId, Books> {
             with(result) {
                 with(transaction) {
-                    return if (canStayOnBook(aggressor.sizes)) thenPlay_2_(
-                        EntryAddedToBookEvent(
-                            bookId = aggregate.bookId,
-                            eventId = aggregate.lastEventId.next(),
-                            entry = aggressor
+                    return if (canStayOnBook(aggressor.sizes)) {
+                        val eventId = aggregate.lastEventId.next()
+                        thenPlay_2_(
+                            EntryAddedToBookEvent(
+                                bookId = aggregate.bookId,
+                                eventId = eventId,
+                                entry = aggressor.withKey(eventId = eventId)
+                            )
                         )
-                    ) else
+                    } else
                         this
 
                 }
@@ -39,6 +43,7 @@ enum class TimeInForce(val code: String) {
     },
 
     IMMEDIATE_OR_CANCEL("IOC") {
+        //TODO: Unit test
         override fun finalise_2_(result: MatchingResult): Transaction<BookId, Books> = finalise(result)
 
         override fun finalise(result: MatchingResult): Transaction<BookId, Books> {

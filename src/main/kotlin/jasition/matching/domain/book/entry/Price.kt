@@ -16,4 +16,4 @@ class PriceComparator(private val multiplier: Int = 1) : Comparator<Price> {
 /**
  * TODO : replace it by SizeAndPrice
  */
-data class PriceWithSize(val price : Price, val size : Int)
+data class PriceWithSize(val price: Price, val size: Int)

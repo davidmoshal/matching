@@ -13,6 +13,7 @@ import jasition.matching.domain.quote.event.MassQuotePlacedEvent
 import jasition.matching.domain.trade.event.TradeEvent
 import java.time.Instant
 
+@Deprecated("Old CQRS Semantics")
 internal class `Given the book has a BUY Limit GTC Order 4 at 10` : FeatureSpec({
     val higherBuyOverLowerFeature = "[1 - Higher BUY over lower] "
     val earlierOverLaterFeature = "[2 - Earlier over later] "

@@ -43,7 +43,7 @@ data class PlaceOrderCommand(
 
         return Either.right(
             Transaction_2_<BookId, Books>(placedAggregate, List.of(placedEvent))
-                .append(matchAndFinalise_2_(placedEvent.toBookEntry(), placedAggregate))
+                .append(matchAndFinalise_2_(placedEvent.toBookEntry_2_(), placedAggregate))
         )
     }
 

@@ -14,6 +14,7 @@ import jasition.matching.domain.quote.event.MassQuotePlacedEvent
 import jasition.matching.domain.trade.event.TradeEvent
 import java.time.Instant
 
+@Deprecated("Old CQRS Semantics")
 internal class `Given the book has quotes of BUY 4 at 9 SELL 4 at 10 and BUY 5 at 8 SELL 5 at 11` : FeatureSpec({
     val quoteEntryModel = "[1 - Quote entry model] "
     val cannotMatchOtherMarketMaker = "[2 -  Cannot match other market maker] "

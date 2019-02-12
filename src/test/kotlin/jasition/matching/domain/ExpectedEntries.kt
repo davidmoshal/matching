@@ -36,7 +36,7 @@ fun expectedBookEntry(
     command: PlaceOrderCommand,
     eventId: EventId,
     sizes: EntrySizes = EntrySizes(available = command.size, traded = 0, cancelled = 0),
-    status : EntryStatus = NEW
+    status: EntryStatus = NEW
 ): BookEntry = with(command) {
     BookEntry(
         eventId = eventId,
@@ -160,19 +160,19 @@ fun expectedTradeSideEntry(
 fun expectedTradeSideEntry(
     bookEntry: BookEntry,
     eventId: EventId = bookEntry.key.eventId,
-    sizes: EntrySizes,
-    status: EntryStatus
-): TradeSideEntry {
-    return TradeSideEntry(
-        requestId = bookEntry.requestId,
-        whoRequested = bookEntry.whoRequested,
-        isQuote = bookEntry.isQuote,
-        entryType = bookEntry.entryType,
+    sizes: EntrySizes = bookEntry.sizes,
+    status: EntryStatus = bookEntry.status
+): TradeSideEntry = with(bookEntry) {
+    TradeSideEntry(
+        requestId = requestId,
+        whoRequested = whoRequested,
+        isQuote = isQuote,
+        entryType = entryType,
         sizes = sizes,
-        side = bookEntry.side,
-        price = bookEntry.key.price,
-        timeInForce = bookEntry.timeInForce,
-        whenSubmitted = bookEntry.key.whenSubmitted,
+        side = side,
+        price = key.price,
+        timeInForce = timeInForce,
+        whenSubmitted = key.whenSubmitted,
         eventId = eventId,
         status = status
     )

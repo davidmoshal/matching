@@ -2,6 +2,7 @@
 
 package jasition.matching.domain
 
+import arrow.core.Tuple4
 import io.vavr.collection.List
 import io.vavr.collection.Seq
 import jasition.cqrs.*
@@ -19,14 +20,20 @@ import jasition.matching.domain.quote.QuoteEntry
 import java.time.Instant
 import kotlin.random.Random
 
-fun aRepoWithAnEmptyBook(
+fun aRepoWithABooks(
     bookId: BookId,
-    defaultTradingStatus: TradingStatus = OPEN_FOR_TRADING
+    defaultTradingStatus: TradingStatus = OPEN_FOR_TRADING,
+    commands: Seq<Command_2_<BookId, Books>> = List.empty()
 ): Repository<BookId, Books> {
     val repository = ConcurrentRepository<BookId, Books>()
 
     CreateBooksCommand(bookId = bookId, defaultTradingStatus = defaultTradingStatus)
         .execute(null) commitOrThrow repository
+
+    val books = repository.read(bookId)
+
+    commands.map { it.execute(books) }
+        .forEach { it.commitOrThrow(repository) }
 
     return repository
 }
@@ -194,3 +201,7 @@ fun aQuoteEntry(
     offer = offerSize?.let { PriceWithSize(Price(offerPrice), it) }
 )
 
+fun entriesAsString(entries: List<Tuple4<Int, Long, Int, Long>>): String? =
+    entries.map { "(BUY ${it.a} at ${it.b} SELL ${it.c} at ${it.d})" }
+    .intersperse(", ")
+    .fold("") { s1, s2 -> s1 + s2 }
