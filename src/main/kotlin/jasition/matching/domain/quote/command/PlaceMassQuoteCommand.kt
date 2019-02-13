@@ -49,13 +49,14 @@ data class PlaceMassQuoteCommand(
 
         val cancelledBooks = cancelledEvent?.play_2_(aggregate) ?: aggregate
 
-        rejectDueToUnknownSymbol(aggregate)
-            ?: rejectDueToIncorrectSizes(aggregate)
-            ?: rejectDueToCrossedPrices(aggregate)
-            ?: rejectDueToExchangeClosed(aggregate)
-                ?.let {
-                    return Either.right(Transaction_2_(it.play_2_(cancelledBooks), events.append(it)))
-                }
+        val rejection = rejectDueToUnknownSymbol(cancelledBooks)
+            ?: rejectDueToIncorrectSizes(cancelledBooks)
+            ?: rejectDueToCrossedPrices(cancelledBooks)
+            ?: rejectDueToExchangeClosed(cancelledBooks)
+
+        rejection?.run {
+            return Either.right(Transaction_2_(play_2_(cancelledBooks), events.append(this)))
+        }
 
         val placedEvent = toPlacedEvent(cancelledBooks)
         val placedBooks = placedEvent.play_2_(cancelledBooks)

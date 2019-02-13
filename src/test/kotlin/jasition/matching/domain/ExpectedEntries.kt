@@ -11,6 +11,8 @@ import jasition.matching.domain.order.event.OrderPlacedEvent
 import jasition.matching.domain.quote.QuoteEntry
 import jasition.matching.domain.quote.command.PlaceMassQuoteCommand
 import jasition.matching.domain.quote.event.MassQuotePlacedEvent
+import jasition.matching.domain.quote.event.MassQuoteRejectedEvent
+import jasition.matching.domain.quote.event.QuoteRejectReason
 import jasition.matching.domain.trade.event.TradeSideEntry
 
 fun expectedBookEntry(
@@ -293,5 +295,26 @@ fun expectedMassQuotePlacedEvent(
         quoteModelType = quoteModelType,
         timeInForce = timeInForce,
         entries = entries
+    )
+}
+
+fun expectedMassQuoteRejectedEvent(
+    bookId: BookId,
+    eventId: EventId,
+    command: PlaceMassQuoteCommand,
+    expectedQuoteRejectReason: QuoteRejectReason,
+    expectedQuoteRejectText: String
+): MassQuoteRejectedEvent = with(command) {
+    MassQuoteRejectedEvent(
+        bookId = bookId,
+        eventId = eventId,
+        quoteId = quoteId,
+        whoRequested = whoRequested,
+        quoteModelType = quoteModelType,
+        timeInForce = timeInForce,
+        entries = entries,
+        whenHappened = whenRequested,
+        quoteRejectReason = expectedQuoteRejectReason,
+        quoteRejectText = expectedQuoteRejectText
     )
 }
