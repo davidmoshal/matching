@@ -27,6 +27,8 @@ fun randomPrice(from: Long = 20, until: Long = 30): Price = Price(Random.nextLon
 
 fun randomFirmWithClient(): Client = Client(firmId = randomFirmId(), firmClientId = randomFirmClientId())
 
+fun randomFirmWithoutClient(): Client = Client(firmId = randomFirmId(), firmClientId = null)
+
 fun randomFirmId() = randomId(prefix = "firm", from = 1, to = 1000)
 
 fun randomFirmClientId() = randomId(prefix = "client", from = 1, to = 1000)
@@ -59,7 +61,7 @@ fun randomPlaceMassQuoteCommand(
     entries: List<Tuple4<Int, Long, Int, Long>>,
     timeInForce: TimeInForce = TimeInForce.GOOD_TILL_CANCEL,
     whenRequested: Instant = Instant.now(),
-    whoRequested: Client = randomFirmWithClient()
+    whoRequested: Client = randomFirmWithoutClient()
 ): PlaceMassQuoteCommand = PlaceMassQuoteCommand(
     quoteId = quoteId,
     bookId = bookId,

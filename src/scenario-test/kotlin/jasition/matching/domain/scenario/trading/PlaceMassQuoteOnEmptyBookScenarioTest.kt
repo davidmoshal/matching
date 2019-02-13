@@ -17,10 +17,10 @@ import jasition.matching.domain.book.event.EntryAddedToBookEvent
 internal class `Place mass quote on empty book` : FeatureSpec({
     val bookId = aBookId()
 
-    forall(
-        row(List.of(Tuple4(4, 10L, 4, 11L), Tuple4(5, 9L, 5, 12L)))
-    ) { entries ->
-        feature("Quote entries added to empty book") {
+    feature("Quote entries added to empty book") {
+        forall(
+            row(List.of(Tuple4(4, 10L, 4, 11L), Tuple4(5, 9L, 5, 12L)))
+        ) { entries ->
             scenario("Given an empty book, when a mass quote of (${entriesAsString(entries)}) is placed, then all quote entries are added") {
                 val repo = aRepoWithABooks(bookId = bookId)
                 val command = randomPlaceMassQuoteCommand(bookId = bookId, entries = entries)

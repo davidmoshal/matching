@@ -22,9 +22,10 @@ data class MassQuoteCancelledEvent(
     override fun eventId(): EventId = eventId
     override fun isPrimary(): Boolean = primary
 
-    override fun play_2_(aggregate: Books): Books {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun play_2_(aggregate: Books): Books = aggregate.removeBookEntries(
+        aggregate.verifyEventId(eventId),
+        entries
+    )
 
     override fun play(aggregate: Books): Transaction<BookId, Books> =
         Transaction(

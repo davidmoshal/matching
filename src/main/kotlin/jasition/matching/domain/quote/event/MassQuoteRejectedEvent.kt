@@ -30,8 +30,17 @@ data class MassQuoteRejectedEvent(
     override fun eventId(): EventId = eventId
     override fun isPrimary(): Boolean = true
 
+    //TODO unit test
     override fun play_2_(aggregate: Books): Books {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val books = aggregate.copy(lastEventId = aggregate.verifyEventId(eventId))
+
+        return cancelExistingQuotes(
+            books = books,
+            eventId = eventId,
+            whoRequested = whoRequested,
+            whenHappened = whenHappened,
+            primary = false
+        )?.play_2_(books) ?: books
     }
 
     override fun play(aggregate: Books): Transaction<BookId, Books> {

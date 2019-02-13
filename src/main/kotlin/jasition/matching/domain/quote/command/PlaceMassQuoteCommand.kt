@@ -37,7 +37,7 @@ data class PlaceMassQuoteCommand(
 
         val cancelledEvent = cancelExistingQuotes(
             books = aggregate,
-            eventId = aggregate.lastEventId.next(),
+            eventId = aggregate.lastEventId,
             whoRequested = whoRequested,
             whenHappened = whenRequested,
             primary = false

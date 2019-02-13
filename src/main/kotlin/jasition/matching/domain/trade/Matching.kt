@@ -28,7 +28,7 @@ fun matchAndFinalise_2_(
     bookEntry: BookEntry,
     books: Books
 ): Transaction<BookId, Books> {
-    val result = match(
+    val result = match_2_(
         aggressor = bookEntry,
         books = books
     )
@@ -36,6 +36,42 @@ fun matchAndFinalise_2_(
     return result.aggressor.timeInForce.finalise_2_(result)
 }
 
+fun match_2_(
+    aggressor: BookEntry,
+    books: Books,
+    events: List<Event<BookId, Books>> = List.empty()
+): MatchingResult {
+    val limitBook = aggressor.side.oppositeSideBook(books)
+
+    if (cannotMatchAnyFurther(aggressor, limitBook)) {
+        return MatchingResult(aggressor, Transaction(books, events))
+    }
+
+    val nextMatch = findNextMatch(aggressor, limitBook.entries.values())
+        ?: return MatchingResult(aggressor, Transaction(books, events))
+
+    val tradeSize = getTradeSize(aggressor.sizes, nextMatch.passive.sizes)
+    val tradedAggressor = aggressor.traded(tradeSize)
+    val tradedPassive = nextMatch.passive.traded(tradeSize)
+    val tradeEvent = TradeEvent(
+        bookId = books.bookId,
+        eventId = books.lastEventId.next(),
+        size = tradeSize,
+        price = nextMatch.tradePrice,
+        whenHappened = aggressor.key.whenSubmitted,
+        aggressor = tradedAggressor.toTradeSideEntry(),
+        passive = tradedPassive.toTradeSideEntry()
+    )
+    val result = tradeEvent.play(books)
+
+    return match_2_(
+        aggressor = tradedAggressor,
+        books = result.aggregate,
+        events = events.append(tradeEvent).appendAll(result.events)
+    )
+}
+
+@Deprecated("Old CQRS semantics")
 fun match(
     aggressor: BookEntry,
     books: Books,

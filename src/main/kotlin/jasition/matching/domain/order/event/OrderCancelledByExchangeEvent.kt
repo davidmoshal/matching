@@ -28,9 +28,14 @@ data class OrderCancelledByExchangeEvent(
     override fun eventId(): EventId = eventId
     override fun isPrimary(): Boolean = false
 
-    override fun play_2_(aggregate: Books): Books {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    //TODO unit test
+    override fun play_2_(aggregate: Books): Books =
+        aggregate.removeBookEntries(eventId = aggregate.verifyEventId(eventId),
+            side = side,
+            predicate = Predicate {
+                it.whoRequested == whoRequested
+                        && (it.requestId.current == requestId.current)
+            })
 
     override fun play(aggregate: Books): Transaction<BookId, Books> = Transaction(
         aggregate.removeBookEntries(eventId = aggregate.verifyEventId(eventId),

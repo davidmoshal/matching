@@ -18,7 +18,7 @@ import jasition.matching.domain.book.event.EntryAddedToBookEvent
 import jasition.matching.domain.client.Client
 
 
-internal class `Prevent wash trade` : FeatureSpec({
+internal class `Prevent wash trade betweeen sides identified as the same firm or same client` : FeatureSpec({
     val bookId = aBookId()
 
     feature("No trade if both sides are identified as the same firm/client") {

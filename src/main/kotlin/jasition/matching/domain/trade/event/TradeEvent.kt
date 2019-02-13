@@ -25,7 +25,9 @@ data class TradeEvent(
     override fun isPrimary(): Boolean = false
 
     override fun play_2_(aggregate: Books): Books {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        aggregate.verifyEventId(eventId)
+
+        return updateBooks(aggregate, passive)
     }
 
     override fun play(aggregate: Books): Transaction<BookId, Books> {
