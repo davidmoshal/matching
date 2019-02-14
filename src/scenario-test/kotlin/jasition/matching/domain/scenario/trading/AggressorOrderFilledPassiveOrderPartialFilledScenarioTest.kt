@@ -33,7 +33,7 @@ internal class `Aggressor order filled and passive order partial filled` : Strin
         row(SELL, Tuple4(LIMIT, GOOD_TILL_CANCEL, 17, 9L), Tuple4(LIMIT, IMMEDIATE_OR_CANCEL, 11, 10L), 11, 9L, 6),
         row(SELL, Tuple4(LIMIT, GOOD_TILL_CANCEL, 17, 9L), Tuple4(LIMIT, IMMEDIATE_OR_CANCEL, 11, 9L), 11, 9L, 6)
     ) { oldSide, old, new, expectedTradeSize, expectedTradePrice, expectedAvailableSize ->
-        "Given the book has a $oldSide ${old.a} ${old.b.code} order ${old.c} at ${old.d}, when a ${oldSide.oppositeSide()} ${new.a} ${new.b.code} order ${new.c} at ${new.d} is placed,  mthen the trade is executed $expectedTradeSize at $expectedTradePrice"{
+        "Given the book has a $oldSide ${old.a} ${old.b.code} order ${old.c} at ${old.d}, when a ${oldSide.oppositeSide()} ${new.a} ${new.b.code} order ${new.c} at ${new.d} is placed,  then the trade is executed $expectedTradeSize at $expectedTradePrice"{
             val oldCommand = randomPlaceOrderCommand(
                 bookId = bookId,
                 side = oldSide,
