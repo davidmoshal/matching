@@ -12,7 +12,8 @@ import jasition.cqrs.EventId
 import jasition.cqrs.commitOrThrow
 import jasition.matching.domain.*
 import jasition.matching.domain.book.entry.EntrySizes
-import jasition.matching.domain.book.entry.EntryStatus
+import jasition.matching.domain.book.entry.EntryStatus.FILLED
+import jasition.matching.domain.book.entry.EntryStatus.PARTIAL_FILL
 import jasition.matching.domain.book.entry.EntryType.LIMIT
 import jasition.matching.domain.book.entry.Price
 import jasition.matching.domain.book.entry.Side.BUY
@@ -68,11 +69,16 @@ internal class `Aggressor order filled and passive quote partial filled` : Strin
                         traded = expectedTradeSize,
                         cancelled = 0
                     ),
-                    status = EntryStatus.PARTIAL_FILL
+                    status = PARTIAL_FILL
                 )
             }
 
-            val newBookEntry = expectedBookEntry(command, EventId(4))
+            val newBookEntry = expectedBookEntry(
+                command = command,
+                eventId = EventId(7),
+                sizes = EntrySizes(available = 0, traded = expectedTradeSize, cancelled = 0),
+                status = FILLED
+            )
 
             with(result) {
                 events shouldBe List.of(
@@ -83,26 +89,21 @@ internal class `Aggressor order filled and passive quote partial filled` : Strin
                         size = expectedTradeSize,
                         price = Price(expectedTradePrice),
                         whenHappened = command.whenRequested,
-                        aggressor = expectedTradeSideEntry(
-                            eventId = EventId(7),
-                            bookEntry = newBookEntry,
-                            sizes = EntrySizes(available = 0, traded = expectedTradeSize, cancelled = 0),
-                            status = EntryStatus.FILLED
-                        ),
+                        aggressor = expectedTradeSideEntry(bookEntry = newBookEntry),
                         passive = expectedTradeSideEntry(bookEntry = oldBookEntries[expectedCounterpartEntryIndex])
                     )
                 )
             }
 
             repo.read(bookId).let {
-                it.buyLimitBook.entries.values() shouldBe List.of(
-                    oldBookEntries[0],
-                    oldBookEntries[2]
-                )
-                it.sellLimitBook.entries.values() shouldBe List.of(
-                    oldBookEntries[1],
-                    oldBookEntries[3]
-                )
+                with(command) {
+                    side.sameSideBook(it).entries.values() shouldBe oldBookEntries.filter { entry ->
+                        entry.side == side
+                    }
+                    side.oppositeSideBook(it).entries.values() shouldBe oldBookEntries.filter { entry ->
+                        entry.side == side.oppositeSide()
+                    }
+                }
             }
         }
     }

@@ -10,7 +10,7 @@ import jasition.cqrs.EventId
 import jasition.cqrs.commitOrThrow
 import jasition.matching.domain.*
 import jasition.matching.domain.book.entry.EntrySizes
-import jasition.matching.domain.book.entry.EntryStatus
+import jasition.matching.domain.book.entry.EntryStatus.FILLED
 import jasition.matching.domain.book.entry.EntryType.LIMIT
 import jasition.matching.domain.book.entry.Price
 import jasition.matching.domain.book.entry.Side.BUY
@@ -46,8 +46,18 @@ internal class `Aggressor takes better execution price` : StringSpec({
 
             val result = command.execute(repo.read(bookId)) commitOrThrow repo
 
-            val oldBookEntry = expectedBookEntry(oldCommand, EventId(2))
-            val newBookEntry = expectedBookEntry(command, EventId(4))
+            val oldBookEntry = expectedBookEntry(
+                command = oldCommand,
+                eventId = EventId(2),
+                sizes = EntrySizes(available = 0, traded = oldCommand.size, cancelled = 0),
+                status = FILLED
+            )
+            val newBookEntry = expectedBookEntry(
+                command = command,
+                eventId = EventId(4),
+                sizes = EntrySizes(available = 0, traded = command.size, cancelled = 0),
+                status = FILLED
+            )
 
             with(result) {
                 events shouldBe List.of(
@@ -58,16 +68,8 @@ internal class `Aggressor takes better execution price` : StringSpec({
                         size = command.size,
                         price = oldCommand.price ?: Price(0),
                         whenHappened = command.whenRequested,
-                        aggressor = expectedTradeSideEntry(
-                            bookEntry = newBookEntry,
-                            sizes = EntrySizes(available = 0, traded = command.size, cancelled = 0),
-                            status = EntryStatus.FILLED
-                        ),
-                        passive = expectedTradeSideEntry(
-                            bookEntry = oldBookEntry,
-                            sizes = EntrySizes(available = 0, traded = oldCommand.size, cancelled = 0),
-                            status = EntryStatus.FILLED
-                        )
+                        aggressor = expectedTradeSideEntry(bookEntry = newBookEntry),
+                        passive = expectedTradeSideEntry(bookEntry = oldBookEntry)
                     )
                 )
             }

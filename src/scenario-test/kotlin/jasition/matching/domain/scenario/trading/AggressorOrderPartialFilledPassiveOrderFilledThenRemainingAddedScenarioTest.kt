@@ -10,7 +10,8 @@ import jasition.cqrs.EventId
 import jasition.cqrs.commitOrThrow
 import jasition.matching.domain.*
 import jasition.matching.domain.book.entry.EntrySizes
-import jasition.matching.domain.book.entry.EntryStatus
+import jasition.matching.domain.book.entry.EntryStatus.FILLED
+import jasition.matching.domain.book.entry.EntryStatus.PARTIAL_FILL
 import jasition.matching.domain.book.entry.EntryType.LIMIT
 import jasition.matching.domain.book.entry.Price
 import jasition.matching.domain.book.entry.Side.BUY
@@ -54,12 +55,12 @@ internal class `Aggressor order partial filled and passive order filled and rema
                 command = oldCommand,
                 eventId = EventId(2),
                 sizes = EntrySizes(available = 0, traded = expectedTradeSize, cancelled = 0),
-                status = EntryStatus.FILLED
+                status = FILLED
             )
             val newBookEntry = expectedBookEntry(
                 command = command, eventId = EventId(5),
                 sizes = EntrySizes(available = expectedAvailableSize, traded = expectedTradeSize, cancelled = 0),
-                status = EntryStatus.PARTIAL_FILL
+                status = PARTIAL_FILL
             )
 
             with(result) {

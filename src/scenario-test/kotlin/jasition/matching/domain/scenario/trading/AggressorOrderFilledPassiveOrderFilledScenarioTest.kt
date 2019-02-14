@@ -5,12 +5,12 @@ import io.kotlintest.data.forall
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import io.kotlintest.tables.row
-import io.vavr.collection.List
+import io.vavr.collection.List.of
 import jasition.cqrs.EventId
 import jasition.cqrs.commitOrThrow
 import jasition.matching.domain.*
 import jasition.matching.domain.book.entry.EntrySizes
-import jasition.matching.domain.book.entry.EntryStatus
+import jasition.matching.domain.book.entry.EntryStatus.FILLED
 import jasition.matching.domain.book.entry.EntryType.LIMIT
 import jasition.matching.domain.book.entry.Price
 import jasition.matching.domain.book.entry.Side.BUY
@@ -42,7 +42,7 @@ internal class `Aggressor order filled and passive order filled` : StringSpec({
                 size = old.c,
                 price = Price(old.d)
             )
-            val repo = aRepoWithABooks(bookId = bookId, commands = List.of(oldCommand))
+            val repo = aRepoWithABooks(bookId = bookId, commands = of(oldCommand))
             val command = randomPlaceOrderCommand(
                 bookId = bookId,
                 side = oldSide.oppositeSide(),
@@ -54,11 +54,25 @@ internal class `Aggressor order filled and passive order filled` : StringSpec({
 
             val result = command.execute(repo.read(bookId)) commitOrThrow repo
 
-            val oldBookEntry = expectedBookEntry(oldCommand, EventId(2))
-            val newBookEntry = expectedBookEntry(command, EventId(4))
+            val oldBookEntry = expectedBookEntry(
+                command = oldCommand,
+                eventId = EventId(2),
+                sizes = EntrySizes(
+                    available = 0,
+                    traded = expectedTradeSize,
+                    cancelled = 0
+                ),
+                status = FILLED
+            )
+            val newBookEntry = expectedBookEntry(
+                command = command,
+                eventId = EventId(4),
+                sizes = EntrySizes(available = 0, traded = expectedTradeSize, cancelled = 0),
+                status = FILLED
+            )
 
             with(result) {
-                events shouldBe List.of(
+                events shouldBe of(
                     expectedOrderPlacedEvent(command, EventId(3)),
                     TradeEvent(
                         bookId = command.bookId,
@@ -66,20 +80,8 @@ internal class `Aggressor order filled and passive order filled` : StringSpec({
                         size = expectedTradeSize,
                         price = Price(expectedTradePrice),
                         whenHappened = command.whenRequested,
-                        aggressor = expectedTradeSideEntry(
-                            bookEntry = newBookEntry,
-                            sizes = EntrySizes(available = 0, traded = expectedTradeSize, cancelled = 0),
-                            status = EntryStatus.FILLED
-                        ),
-                        passive = expectedTradeSideEntry(
-                            bookEntry = oldBookEntry,
-                            sizes = EntrySizes(
-                                available = 0,
-                                traded = expectedTradeSize,
-                                cancelled = 0
-                            ),
-                            status = EntryStatus.FILLED
-                        )
+                        aggressor = expectedTradeSideEntry(bookEntry = newBookEntry),
+                        passive = expectedTradeSideEntry(bookEntry = oldBookEntry)
                     )
                 )
             }

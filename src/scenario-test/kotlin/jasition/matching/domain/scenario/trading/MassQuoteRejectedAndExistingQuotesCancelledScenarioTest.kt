@@ -11,11 +11,11 @@ import jasition.cqrs.EventId
 import jasition.cqrs.commitOrThrow
 import jasition.matching.domain.*
 import jasition.matching.domain.book.entry.EntrySizes
-import jasition.matching.domain.book.entry.EntryStatus
+import jasition.matching.domain.book.entry.EntryStatus.CANCELLED
 import jasition.matching.domain.book.entry.Side.BUY
 import jasition.matching.domain.book.entry.Side.SELL
 import jasition.matching.domain.quote.event.MassQuoteCancelledEvent
-import jasition.matching.domain.quote.event.QuoteRejectReason
+import jasition.matching.domain.quote.event.QuoteRejectReason.INVALID_BID_ASK_SPREAD
 
 internal class `Mass quote rejected and existing quotes cancelled` : StringSpec({
     val bookId = aBookId()
@@ -24,7 +24,7 @@ internal class `Mass quote rejected and existing quotes cancelled` : StringSpec(
         row(
             List.of(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
             List.of(Tuple4(8, 10L, 8, 11L), Tuple4(9, 11L, 9, 12L)),
-            QuoteRejectReason.INVALID_BID_ASK_SPREAD,
+            INVALID_BID_ASK_SPREAD,
             "Quote prices must not cross within a mass quote: lowestSellPrice=11, highestBuyPrice=11"
         )
     ) { oldEntries, newEntries, expectedQuoteRejectReason, expectedQuoteRejectText ->
@@ -58,7 +58,7 @@ internal class `Mass quote rejected and existing quotes cancelled` : StringSpec(
                         traded = 0,
                         cancelled = it.c.priceWithSize(oldCommand.entries[it.a])?.size ?: 0
                     ),
-                    status = EntryStatus.CANCELLED
+                    status = CANCELLED
                 )
             }
 
