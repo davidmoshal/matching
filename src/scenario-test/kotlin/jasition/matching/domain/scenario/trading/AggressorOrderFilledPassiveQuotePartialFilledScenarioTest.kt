@@ -22,21 +22,21 @@ import jasition.matching.domain.book.entry.TimeInForce.IMMEDIATE_OR_CANCEL
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.trade.event.TradeEvent
 
-internal class `Aggressor order filled and passive quote filled` : StringSpec({
+internal class `Aggressor order filled and passive quote partial filled` : StringSpec({
     val bookId = aBookId()
 
     forall(
         row(
             List.of(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
-            Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 6, 12L),
-            1, 6, 12L
+            Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 5, 12L),
+            1, 5, 12L, 1
         ),
         row(
             List.of(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
-            Tuple5(BUY, LIMIT, IMMEDIATE_OR_CANCEL, 6, 12L),
-            1, 6, 12L
+            Tuple5(BUY, LIMIT, IMMEDIATE_OR_CANCEL, 5, 12L),
+            1, 5, 12L, 1
         )
-    ) { oldEntries, new, expectedCounterpartEntryIndex, expectedTradeSize, expectedTradePrice ->
+    ) { oldEntries, new, expectedCounterpartEntryIndex, expectedTradeSize, expectedTradePrice, expectedAvailableSize ->
         "Given a book has existing quote entries of (${entriesAsString(oldEntries)}) of the same firm, when a ${new.a} ${new.b} ${new.c.code} order ${new.d} at ${new.e} is placed,  then the trade is executed $expectedTradeSize at $expectedTradePrice" {
             val oldCommand = randomPlaceMassQuoteCommand(
                 bookId = bookId, entries = oldEntries,
@@ -64,11 +64,11 @@ internal class `Aggressor order filled and passive quote filled` : StringSpec({
             }.update(expectedCounterpartEntryIndex) {
                 it.copy(
                     sizes = EntrySizes(
-                        available = 0,
+                        available = expectedAvailableSize,
                         traded = expectedTradeSize,
                         cancelled = 0
                     ),
-                    status = EntryStatus.FILLED
+                    status = EntryStatus.PARTIAL_FILL
                 )
             }
 
@@ -98,11 +98,11 @@ internal class `Aggressor order filled and passive quote filled` : StringSpec({
                 it.buyLimitBook.entries.values() shouldBe List.of(
                     oldBookEntries[0],
                     oldBookEntries[2]
-                ).remove(oldBookEntries[expectedCounterpartEntryIndex])
+                )
                 it.sellLimitBook.entries.values() shouldBe List.of(
                     oldBookEntries[1],
                     oldBookEntries[3]
-                ).remove(oldBookEntries[expectedCounterpartEntryIndex])
+                )
             }
         }
     }
