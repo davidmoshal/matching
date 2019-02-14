@@ -15,18 +15,24 @@ import jasition.matching.domain.book.entry.Side.SELL
 import jasition.matching.domain.book.event.EntryAddedToBookEvent
 import jasition.matching.domain.client.Client
 
-internal class `No trade between market makers` : StringSpec({
+internal class `Quote entry model does not cancel existing quote of the different firm` : StringSpec({
     val bookId = aBookId()
 
     forall(
         row(
-            List.of(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
-            List.of(Tuple4(8, 12L, 8, 13L), Tuple4(9, 11L, 9, 14L))
+            List.of(Tuple4(6, 13L, 6, 14L), Tuple4(7, 12L, 7, 15L)),
+            List.of(Tuple4(8, 11L, 8, 16L), Tuple4(9, 10L, 9, 17L))
+        ),
+        row(
+            List.of(Tuple4(6, 13L, 6, 14L), Tuple4(7, 12L, 7, 15L)),
+            List.of(Tuple4(8, 12L, 8, 15L), Tuple4(9, 11L, 9, 16L))
         )
     ) { oldEntries, newEntries ->
-        "Given a book has existing quote entries of (${entriesAsString(oldEntries)}) of the same firm, when a mass quote of (${entriesAsString(
+        "Given a book has existing quote entries of (${entriesAsString(
+            oldEntries
+        )}) of the different firm, when a mass quote of (${entriesAsString(
             newEntries
-        )}) of the different firm is placed, then all existing quote entries are retained and all new quote entries are added and there is no trade" {
+        )}) of the same firm is placed, then all existing quote entries are retained and all new quote entries are added" {
             val oldCommand = randomPlaceMassQuoteCommand(
                 bookId = bookId, entries = oldEntries,
                 whoRequested = Client(firmId = "firm1", firmClientId = null)
@@ -64,10 +70,10 @@ internal class `No trade between market makers` : StringSpec({
 
             repo.read(bookId).let {
                 it.buyLimitBook.entries.values() shouldBe List.of(
-                    newBookEntries[0],
                     oldBookEntries[0],
-                    newBookEntries[2],
-                    oldBookEntries[2]
+                    oldBookEntries[2],
+                    newBookEntries[0],
+                    newBookEntries[2]
                 )
                 it.sellLimitBook.entries.values() shouldBe List.of(
                     oldBookEntries[1],
@@ -79,4 +85,3 @@ internal class `No trade between market makers` : StringSpec({
         }
     }
 })
-

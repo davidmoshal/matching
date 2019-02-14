@@ -3,7 +3,7 @@ package jasition.matching.domain.scenario.trading
 import arrow.core.Tuple3
 import io.kotlintest.data.forall
 import io.kotlintest.shouldBe
-import io.kotlintest.specs.FeatureSpec
+import io.kotlintest.specs.StringSpec
 import io.kotlintest.tables.row
 import io.vavr.collection.List
 import jasition.cqrs.EventId
@@ -17,21 +17,16 @@ import jasition.matching.domain.book.entry.TimeInForce.GOOD_TILL_CANCEL
 import jasition.matching.domain.book.event.EntryAddedToBookEvent
 
 
-internal class `Better prices over worse` : FeatureSpec({
+internal class `Better prices have priority over worse` : StringSpec({
     val bookId = aBookId()
 
-    feature("Better prices over worse") {
         forall(
             row(BUY, Tuple3(LIMIT, GOOD_TILL_CANCEL , 10L), Tuple3(LIMIT, GOOD_TILL_CANCEL, 11L), true),
             row(BUY, Tuple3(LIMIT, GOOD_TILL_CANCEL, 10L), Tuple3(LIMIT, GOOD_TILL_CANCEL, 9L), false),
             row(SELL, Tuple3(LIMIT, GOOD_TILL_CANCEL , 10L), Tuple3(LIMIT, GOOD_TILL_CANCEL,9L), true),
             row(SELL, Tuple3(LIMIT, GOOD_TILL_CANCEL, 10L), Tuple3(LIMIT, GOOD_TILL_CANCEL, 11L), false)
         ) { side, old, new, expectNewOverOld ->
-            scenario(
-                "Given the book has a $side ${old.a} ${old.b.code} order at ${old.c}, " +
-                        "when a $side ${new.a} ${new.b.code} order at ${new.c} is placed, " +
-                        "then the new entry is added ${if (expectNewOverOld) "above" else "below"} the old"
-            ) {
+                "Given the book has a $side ${old.a} ${old.b.code} order at ${old.c}, when a $side ${new.a} ${new.b.code} order at ${new.c} is placed, then the new entry is added ${if (expectNewOverOld) "above" else "below"} the old" {
                 val oldCommand = randomPlaceOrderCommand(
                     bookId = bookId,
                     side = side,
@@ -71,6 +66,5 @@ internal class `Better prices over worse` : FeatureSpec({
                 }
             }
         }
-    }
 })
 

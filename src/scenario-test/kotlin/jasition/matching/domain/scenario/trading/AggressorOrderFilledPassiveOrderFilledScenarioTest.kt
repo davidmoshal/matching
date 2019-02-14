@@ -1,6 +1,6 @@
 package jasition.matching.domain.scenario.trading
 
-import arrow.core.Tuple3
+import arrow.core.Tuple4
 import io.kotlintest.data.forall
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
@@ -16,23 +16,31 @@ import jasition.matching.domain.book.entry.Price
 import jasition.matching.domain.book.entry.Side.BUY
 import jasition.matching.domain.book.entry.Side.SELL
 import jasition.matching.domain.book.entry.TimeInForce.GOOD_TILL_CANCEL
+import jasition.matching.domain.book.entry.TimeInForce.IMMEDIATE_OR_CANCEL
 import jasition.matching.domain.trade.event.TradeEvent
 
 
-internal class `Aggressor takes better execution price` : StringSpec({
+internal class `Aggressor order filled and passive order filled` : StringSpec({
     val bookId = aBookId()
 
     forall(
-        row(BUY, Tuple3(LIMIT, GOOD_TILL_CANCEL, 10L), Tuple3(LIMIT, GOOD_TILL_CANCEL, 9L)),
-        row(SELL, Tuple3(LIMIT, GOOD_TILL_CANCEL, 10L), Tuple3(LIMIT, GOOD_TILL_CANCEL, 11L))
-    ) { oldSide, old, new ->
-        "Given the book has a $oldSide ${old.a} ${old.b.code} order at ${old.c}, when a ${oldSide.oppositeSide()} ${new.a} ${new.b.code} order at ${new.c} is placed, then the trade is executed at ${old.c}" {
+        row(BUY, Tuple4(LIMIT, GOOD_TILL_CANCEL, 17, 9L), Tuple4(LIMIT, GOOD_TILL_CANCEL, 17, 8L), 17, 9L),
+        row(BUY, Tuple4(LIMIT, GOOD_TILL_CANCEL, 17, 9L), Tuple4(LIMIT, GOOD_TILL_CANCEL, 17, 9L), 17, 9L),
+        row(BUY, Tuple4(LIMIT, GOOD_TILL_CANCEL, 17, 9L), Tuple4(LIMIT, IMMEDIATE_OR_CANCEL, 17, 8L), 17, 9L),
+        row(BUY, Tuple4(LIMIT, GOOD_TILL_CANCEL, 17, 9L), Tuple4(LIMIT, IMMEDIATE_OR_CANCEL, 17, 9L), 17, 9L),
+        row(SELL, Tuple4(LIMIT, GOOD_TILL_CANCEL, 17, 9L), Tuple4(LIMIT, GOOD_TILL_CANCEL, 17, 10L), 17, 9L),
+        row(SELL, Tuple4(LIMIT, GOOD_TILL_CANCEL, 17, 9L), Tuple4(LIMIT, GOOD_TILL_CANCEL, 17, 9L), 17, 9L),
+        row(SELL, Tuple4(LIMIT, GOOD_TILL_CANCEL, 17, 9L), Tuple4(LIMIT, IMMEDIATE_OR_CANCEL, 17, 10L), 17, 9L),
+        row(SELL, Tuple4(LIMIT, GOOD_TILL_CANCEL, 17, 9L), Tuple4(LIMIT, IMMEDIATE_OR_CANCEL, 17, 9L), 17, 9L)
+    ) { oldSide, old, new, expectedTradeSize, expectedTradePrice ->
+        "Given the book has a $oldSide ${old.a} ${old.b.code} order ${old.c} at ${old.d}, when a ${oldSide.oppositeSide()} ${new.a} ${new.b.code} order ${new.c} at ${new.d} is placed, then the trade is executed $expectedTradeSize at $expectedTradePrice" {
             val oldCommand = randomPlaceOrderCommand(
                 bookId = bookId,
                 side = oldSide,
                 entryType = old.a,
                 timeInForce = old.b,
-                price = Price(old.c)
+                size = old.c,
+                price = Price(old.d)
             )
             val repo = aRepoWithABooks(bookId = bookId, commands = List.of(oldCommand))
             val command = randomPlaceOrderCommand(
@@ -40,8 +48,8 @@ internal class `Aggressor takes better execution price` : StringSpec({
                 side = oldSide.oppositeSide(),
                 entryType = new.a,
                 timeInForce = new.b,
-                size = oldCommand.size,
-                price = Price(new.c)
+                size = new.c,
+                price = Price(new.d)
             )
 
             val result = command.execute(repo.read(bookId)) commitOrThrow repo
@@ -55,17 +63,21 @@ internal class `Aggressor takes better execution price` : StringSpec({
                     TradeEvent(
                         bookId = command.bookId,
                         eventId = EventId(4),
-                        size = command.size,
-                        price = oldCommand.price ?: Price(0),
+                        size = expectedTradeSize,
+                        price = Price(expectedTradePrice),
                         whenHappened = command.whenRequested,
                         aggressor = expectedTradeSideEntry(
                             bookEntry = newBookEntry,
-                            sizes = EntrySizes(available = 0, traded = command.size, cancelled = 0),
+                            sizes = EntrySizes(available = 0, traded = expectedTradeSize, cancelled = 0),
                             status = EntryStatus.FILLED
                         ),
                         passive = expectedTradeSideEntry(
                             bookEntry = oldBookEntry,
-                            sizes = EntrySizes(available = 0, traded = oldCommand.size, cancelled = 0),
+                            sizes = EntrySizes(
+                                available = 0,
+                                traded = expectedTradeSize,
+                                cancelled = 0
+                            ),
                             status = EntryStatus.FILLED
                         )
                     )
