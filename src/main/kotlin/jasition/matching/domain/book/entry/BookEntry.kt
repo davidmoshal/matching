@@ -43,7 +43,7 @@ data class BookEntry(
         status = status
     )
 
-    fun toTradeSideEntry(): TradeSideEntry = TradeSideEntry(
+    fun toTradeSideEntry(eventId: EventId = key.eventId): TradeSideEntry = TradeSideEntry(
         requestId = requestId,
         whoRequested = whoRequested,
         isQuote = isQuote,
@@ -53,7 +53,7 @@ data class BookEntry(
         price = key.price,
         timeInForce = timeInForce,
         whenSubmitted = key.whenSubmitted,
-        eventId = key.eventId,
+        eventId = eventId,
         status = status.traded(sizes)
     )
 

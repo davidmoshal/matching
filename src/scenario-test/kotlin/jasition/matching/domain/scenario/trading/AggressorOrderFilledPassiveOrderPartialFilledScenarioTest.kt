@@ -18,6 +18,7 @@ import jasition.matching.domain.book.entry.Side.BUY
 import jasition.matching.domain.book.entry.Side.SELL
 import jasition.matching.domain.book.entry.TimeInForce.GOOD_TILL_CANCEL
 import jasition.matching.domain.book.entry.TimeInForce.IMMEDIATE_OR_CANCEL
+import jasition.matching.domain.client.Client
 import jasition.matching.domain.trade.event.TradeEvent
 
 
@@ -41,7 +42,8 @@ internal class `Aggressor order filled and passive order partial filled` : Strin
                 entryType = old.a,
                 timeInForce = old.b,
                 size = old.c,
-                price = Price(old.d)
+                price = Price(old.d),
+                whoRequested = Client(firmId = randomFirmId(), firmClientId = "client1")
             )
             val repo = aRepoWithABooks(bookId = bookId, commands = List.of(oldCommand))
             val command = randomPlaceOrderCommand(
@@ -50,7 +52,8 @@ internal class `Aggressor order filled and passive order partial filled` : Strin
                 entryType = new.a,
                 timeInForce = new.b,
                 size = new.c,
-                price = Price(new.d)
+                price = Price(new.d),
+                whoRequested = Client(firmId = randomFirmId(), firmClientId = "client2")
             )
 
             val result = command.execute(repo.read(bookId)) commitOrThrow repo

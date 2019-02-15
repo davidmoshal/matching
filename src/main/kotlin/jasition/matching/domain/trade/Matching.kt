@@ -3,6 +3,7 @@ package jasition.matching.domain.trade
 import io.vavr.collection.List
 import io.vavr.collection.Seq
 import jasition.cqrs.Event
+import jasition.cqrs.EventId
 import jasition.cqrs.Transaction
 import jasition.cqrs.Transaction_2_
 import jasition.matching.domain.book.BookId
@@ -40,6 +41,7 @@ fun matchAndFinalise_2_(
 fun match_2_(
     aggressor: BookEntry,
     books: Books,
+    lastEventId: EventId = books.lastEventId,
     events: List<Event<BookId, Books>> = List.empty()
 ): MatchingResult_2_ {
     val limitBook = aggressor.side.oppositeSideBook(books)
@@ -51,16 +53,17 @@ fun match_2_(
     val nextMatch = findNextMatch(aggressor, limitBook.entries.values())
         ?: return MatchingResult_2_(aggressor, Transaction_2_(books, events))
 
+    val eventId = lastEventId.next()
     val tradeSize = getTradeSize(aggressor.sizes, nextMatch.passive.sizes)
     val tradedAggressor = aggressor.traded(tradeSize)
     val tradedPassive = nextMatch.passive.traded(tradeSize)
     val tradeEvent = TradeEvent(
         bookId = books.bookId,
-        eventId = books.lastEventId.next(),
+        eventId = eventId,
         size = tradeSize,
         price = nextMatch.tradePrice,
         whenHappened = aggressor.key.whenSubmitted,
-        aggressor = tradedAggressor.toTradeSideEntry(),
+        aggressor = tradedAggressor.toTradeSideEntry(eventId = eventId),
         passive = tradedPassive.toTradeSideEntry()
     )
     val result = tradeEvent.play_2_(books)
@@ -68,6 +71,7 @@ fun match_2_(
     return match_2_(
         aggressor = tradedAggressor,
         books = result,
+        lastEventId = eventId,
         events = events.append(tradeEvent)
     )
 }
