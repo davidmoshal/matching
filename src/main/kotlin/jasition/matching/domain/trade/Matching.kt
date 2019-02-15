@@ -4,6 +4,7 @@ import io.vavr.collection.List
 import io.vavr.collection.Seq
 import jasition.cqrs.Event
 import jasition.cqrs.Transaction
+import jasition.cqrs.Transaction_2_
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.LimitBook
@@ -27,7 +28,7 @@ fun matchAndFinalise(
 fun matchAndFinalise_2_(
     bookEntry: BookEntry,
     books: Books
-): Transaction<BookId, Books> {
+): Transaction_2_<BookId, Books> {
     val result = match_2_(
         aggressor = bookEntry,
         books = books
@@ -40,15 +41,15 @@ fun match_2_(
     aggressor: BookEntry,
     books: Books,
     events: List<Event<BookId, Books>> = List.empty()
-): MatchingResult {
+): MatchingResult_2_ {
     val limitBook = aggressor.side.oppositeSideBook(books)
 
     if (cannotMatchAnyFurther(aggressor, limitBook)) {
-        return MatchingResult(aggressor, Transaction(books, events))
+        return MatchingResult_2_(aggressor, Transaction_2_(books, events))
     }
 
     val nextMatch = findNextMatch(aggressor, limitBook.entries.values())
-        ?: return MatchingResult(aggressor, Transaction(books, events))
+        ?: return MatchingResult_2_(aggressor, Transaction_2_(books, events))
 
     val tradeSize = getTradeSize(aggressor.sizes, nextMatch.passive.sizes)
     val tradedAggressor = aggressor.traded(tradeSize)
@@ -62,12 +63,12 @@ fun match_2_(
         aggressor = tradedAggressor.toTradeSideEntry(),
         passive = tradedPassive.toTradeSideEntry()
     )
-    val result = tradeEvent.play(books)
+    val result = tradeEvent.play_2_(books)
 
     return match_2_(
         aggressor = tradedAggressor,
-        books = result.aggregate,
-        events = events.append(tradeEvent).appendAll(result.events)
+        books = result,
+        events = events.append(tradeEvent)
     )
 }
 
@@ -151,3 +152,4 @@ data class Match(val passive: BookEntry, val tradePrice: Price)
 
 data class MatchingResult(val aggressor: BookEntry, val transaction: Transaction<BookId, Books>)
 
+data class MatchingResult_2_(val aggressor: BookEntry, val transaction: Transaction_2_<BookId, Books>)

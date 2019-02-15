@@ -27,7 +27,29 @@ data class TradeEvent(
     override fun play_2_(aggregate: Books): Books {
         aggregate.verifyEventId(eventId)
 
-        return updateBooks(aggregate, passive)
+        return updateOrRemoveEntry(updateOrRemoveEntry(aggregate, aggressor), passive)
+    }
+
+    private fun updateOrRemoveEntry(
+        aggregate: Books,
+        entry: TradeSideEntry
+    ): Books {
+        return if (entry.status.isFinal())
+            aggregate.removeBookEntry(
+                eventId = eventId,
+                side = entry.side,
+                bookEntryKey = entry.toBookEntryKey()
+            )
+        else
+            aggregate.updateBookEntry(eventId = eventId,
+                side = entry.side,
+                bookEntryKey = entry.toBookEntryKey(),
+                updater = Function {
+                    it.copy(
+                        sizes = entry.sizes,
+                        status = entry.status
+                    )
+                })
     }
 
     override fun play(aggregate: Books): Transaction<BookId, Books> {
