@@ -47,6 +47,20 @@ internal class `Aggressor order filled and passive quote filled` : StringSpec({
         ),
         row(
             List.of(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
+            Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 6, 11L),
+            List.of(
+                Tuple6(0, 6, 11L, FILLED, 0, 6)
+            )
+        ),
+        row(
+            List.of(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
+            Tuple5(SELL, LIMIT, IMMEDIATE_OR_CANCEL, 6, 11L),
+            List.of(
+                Tuple6(0, 6, 11L, FILLED, 0, 6)
+            )
+        ),
+        row(
+            List.of(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
             Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 13, 13L),
             List.of(
                 Tuple6(1, 6, 12L, PARTIAL_FILL, 7, 6),
@@ -60,9 +74,24 @@ internal class `Aggressor order filled and passive quote filled` : StringSpec({
                 Tuple6(1, 6, 12L, PARTIAL_FILL, 7, 6),
                 Tuple6(3, 7, 13L, FILLED, 0, 13)
             )
+        ),
+        row(
+            List.of(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
+            Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 13, 10L),
+            List.of(
+                Tuple6(0, 6, 11L, PARTIAL_FILL, 7, 6),
+                Tuple6(2, 7, 10L, FILLED, 0, 13)
+            )
+        ),
+        row(
+            List.of(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
+            Tuple5(SELL, LIMIT, IMMEDIATE_OR_CANCEL, 13, 10L),
+            List.of(
+                Tuple6(0, 6, 11L, PARTIAL_FILL, 7, 6),
+                Tuple6(2, 7, 10L, FILLED, 0, 13)
+            )
         )
     ) { oldEntries, new, expectedTrades ->
-
         "Given a book has existing quote entries of (${entriesAsString(
             oldEntries
         )}) of the same firm, when a ${new.a} ${new.b} ${new.c.code} order ${new.d} at ${new.e} is placed, then the trade is executed ${tradesAsString(
@@ -94,40 +123,38 @@ internal class `Aggressor order filled and passive quote filled` : StringSpec({
             }
 
             var tradeEventId = 6L
-
-            val tradeEvents = expectedTrades.map { trade ->
-                tradeEventId++
-
-                val passive = oldBookEntries[trade.a].copy(
-                    sizes = EntrySizes(
-                        available = 0,
-                        traded = trade.b,
-                        cancelled = 0
-                    ),
-                    status = FILLED
-                )
-
-                val aggressor = expectedBookEntry(
-                    command = command,
-                    eventId = EventId(tradeEventId),
-                    sizes = EntrySizes(available = trade.e, traded = trade.f, cancelled = 0),
-                    status = trade.d
-                )
-
-                TradeEvent(
-                    bookId = command.bookId,
-                    eventId = EventId(tradeEventId),
-                    size = trade.b,
-                    price = Price(trade.c),
-                    whenHappened = command.whenRequested,
-                    aggressor = expectedTradeSideEntry(bookEntry = aggressor),
-                    passive = expectedTradeSideEntry(bookEntry = passive)
-                )
-            }
             with(result) {
                 events shouldBe List.of<Event<BookId, Books>>(
                     expectedOrderPlacedEvent(command, EventId(6))
-                ).appendAll(tradeEvents)
+                ).appendAll(expectedTrades.map { trade ->
+                    tradeEventId++
+
+                    TradeEvent(
+                        bookId = command.bookId,
+                        eventId = EventId(tradeEventId),
+                        size = trade.b,
+                        price = Price(trade.c),
+                        whenHappened = command.whenRequested,
+                        aggressor = expectedTradeSideEntry(
+                            bookEntry = expectedBookEntry(
+                                command = command,
+                                eventId = EventId(tradeEventId),
+                                sizes = EntrySizes(available = trade.e, traded = trade.f, cancelled = 0),
+                                status = trade.d
+                            )
+                        ),
+                        passive = expectedTradeSideEntry(
+                            bookEntry = oldBookEntries[trade.a].copy(
+                                sizes = EntrySizes(
+                                    available = 0,
+                                    traded = trade.b,
+                                    cancelled = 0
+                                ),
+                                status = FILLED
+                            )
+                        )
+                    )
+                })
             }
 
             repo.read(bookId).let {
