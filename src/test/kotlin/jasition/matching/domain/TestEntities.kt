@@ -2,8 +2,8 @@
 
 package jasition.matching.domain
 
+import arrow.core.Tuple2
 import arrow.core.Tuple4
-import arrow.core.Tuple6
 import io.vavr.collection.List
 import io.vavr.collection.Seq
 import jasition.cqrs.*
@@ -207,8 +207,8 @@ fun entriesAsString(entries: List<Tuple4<Int, Long, Int, Long>>): String? =
     .intersperse(", ")
     .fold("") { s1, s2 -> s1 + s2 }
 
-fun tradesAsString(expectedTrade: List<Tuple6<Int, Int, Long, EntryStatus, Int, Int>>): String? =
-    expectedTrade.map { "(${it.b} at ${it.c})" }
+fun tradesAsString(expectedTrade: List<Tuple2<Int, Long>>): String? =
+    expectedTrade.map { "(${it.a} at ${it.b})" }
         .intersperse(", ")
         .fold("") { s1, s2 -> s1 + s2 }
 

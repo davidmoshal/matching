@@ -1,9 +1,6 @@
 package jasition.matching.domain.scenario.trading
 
-import arrow.core.Tuple3
-import arrow.core.Tuple4
-import arrow.core.Tuple5
-import arrow.core.Tuple6
+import arrow.core.*
 import io.kotlintest.data.forall
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
@@ -31,71 +28,69 @@ internal class `Aggressor order filled and passive quote filled` : StringSpec({
     val bookId = aBookId()
 
     forall(
+        // 1. Quote: bid size, bid price, offer size, offer price
+        // 2. Order: side, type, time in force, size, price
+        // 3. Trade: passive entry index (even = buy(0, 2), odd = sell(1, 3)), size, price,
+        //           aggressor status, aggressor available size, aggressor traded size,
+        //           passive status, passive available size
+
         row(
             List.of(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
             Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 6, 12L),
-            List.of(
-                Tuple6(1, 6, 12L, FILLED, 0, 6)
-            )
+            List.of(Tuple8(1, 6, 12L, FILLED, 0, 6, FILLED, 0))
         ),
         row(
             List.of(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
             Tuple5(BUY, LIMIT, IMMEDIATE_OR_CANCEL, 6, 12L),
-            List.of(
-                Tuple6(1, 6, 12L, FILLED, 0, 6)
-            )
+            List.of(Tuple8(1, 6, 12L, FILLED, 0, 6, FILLED, 0))
         ),
         row(
             List.of(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
             Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 6, 11L),
-            List.of(
-                Tuple6(0, 6, 11L, FILLED, 0, 6)
-            )
+            List.of(Tuple8(0, 6, 11L, FILLED, 0, 6, FILLED, 0))
         ),
         row(
             List.of(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
             Tuple5(SELL, LIMIT, IMMEDIATE_OR_CANCEL, 6, 11L),
-            List.of(
-                Tuple6(0, 6, 11L, FILLED, 0, 6)
-            )
+            List.of(Tuple8(0, 6, 11L, FILLED, 0, 6, FILLED, 0))
         ),
         row(
             List.of(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
             Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 13, 13L),
             List.of(
-                Tuple6(1, 6, 12L, PARTIAL_FILL, 7, 6),
-                Tuple6(3, 7, 13L, FILLED, 0, 13)
+                Tuple8(1, 6, 12L, PARTIAL_FILL, 7, 6, FILLED, 0),
+                Tuple8(3, 7, 13L, FILLED, 0, 13, FILLED, 0)
             )
         ),
         row(
             List.of(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
             Tuple5(BUY, LIMIT, IMMEDIATE_OR_CANCEL, 13, 13L),
             List.of(
-                Tuple6(1, 6, 12L, PARTIAL_FILL, 7, 6),
-                Tuple6(3, 7, 13L, FILLED, 0, 13)
+                Tuple8(1, 6, 12L, PARTIAL_FILL, 7, 6, FILLED, 0),
+                Tuple8(3, 7, 13L, FILLED, 0, 13, FILLED, 0)
             )
         ),
         row(
             List.of(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
             Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 13, 10L),
             List.of(
-                Tuple6(0, 6, 11L, PARTIAL_FILL, 7, 6),
-                Tuple6(2, 7, 10L, FILLED, 0, 13)
+                Tuple8(0, 6, 11L, PARTIAL_FILL, 7, 6, FILLED, 0),
+                Tuple8(2, 7, 10L, FILLED, 0, 13, FILLED, 0)
             )
         ),
         row(
             List.of(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
             Tuple5(SELL, LIMIT, IMMEDIATE_OR_CANCEL, 13, 10L),
             List.of(
-                Tuple6(0, 6, 11L, PARTIAL_FILL, 7, 6),
-                Tuple6(2, 7, 10L, FILLED, 0, 13)
+                Tuple8(0, 6, 11L, PARTIAL_FILL, 7, 6, FILLED, 0),
+                Tuple8(2, 7, 10L, FILLED, 0, 13, FILLED, 0)
             )
         )
     ) { oldEntries, new, expectedTrades ->
         "Given a book has existing quote entries of (${entriesAsString(
             oldEntries
         )}) of the same firm, when a ${new.a} ${new.b} ${new.c.code} order ${new.d} at ${new.e} is placed, then the trade is executed ${tradesAsString(
-            expectedTrades
+            expectedTrades.map { Tuple2(it.b, it.c) }
         )}" {
             val oldCommand = randomPlaceMassQuoteCommand(
                 bookId = bookId, entries = oldEntries,
@@ -146,11 +141,11 @@ internal class `Aggressor order filled and passive quote filled` : StringSpec({
                         passive = expectedTradeSideEntry(
                             bookEntry = oldBookEntries[trade.a].copy(
                                 sizes = EntrySizes(
-                                    available = 0,
+                                    available = trade.h,
                                     traded = trade.b,
                                     cancelled = 0
                                 ),
-                                status = FILLED
+                                status = trade.g
                             )
                         )
                     )
