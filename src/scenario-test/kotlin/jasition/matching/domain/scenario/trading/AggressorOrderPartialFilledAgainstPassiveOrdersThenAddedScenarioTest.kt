@@ -1,11 +1,14 @@
 package jasition.matching.domain.scenario.trading
 
-import arrow.core.*
+import arrow.core.Tuple2
+import arrow.core.Tuple5
+import arrow.core.Tuple8
 import io.kotlintest.data.forall
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import io.kotlintest.tables.row
 import io.vavr.collection.List
+import jasition.cqrs.Command_2_
 import jasition.cqrs.Event
 import jasition.cqrs.EventId
 import jasition.cqrs.commitOrThrow
@@ -22,14 +25,15 @@ import jasition.matching.domain.book.entry.Side.SELL
 import jasition.matching.domain.book.entry.TimeInForce.GOOD_TILL_CANCEL
 import jasition.matching.domain.book.event.EntryAddedToBookEvent
 import jasition.matching.domain.client.Client
+import jasition.matching.domain.order.command.PlaceOrderCommand
 import jasition.matching.domain.trade.event.TradeEvent
 
-internal class `Aggressor order partial filled against passive quotes then added to book` : StringSpec({
+internal class `Aggressor order partial filled against passive orders then added to books` : StringSpec({
     val bookId = aBookId()
 
     forall(
         /**
-         * 1. Passive  : bid size, bid price, offer size, offer price
+         * 1. Passive  : side, type, time in force, size, price
          * 2. Aggressor: side, type, time in force, size, price
          * 3. Trade    : passive entry index (even = buy(0, 2), odd = sell(1, 3)), size, price,
          *               aggressor status, aggressor available size, aggressor traded size,
@@ -43,47 +47,65 @@ internal class `Aggressor order partial filled against passive quotes then added
          */
 
         row(
-            List.of(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
+            List.of(
+                Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 6, 12L),
+                Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 7, 13L)
+            ),
             Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 16, 12L),
-            List.of(
-                Tuple8(1, 6, 12L, PARTIAL_FILL, 10, 6, FILLED, 0)
-            )
+            List.of(Tuple8(0, 6, 12L, PARTIAL_FILL, 10, 6, FILLED, 0))
         ),
         row(
-            List.of(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
-            Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 16, 11L),
             List.of(
-                Tuple8(0, 6, 11L, PARTIAL_FILL, 10, 6, FILLED, 0)
-            )
-        ),
-        row(
-            List.of(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
+                Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 6, 12L),
+                Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 7, 13L)
+            ),
             Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 16, 13L),
             List.of(
-                Tuple8(1, 6, 12L, PARTIAL_FILL, 10, 6, FILLED, 0),
-                Tuple8(3, 7, 13L, PARTIAL_FILL, 3, 13, FILLED, 0)
+                Tuple8(0, 6, 12L, PARTIAL_FILL, 10, 6, FILLED, 0),
+                Tuple8(1, 7, 13L, PARTIAL_FILL, 3, 13, FILLED, 0)
             )
         ),
         row(
-            List.of(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
+            List.of(
+                Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 6, 11L),
+                Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 7, 10L)
+            ),
+            Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 16, 11L),
+            List.of(Tuple8(0, 6, 11L, PARTIAL_FILL, 10, 6, FILLED, 0))
+        ),
+        row(
+            List.of(
+                Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 6, 11L),
+                Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 7, 10L)
+            ),
             Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 16, 10L),
             List.of(
                 Tuple8(0, 6, 11L, PARTIAL_FILL, 10, 6, FILLED, 0),
-                Tuple8(2, 7, 10L, PARTIAL_FILL, 3, 13, FILLED, 0)
+                Tuple8(1, 7, 10L, PARTIAL_FILL, 3, 13, FILLED, 0)
             )
         )
-
     ) { oldEntries, new, expectedTrades ->
-        "Given a book has existing quote entries of (${quoteEntriesAsString(
+        "Given a book has existing orders of (${orderEntriesAsString(
             oldEntries
-        )}) of the same firm, when a ${new.a} ${new.b} ${new.c.code} order ${new.d} at ${new.e} is placed, then the trade is executed ${tradesAsString(
+        )}) , when a ${new.a} ${new.b} ${new.c.code} order ${new.d} at ${new.e} is placed, then the trade is executed ${tradesAsString(
             expectedTrades.map { Tuple2(it.b, it.c) }
         )} and the rest of order is added to the book" {
-            val oldCommand = randomPlaceMassQuoteCommand(
-                bookId = bookId, entries = oldEntries,
-                whoRequested = Client(firmId = "firm1", firmClientId = null)
+            val oldCommands = oldEntries.map {
+                randomPlaceOrderCommand(
+                    bookId = bookId,
+                    side = it.a,
+                    entryType = it.b,
+                    timeInForce = it.c,
+                    size = it.d,
+                    price = Price(it.e),
+                    whoRequested = Client(firmId = "firm1", firmClientId = "client1")
+                ) as Command_2_<BookId, Books>
+            }
+
+            val repo = aRepoWithABooks(
+                bookId = bookId,
+                commands = oldCommands as List<Command_2_<BookId, Books>>
             )
-            val repo = aRepoWithABooks(bookId = bookId, commands = List.of(oldCommand))
             val command = randomPlaceOrderCommand(
                 bookId = bookId,
                 side = new.a,
@@ -91,22 +113,21 @@ internal class `Aggressor order partial filled against passive quotes then added
                 timeInForce = new.c,
                 size = new.d,
                 price = Price(new.e),
-                whoRequested = Client(firmId = "firm2", firmClientId = randomFirmClientId())
+                whoRequested = Client(firmId = "firm2", firmClientId = "client2")
             )
 
             val result = command.execute(repo.read(bookId)) commitOrThrow repo
 
-            val oldBookEntries = List.of(
-                Tuple3(0, EventId(2), BUY),
-                Tuple3(0, EventId(3), SELL),
-                Tuple3(1, EventId(4), BUY),
-                Tuple3(1, EventId(5), SELL)
-            ).map {
-                expectedBookEntry(command = oldCommand, entryIndex = it.a, eventId = it.b, side = it.c)
+            var oldBookEventId = 1L
+            val oldBookEntries = oldCommands.map {
+                expectedBookEntry(
+                    command = it as PlaceOrderCommand,
+                    eventId = EventId(oldBookEventId++ * oldEntries.size())
+                )
             }
 
-            var tradeEventId = 6L
-            val entryAddedToBookEventId = tradeEventId  + expectedTrades.size() + 1
+            var tradeEventId = 5L
+            val entryAddedToBookEventId = tradeEventId + expectedTrades.size() + 1
             val lastNewBookEntry = expectedTrades.last().let {
                 expectedBookEntry(
                     command = command,
@@ -118,7 +139,7 @@ internal class `Aggressor order partial filled against passive quotes then added
 
             with(result) {
                 events shouldBe List.of<Event<BookId, Books>>(
-                    expectedOrderPlacedEvent(command, EventId(6))
+                    expectedOrderPlacedEvent(command, EventId(5))
                 ).appendAll(expectedTrades.map { trade ->
                     tradeEventId++
 
@@ -158,10 +179,7 @@ internal class `Aggressor order partial filled against passive quotes then added
 
             repo.read(bookId).let {
                 with(command) {
-                    side.sameSideBook(it).entries.values() shouldBe oldBookEntries.filter { entry ->
-                        entry.side == side
-                    }.insert(0, lastNewBookEntry)
-
+                    side.sameSideBook(it).entries.values() shouldBe List.of(lastNewBookEntry)
                     side.oppositeSideBook(it).entries.values() shouldBe updatedBookEntries(
                         side = side,
                         oldBookEntries = oldBookEntries,

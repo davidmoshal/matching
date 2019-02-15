@@ -236,7 +236,7 @@ internal class `Aggressor order filled against passive orders` : StringSpec({
             var oldBookEventId = 1L
             val oldBookEntries = oldCommands.map {
                 expectedBookEntry(command = it as PlaceOrderCommand,
-                    eventId = EventId(oldBookEventId++ * 2))
+                    eventId = EventId(oldBookEventId++ * oldEntries.size()))
             }
 
             var tradeEventId = 5L

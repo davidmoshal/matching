@@ -77,7 +77,7 @@ internal class `Aggressor order partial filled against passive quotes then cance
             oldEntries
         )}) of the same firm, when a ${new.a} ${new.b} ${new.c.code} order ${new.d} at ${new.e} is placed, then the trade is executed ${tradesAsString(
             expectedTrades.map { Tuple2(it.b, it.c) }
-        )}" {
+        )} and the rest of order is cancelled" {
             val oldCommand = randomPlaceMassQuoteCommand(
                 bookId = bookId, entries = oldEntries,
                 whoRequested = Client(firmId = "firm1", firmClientId = null)
