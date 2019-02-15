@@ -29,11 +29,11 @@ internal class `Aggressor order partial filled against passive quotes then added
 
     forall(
         /**
-         * 1. Quote: bid size, bid price, offer size, offer price
-         * 2. Order: side, type, time in force, size, price
-         * 3. Trade: passive entry index (even = buy(0, 2), odd = sell(1, 3)), size, price,
-         *           aggressor status, aggressor available size, aggressor traded size,
-         *           passive status, passive available size
+         * 1. Passive  : bid size, bid price, offer size, offer price
+         * 2. Aggressor: side, type, time in force, size, price
+         * 3. Trade    : passive entry index (even = buy(0, 2), odd = sell(1, 3)), size, price,
+         *               aggressor status, aggressor available size, aggressor traded size,
+         *               passive status, passive available size
          *
          * Parameter dimensions
          * 1. Buy / Sell of aggressor order
@@ -74,7 +74,7 @@ internal class `Aggressor order partial filled against passive quotes then added
         )
 
     ) { oldEntries, new, expectedTrades ->
-        "Given a book has existing quote entries of (${entriesAsString(
+        "Given a book has existing quote entries of (${quoteEntriesAsString(
             oldEntries
         )}) of the same firm, when a ${new.a} ${new.b} ${new.c.code} order ${new.d} at ${new.e} is placed, then the trade is executed ${tradesAsString(
             expectedTrades.map { Tuple2(it.b, it.c) }

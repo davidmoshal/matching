@@ -28,9 +28,9 @@ internal class `Mass quote rejected and existing quotes cancelled` : StringSpec(
             "Quote prices must not cross within a mass quote: lowestSellPrice=11, highestBuyPrice=11"
         )
     ) { oldEntries, newEntries, expectedQuoteRejectReason, expectedQuoteRejectText ->
-        "Given a book has existing quote entries of (${entriesAsString(
+        "Given a book has existing quote entries of (${quoteEntriesAsString(
             oldEntries
-        )}) of the same firm, when a mass quote of (${entriesAsString(
+        )}) of the same firm, when a mass quote of (${quoteEntriesAsString(
             newEntries
         )}) of the same firm is placed, then all existing quote entries are cancelled and the mass quote is rejected and no new quote entries are added" {
             val oldCommand = randomPlaceMassQuoteCommand(bookId = bookId, entries = oldEntries)

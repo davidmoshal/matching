@@ -20,7 +20,7 @@ internal class `Mass quote placed on and added to empty book` : StringSpec({
     forall(
         row(List.of(Tuple4(4, 10L, 4, 11L), Tuple4(5, 9L, 5, 12L)))
     ) { entries ->
-        "Given an empty book, when a mass quote of (${entriesAsString(
+        "Given an empty book, when a mass quote of (${quoteEntriesAsString(
             entries
         )}) is placed, then all quote entries are added" {
             val repo = aRepoWithABooks(bookId = bookId)

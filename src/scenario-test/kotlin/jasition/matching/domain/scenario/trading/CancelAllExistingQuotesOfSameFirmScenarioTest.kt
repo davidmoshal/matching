@@ -30,9 +30,9 @@ internal class `Mass quote placed and replaced existing quotes` : StringSpec({
             List.of(Tuple4(8, 10L, 8, 11L), Tuple4(9, 9L, 9, 12L))
         )
     ) { oldEntries, newEntries ->
-        "Given a book has existing quote entries of (${entriesAsString(
+        "Given a book has existing quote entries of (${quoteEntriesAsString(
             oldEntries
-        )}) of the same firm, when a mass quote of (${entriesAsString(
+        )}) of the same firm, when a mass quote of (${quoteEntriesAsString(
             newEntries
         )}) of the same firm is placed, then all existing quote entries are cancelled and all new quote entries are added" {
             val oldCommand = randomPlaceMassQuoteCommand(bookId = bookId, entries = oldEntries)

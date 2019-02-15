@@ -28,9 +28,9 @@ internal class `Quote entry model does not cancel existing quote of the differen
             List.of(Tuple4(8, 12L, 8, 15L), Tuple4(9, 11L, 9, 16L))
         )
     ) { oldEntries, newEntries ->
-        "Given a book has existing quote entries of (${entriesAsString(
+        "Given a book has existing quote entries of (${quoteEntriesAsString(
             oldEntries
-        )}) of the different firm, when a mass quote of (${entriesAsString(
+        )}) of the different firm, when a mass quote of (${quoteEntriesAsString(
             newEntries
         )}) of the same firm is placed, then all existing quote entries are retained and all new quote entries are added" {
             val oldCommand = randomPlaceMassQuoteCommand(

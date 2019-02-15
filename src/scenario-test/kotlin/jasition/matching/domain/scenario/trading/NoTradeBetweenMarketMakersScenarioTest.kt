@@ -24,7 +24,7 @@ internal class `No trade between market makers` : StringSpec({
             List.of(Tuple4(8, 12L, 8, 13L), Tuple4(9, 11L, 9, 14L))
         )
     ) { oldEntries, newEntries ->
-        "Given a book has existing quote entries of (${entriesAsString(oldEntries)}) of the same firm, when a mass quote of (${entriesAsString(
+        "Given a book has existing quote entries of (${quoteEntriesAsString(oldEntries)}) of the same firm, when a mass quote of (${quoteEntriesAsString(
             newEntries
         )}) of the different firm is placed, then all existing quote entries are retained and all new quote entries are added and there is no trade" {
             val oldCommand = randomPlaceMassQuoteCommand(

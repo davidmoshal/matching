@@ -4,6 +4,7 @@ package jasition.matching.domain
 
 import arrow.core.Tuple2
 import arrow.core.Tuple4
+import arrow.core.Tuple5
 import io.vavr.collection.List
 import io.vavr.collection.Seq
 import jasition.cqrs.*
@@ -31,10 +32,9 @@ fun aRepoWithABooks(
     CreateBooksCommand(bookId = bookId, defaultTradingStatus = defaultTradingStatus)
         .execute(null) commitOrThrow repository
 
-    val books = repository.read(bookId)
-
-    commands.map { it.execute(books) }
-        .forEach { it.commitOrThrow(repository) }
+    commands.forEach {
+        it.execute(repository.read(bookId)) commitOrThrow repository
+    }
 
     return repository
 }
@@ -202,8 +202,13 @@ fun aQuoteEntry(
     offer = offerSize?.let { PriceWithSize(Price(offerPrice), it) }
 )
 
-fun entriesAsString(entries: List<Tuple4<Int, Long, Int, Long>>): String? =
+fun quoteEntriesAsString(entries: List<Tuple4<Int, Long, Int, Long>>): String? =
     entries.map { "(BUY ${it.a} at ${it.b} SELL ${it.c} at ${it.d})" }
+    .intersperse(", ")
+    .fold("") { s1, s2 -> s1 + s2 }
+
+fun orderEntriesAsString(entries: List<Tuple5<Side, EntryType, TimeInForce, Int, Long>>): String? =
+    entries.map { "(${it.a} ${it.b} ${it.c.code} ${it.d} at ${it.e})" }
     .intersperse(", ")
     .fold("") { s1, s2 -> s1 + s2 }
 

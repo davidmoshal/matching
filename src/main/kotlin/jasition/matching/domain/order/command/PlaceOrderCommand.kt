@@ -31,12 +31,13 @@ data class PlaceOrderCommand(
     override fun execute(aggregate: Books?): Either<Exception, Transaction_2_<BookId, Books>> {
         if (aggregate == null) return Either.left(BooksNotFoundException("Books $bookId not found"))
 
-        rejectDueToUnknownSymbol(aggregate)
+        val rejection = rejectDueToUnknownSymbol(aggregate)
             ?: rejectDueToIncorrectSize(aggregate)
             ?: rejectDueToExchangeClosed(aggregate)
-                ?.let {
-                    return Either.right(Transaction_2_<BookId, Books>(it.play_2_(aggregate), List.of(it)))
-                }
+
+        rejection?.let {
+            return Either.right(Transaction_2_<BookId, Books>(it.play_2_(aggregate), List.of(it)))
+        }
 
         val placedEvent = toPlacedEvent(books = aggregate, currentTime = whenRequested)
         val placedAggregate = placedEvent.play_2_(aggregate)
