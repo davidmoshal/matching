@@ -34,7 +34,8 @@ internal class `Aggressor order partial filled and passive quote filled and rema
     ) { oldEntries, new, expectedCounterpartEntryIndex, expectedTradeSize, expectedTradePrice, expectedAvailableSize ->
         "Given a book has existing quote entries of (${entriesAsString(oldEntries)}) of the same firm, when a ${new.a} ${new.b} ${new.c.code} order ${new.d} at ${new.e} is placed,  then the trade is executed $expectedTradeSize at $expectedTradePrice and the rest of order is cancelled" {
             val oldCommand = randomPlaceMassQuoteCommand(
-                bookId = bookId, entries = oldEntries,
+                bookId = bookId,
+                entries = oldEntries,
                 whoRequested = Client(firmId = "firm1", firmClientId = null)
             )
             val repo = aRepoWithABooks(bookId = bookId, commands = List.of(oldCommand))

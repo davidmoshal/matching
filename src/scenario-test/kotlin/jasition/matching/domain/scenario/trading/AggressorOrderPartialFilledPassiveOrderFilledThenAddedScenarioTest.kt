@@ -58,7 +58,8 @@ internal class `Aggressor order partial filled and passive order filled and rema
                 status = FILLED
             )
             val newBookEntry = expectedBookEntry(
-                command = command, eventId = EventId(5),
+                command = command,
+                eventId = EventId(5),
                 sizes = EntrySizes(available = expectedAvailableSize, traded = expectedTradeSize, cancelled = 0),
                 status = PARTIAL_FILL
             )
