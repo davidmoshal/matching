@@ -26,7 +26,7 @@ import jasition.matching.domain.client.Client
 import jasition.matching.domain.order.command.PlaceOrderCommand
 import jasition.matching.domain.trade.event.TradeEvent
 
-internal class `Aggressor one level quote filled against passive orders` : StringSpec({
+internal class `Aggressor one level bid partial filled against passive orders` : StringSpec({
     val bookId = aBookId()
 
     forall(
