@@ -5,12 +5,12 @@ import io.kotlintest.specs.FeatureSpec
 import jasition.cqrs.Command_2_
 import jasition.cqrs.ConcurrentRepository
 import jasition.cqrs.commitOrThrow
+import jasition.cqrs.recovery.replay_2_
 import jasition.matching.domain.*
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.TradingStatus.OPEN_FOR_TRADING
 import jasition.matching.domain.book.command.CreateBooksCommand
-import jasition.matching.domain.book.event.BooksCreatedEvent
 import kotlin.random.Random
 
 internal class `Recover books from replaying events only_2_` : FeatureSpec({
@@ -55,13 +55,7 @@ internal class `Recover books from replaying events only_2_` : FeatureSpec({
 
             printBooksOverview("Current books", aggregate)
 
-            val recovered = latest.events.fold(initial.aggregate) { agg, event ->
-                if (event is BooksCreatedEvent) {
-                    agg
-                } else {
-                    event.play_2_(agg)
-                }
-            }
+            val recovered = replay_2_(initial.aggregate, latest.events)
 
             printBooksOverview("Recovered books", aggregate)
             recovered shouldBe latest.aggregate
