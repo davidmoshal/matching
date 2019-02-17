@@ -56,7 +56,7 @@ internal class `Aggressor one level bid partial filled against passive orders` :
             newEntries
         )} is placed, then the trade is executed ${tradesAsString(
             expectedTrades.map { Tuple2(it.c, it.d) }
-        )}" {
+        )} and the rest of the quotes added to the book" {
             val oldCommands = oldEntries.map {
                 randomPlaceOrderCommand(
                     bookId = bookId,
