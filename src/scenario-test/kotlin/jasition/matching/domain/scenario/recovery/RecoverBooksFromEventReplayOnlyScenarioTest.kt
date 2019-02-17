@@ -8,6 +8,8 @@ import jasition.cqrs.thenPlay
 import jasition.matching.domain.*
 import jasition.matching.domain.book.TradingStatus
 import jasition.matching.domain.book.command.CreateBooksCommand
+import java.time.Duration
+import java.time.Instant
 import kotlin.random.Random
 
 internal class `Recover books from replaying events only` : FeatureSpec({
@@ -26,7 +28,7 @@ internal class `Recover books from replaying events only` : FeatureSpec({
 
     println("About to start validating the commands and playing the events to create the book state")
 
-    for (i in 0 until Random.nextInt(50, 100)) {
+    for (i in 0 until 10000) {
         val orderOrQuote = Random.nextBoolean()
         if (orderOrQuote) {
             orderCommandCount++
@@ -48,21 +50,22 @@ internal class `Recover books from replaying events only` : FeatureSpec({
                 })
         }
     }
-    println("Book state created. noOfEvents=${latest.events.size()}")
+    println("Book state created. noOfEvents=${latest.events.size()},  eventCountByType=${countEventsByClass(latest.events)}\n")
 
     feature("Recover from event re-playing") {
         scenario("Recover the books that was created by $orderCommandCount orders and $massQuoteCommandCount mass quotes with random values (Placed, Rejected and Trade)") {
 
             val (aggregate, events) = latest
 
-            println(
-                "Books to recover: lastEventId=${aggregate.lastEventId}" +
-                        ", buyBookDepth=${aggregate.buyLimitBook.entries.size()}" +
-                        ", sellBookDepth=${aggregate.sellLimitBook.entries.size()}" +
-                        ", eventCountByType=${countEventsByClass(events)}"
-            )
+            printBooksOverview("Current books", aggregate)
 
-            replay(initial = initialBooks, events = events) shouldBe aggregate
+            val start = Instant.now()
+            val recovered = replay(initial = initialBooks, events = events)
+            val end = Instant.now()
+
+            printBooksOverview("Recovered books", aggregate)
+            println("Time spent = ${Duration.between(start, end).toMillis()} millis")
+            recovered shouldBe aggregate
         }
     }
 })
