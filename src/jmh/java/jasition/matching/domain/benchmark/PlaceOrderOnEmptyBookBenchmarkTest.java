@@ -32,7 +32,6 @@ import java.util.concurrent.TimeUnit;
 
 import static jasition.matching.domain.PreconditionSetup.aPlaceOrderCommand;
 import static jasition.matching.domain.PreconditionSetup.anEmptyBooks;
-import static jasition.matching.domain.TestExecutor.validateAndPlay;
 import static jasition.matching.domain.book.entry.Side.BUY;
 
 public class PlaceOrderOnEmptyBookBenchmarkTest {
@@ -46,6 +45,6 @@ public class PlaceOrderOnEmptyBookBenchmarkTest {
     @BenchmarkMode(Mode.SampleTime)
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void orderPlacedOnEmptyBook(Precondition precondition) {
-        validateAndPlay(precondition.command, precondition.book);
+        precondition.command.execute(precondition.book);
     }
 }

@@ -8,7 +8,7 @@ import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import io.kotlintest.tables.row
 import io.vavr.collection.List
-import jasition.cqrs.Command_2_
+import jasition.cqrs.Command
 import jasition.cqrs.Event
 import jasition.cqrs.EventId
 import jasition.cqrs.commitOrThrow
@@ -214,12 +214,12 @@ internal class `Aggressor order filled against passive orders` : StringSpec({
                     size = it.d,
                     price = Price(it.e),
                     whoRequested = Client(firmId = "firm1", firmClientId = "client1")
-                ) as Command_2_<BookId, Books>
+                ) as Command<BookId, Books>
             }
 
             val repo = aRepoWithABooks(
                 bookId = bookId,
-                commands = oldCommands as List<Command_2_<BookId, Books>>
+                commands = oldCommands as List<Command<BookId, Books>>
             )
             val command = randomPlaceOrderCommand(
                 bookId = bookId,
@@ -233,10 +233,10 @@ internal class `Aggressor order filled against passive orders` : StringSpec({
 
             val result = command.execute(repo.read(bookId)) commitOrThrow repo
 
-            var oldBookEventId = 1L
+            var oldBookEventId = 0L
             val oldBookEntries = oldCommands.map {
                 expectedBookEntry(command = it as PlaceOrderCommand,
-                    eventId = EventId(oldBookEventId++ * oldEntries.size()))
+                    eventId = EventId((oldBookEventId++ * 2) + 1))
             }
 
             var tradeEventId = 5L

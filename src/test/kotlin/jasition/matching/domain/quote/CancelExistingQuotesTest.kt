@@ -3,17 +3,24 @@ package jasition.matching.domain.quote
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import io.vavr.collection.List
+import jasition.cqrs.Event
 import jasition.cqrs.EventId
+import jasition.cqrs.play
 import jasition.matching.domain.*
+import jasition.matching.domain.book.BookId
+import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.*
+import jasition.matching.domain.book.event.EntryAddedToBookEvent
 import jasition.matching.domain.quote.event.MassQuoteCancelledEvent
 import jasition.matching.domain.quote.event.MassQuotePlacedEvent
 import java.time.Instant
 
 internal class CancelExistingQuotesTest : StringSpec({
+    val bookId = aBookId()
+    var eventIdSeq = 0L
     val event = MassQuotePlacedEvent(
-        bookId = aBookId(),
-        eventId = EventId(1),
+        bookId = bookId,
+        eventId = EventId(++eventIdSeq),
         whenHappened = Instant.now(),
         quoteId = randomId(),
         whoRequested = aFirmWithoutClient(),
@@ -29,37 +36,50 @@ internal class CancelExistingQuotesTest : StringSpec({
             )
         )
     )
-    val books = event.play(aBooks(aBookId())).aggregate
+    val books = event.toBookEntries().map {
+        EntryAddedToBookEvent(
+            bookId = bookId,
+            eventId = EventId(++eventIdSeq),
+            entry = it
+        ) as Event<BookId, Books>
+    }.play(aBooks(bookId))
 
     "Cancels existing quotes of the same client if there are any" {
         cancelExistingQuotes(
             books = books,
-            eventId = event.eventId,
+            eventId = EventId(5),
             whoRequested = event.whoRequested,
-            whenHappened = event.whenHappened,
-            primary = true
+            whenHappened = event.whenHappened
         ) shouldBe MassQuoteCancelledEvent(
-            eventId = EventId(2),
+            eventId = EventId(6),
             bookId = event.bookId,
             entries = List.of(
                 expectedBookEntry(
-                    event = event, quoteEntry = event.entries.get(0), side = Side.BUY,
-                    sizes = EntrySizes(available = 0, traded = 0, cancelled = 4), status = EntryStatus.CANCELLED
+                    event = event,
+                    quoteEntry = event.entries.get(0),
+                    side = Side.BUY,
+                    sizes = EntrySizes(available = 0, traded = 0, cancelled = 4),
+                    status = EntryStatus.CANCELLED
                 ),
                 expectedBookEntry(
-                    event = event, quoteEntry = event.entries.get(1), side = Side.BUY,
-                    sizes = EntrySizes(available = 0, traded = 0, cancelled = 6), status = EntryStatus.CANCELLED
+                    event = event,
+                    quoteEntry = event.entries.get(1),
+                    side = Side.BUY,
+                    sizes = EntrySizes(available = 0, traded = 0, cancelled = 6),
+                    status = EntryStatus.CANCELLED
                 ),
                 expectedBookEntry(
-                    event = event, quoteEntry = event.entries.get(0), side = Side.SELL,
+                    event = event,
+                    quoteEntry = event.entries.get(0),
+                    side = Side.SELL,
                     sizes = EntrySizes(available = 0, traded = 0, cancelled = 5), status = EntryStatus.CANCELLED
                 ),
                 expectedBookEntry(
-                    event = event, quoteEntry = event.entries.get(1), side = Side.SELL,
+                    event = event,
+                    quoteEntry = event.entries.get(1), side = Side.SELL,
                     sizes = EntrySizes(available = 0, traded = 0, cancelled = 7), status = EntryStatus.CANCELLED
                 )
             ),
-            primary = true,
             whoRequested = event.whoRequested,
             whenHappened = event.whenHappened
         )
@@ -69,8 +89,7 @@ internal class CancelExistingQuotesTest : StringSpec({
             books = books.addBookEntry(aBookEntry(whoRequested = event.whoRequested)),
             eventId = event.eventId,
             whoRequested = anotherFirmWithoutClient(),
-            whenHappened = event.whenHappened,
-            primary = true
+            whenHappened = event.whenHappened
         ) shouldBe null
     }
     "Does not cancel any quotes if there are none" {
@@ -78,8 +97,7 @@ internal class CancelExistingQuotesTest : StringSpec({
             books = books,
             eventId = event.eventId,
             whoRequested = anotherFirmWithoutClient(),
-            whenHappened = event.whenHappened,
-            primary = true
+            whenHappened = event.whenHappened
         ) shouldBe null
     }
 })

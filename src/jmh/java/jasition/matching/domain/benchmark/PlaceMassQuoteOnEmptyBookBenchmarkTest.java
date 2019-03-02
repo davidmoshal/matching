@@ -35,7 +35,6 @@ import java.util.concurrent.TimeUnit;
 import static jasition.matching.domain.PreconditionSetup.aPlaceMassQuoteCommand;
 import static jasition.matching.domain.PreconditionSetup.anEmptyBooks;
 import static jasition.matching.domain.TestEntities.aQuoteEntry;
-import static jasition.matching.domain.TestExecutor.validateAndPlay;
 
 public class PlaceMassQuoteOnEmptyBookBenchmarkTest {
     @State(Scope.Benchmark)
@@ -56,20 +55,20 @@ public class PlaceMassQuoteOnEmptyBookBenchmarkTest {
     @BenchmarkMode(Mode.SampleTime)
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void massQuoteOfOneLevelsPlacedOnEmptyBook(Precondition precondition) {
-        validateAndPlay(precondition.commandOneLevel, precondition.book);
+        precondition.commandOneLevel.execute(precondition.book);
     }
 
     @Benchmark
     @BenchmarkMode(Mode.SampleTime)
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void massQuoteOfThreeLevelsPlacedOnEmptyBook(Precondition precondition) {
-        validateAndPlay(precondition.commandThreeLevel, precondition.book);
+        precondition.commandThreeLevel.execute(precondition.book);
     }
 
     @Benchmark
     @BenchmarkMode(Mode.SampleTime)
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void massQuoteOfFiveLevelsPlacedOnEmptyBook(Precondition precondition) {
-        validateAndPlay(precondition.commandFiveLevel, precondition.book);
+        precondition.commandFiveLevel.execute(precondition.book);
     }
 }

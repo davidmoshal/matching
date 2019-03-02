@@ -25,7 +25,7 @@ import kotlin.random.Random
 fun aRepoWithABooks(
     bookId: BookId,
     defaultTradingStatus: TradingStatus = OPEN_FOR_TRADING,
-    commands: Seq<Command_2_<BookId, Books>> = List.empty()
+    commands: Seq<Command<BookId, Books>> = List.empty()
 ): Repository<BookId, Books> {
     val repository = ConcurrentRepository<BookId, Books>()
 

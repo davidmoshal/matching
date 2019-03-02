@@ -1,6 +1,6 @@
 package jasition.matching.domain.scenario.trading
 
-import arrow.core.Tuple3
+import arrow.core.Tuple2
 import arrow.core.Tuple4
 import io.kotlintest.data.forall
 import io.kotlintest.shouldBe
@@ -40,17 +40,17 @@ internal class `No trade between market makers` : StringSpec({
             val result = command.execute(repo.read(bookId)) commitOrThrow repo
 
             val oldBookEntries = List.of(
-                Tuple3(0, EventId(2), BUY),
-                Tuple3(0, EventId(3), SELL),
-                Tuple3(1, EventId(4), BUY),
-                Tuple3(1, EventId(5), SELL)
-            ).map { expectedBookEntry(command = oldCommand, entryIndex = it.a, eventId = it.b, side = it.c) }
+                Tuple2(0, BUY),
+                Tuple2(0, SELL),
+                Tuple2(1, BUY),
+                Tuple2(1, SELL)
+            ).map { expectedBookEntry(command = oldCommand, entryIndex = it.a, eventId = EventId(1), side = it.b) }
             val newBookEntries = List.of(
-                Tuple3(0, EventId(7), BUY),
-                Tuple3(0, EventId(8), SELL),
-                Tuple3(1, EventId(9), BUY),
-                Tuple3(1, EventId(10), SELL)
-            ).map { expectedBookEntry(command = command, entryIndex = it.a, eventId = it.b, side = it.c) }
+                Tuple2(0, BUY),
+                Tuple2(0, SELL),
+                Tuple2(1, BUY),
+                Tuple2(1, SELL)
+            ).map { expectedBookEntry(command = command, entryIndex = it.a, eventId = EventId(6), side = it.b) }
 
             with(result) {
                 events shouldBe List.of(

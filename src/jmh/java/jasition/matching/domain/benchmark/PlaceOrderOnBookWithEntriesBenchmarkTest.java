@@ -24,6 +24,7 @@
  */
 package jasition.matching.domain.benchmark;
 
+import arrow.core.Either;
 import io.vavr.collection.List;
 import jasition.cqrs.Transaction;
 import jasition.matching.domain.book.BookId;
@@ -34,16 +35,14 @@ import org.openjdk.jmh.annotations.*;
 import java.util.concurrent.TimeUnit;
 
 import static jasition.matching.domain.PreconditionSetup.*;
-import static jasition.matching.domain.TestExecutor.validateAndPlay;
 import static jasition.matching.domain.book.entry.Side.BUY;
 
 public class PlaceOrderOnBookWithEntriesBenchmarkTest {
     // Can verify the test correctness here
     public static void main(String[] args) {
         Precondition precondition = new Precondition();
-        Transaction<BookId, Books> transaction = validateAndPlay(precondition.commandFiveMatchesAndAddedToBook, precondition.book);
+        Either<Exception, Transaction<BookId, Books>> transaction = precondition.commandFiveMatchesAndAddedToBook.execute(precondition.book);
         System.out.println(precondition.book);
-        System.out.println(transaction.getEvents());
     }
 
     @State(Scope.Benchmark)
@@ -72,7 +71,7 @@ public class PlaceOrderOnBookWithEntriesBenchmarkTest {
     @BenchmarkMode(Mode.SampleTime)
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void orderPlacedOnBookOfFiveEntriesNoMatch(Precondition precondition) {
-        validateAndPlay(precondition.commandNoMatch, precondition.book);
+        precondition.commandNoMatch.execute(precondition.book);
 
     }
 
@@ -80,14 +79,14 @@ public class PlaceOrderOnBookWithEntriesBenchmarkTest {
     @BenchmarkMode(Mode.SampleTime)
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void orderPlacedOnBookOfFiveEntriesOneMatch(Precondition precondition) {
-        validateAndPlay(precondition.commandOneMatch, precondition.book);
+        precondition.commandOneMatch.execute(precondition.book);
     }
 
     @Benchmark
     @BenchmarkMode(Mode.SampleTime)
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void orderPlacedOnBookOfFiveEntriesThreeMatches(Precondition precondition) {
-        validateAndPlay(precondition.commandThreeMatches, precondition.book);
+        precondition.commandThreeMatches.execute(precondition.book);
 
     }
 
@@ -95,13 +94,13 @@ public class PlaceOrderOnBookWithEntriesBenchmarkTest {
     @BenchmarkMode(Mode.SampleTime)
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void orderPlacedOnBookOfFiveEntriesFiveMatches(Precondition precondition) {
-        validateAndPlay(precondition.commandFiveMatches, precondition.book);
+        precondition.commandFiveMatches.execute(precondition.book);
     }
 
     @Benchmark
     @BenchmarkMode(Mode.SampleTime)
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void orderPlacedOnBookOfFiveEntriesThreeMatchesAndAddedToBook(Precondition precondition) {
-        validateAndPlay(precondition.commandFiveMatchesAndAddedToBook, precondition.book);
+        precondition.commandFiveMatchesAndAddedToBook.execute(precondition.book);
     }
 }

@@ -1,23 +1,12 @@
 package jasition.cqrs
 
-import io.vavr.collection.List
+import io.vavr.collection.Seq
 
 interface Event<K, A : Aggregate<K>> {
     fun aggregateId(): K
     fun eventId(): EventId
-    fun isPrimary(): Boolean
-
-    @Deprecated("Old CQRS semantics")
-    fun play(aggregate: A): Transaction<K, A>
-
-    fun play_2_(aggregate: A): A
+    fun play(aggregate: A): A
 }
-
-infix fun <K, A : Aggregate<K>> Event<K, A>.playAndAppend(aggregate: A): Transaction<K, A> {
-    val transaction = play(aggregate)
-    return transaction.copy(events = List.of(this).appendAll(transaction.events))
-}
-
 
 data class EventId(val value: Long) : Comparable<EventId> {
     init {
@@ -25,8 +14,6 @@ data class EventId(val value: Long) : Comparable<EventId> {
     }
 
     fun next(): EventId = EventId(if (value == Long.MAX_VALUE) 0 else value + 1)
-
-    fun increment(delta : Int) : EventId = copy(value = value + delta)
 
     fun isNextOf(other: EventId): Boolean =
         if (value == 0L && other.value == Long.MAX_VALUE) true
@@ -37,3 +24,6 @@ data class EventId(val value: Long) : Comparable<EventId> {
         else if (other.value == Long.MAX_VALUE && value == 0L) 1
         else value.compareTo(other.value)
 }
+
+infix fun <K, A : Aggregate<K>> Seq<Event<K, A>>.play(initial: A): A =
+    fold(initial) { aggregate, event -> event.play(aggregate) }

@@ -112,7 +112,7 @@ internal class MatchingTest : StringSpec({
                         size = tradeSize,
                         price = tradePrice,
                         whenHappened = aggressor.key.whenSubmitted,
-                        aggressor = tradedAggressor.toTradeSideEntry(),
+                        aggressor = tradedAggressor.toTradeSideEntry(EventId(2)),
                         passive = tradedPassive.toTradeSideEntry()
                     )
                 )
@@ -154,7 +154,7 @@ internal class MatchingTest : StringSpec({
                         size = tradeSize,
                         price = Price(35),
                         whenHappened = aggressor.key.whenSubmitted,
-                        aggressor = tradedAggressor.toTradeSideEntry(),
+                        aggressor = tradedAggressor.toTradeSideEntry(EventId(2)),
                         passive = tradedPassive.toTradeSideEntry()
                     )
                 )
@@ -204,7 +204,7 @@ internal class MatchingTest : StringSpec({
                             size = tradeSize,
                             price = Price(35),
                             whenHappened = aggressor.key.whenSubmitted,
-                            aggressor = tradedAggressor.toTradeSideEntry(),
+                            aggressor = tradedAggressor.toTradeSideEntry(EventId(3)),
                             passive = tradedPassive.toTradeSideEntry()
                         ),
                         TradeEvent(
@@ -213,7 +213,7 @@ internal class MatchingTest : StringSpec({
                             size = tradeSize2,
                             price = Price(35),
                             whenHappened = aggressor.key.whenSubmitted,
-                            aggressor = tradedAggressor2.toTradeSideEntry(),
+                            aggressor = tradedAggressor2.toTradeSideEntry(EventId(4)),
                             passive = tradedPassive2.toTradeSideEntry()
                         )
                     )

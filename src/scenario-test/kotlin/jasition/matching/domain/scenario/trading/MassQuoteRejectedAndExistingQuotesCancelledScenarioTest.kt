@@ -1,6 +1,6 @@
 package jasition.matching.domain.scenario.trading
 
-import arrow.core.Tuple3
+import arrow.core.Tuple2
 import arrow.core.Tuple4
 import io.kotlintest.data.forall
 import io.kotlintest.shouldBe
@@ -43,20 +43,20 @@ internal class `Mass quote rejected and existing quotes cancelled` : StringSpec(
             val result = command.execute(repo.read(bookId)) commitOrThrow repo
 
             val oldBookEntries = List.of(
-                Tuple3(0, EventId(2), BUY),
-                Tuple3(1, EventId(4), BUY),
-                Tuple3(0, EventId(3), SELL),
-                Tuple3(1, EventId(5), SELL)
+                Tuple2(0, BUY),
+                Tuple2(1, BUY),
+                Tuple2(0, SELL),
+                Tuple2(1, SELL)
             ).map {
                 expectedBookEntry(
                     command = oldCommand,
                     entryIndex = it.a,
-                    eventId = it.b,
-                    side = it.c,
+                    eventId = EventId(1),
+                    side = it.b,
                     sizes = EntrySizes(
                         available = 0,
                         traded = 0,
-                        cancelled = it.c.priceWithSize(oldCommand.entries[it.a])?.size ?: 0
+                        cancelled = it.b.priceWithSize(oldCommand.entries[it.a])?.size ?: 0
                     ),
                     status = CANCELLED
                 )
@@ -68,7 +68,6 @@ internal class `Mass quote rejected and existing quotes cancelled` : StringSpec(
                         bookId = bookId,
                         eventId = EventId(6),
                         entries = oldBookEntries,
-                        primary = false,
                         whoRequested = oldCommand.whoRequested,
                         whenHappened = command.whenRequested
                     ),

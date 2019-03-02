@@ -1,6 +1,6 @@
 package jasition.matching.domain.scenario.trading
 
-import arrow.core.Tuple3
+import arrow.core.Tuple2
 import arrow.core.Tuple4
 import io.kotlintest.data.forall
 import io.kotlintest.shouldBe
@@ -29,11 +29,11 @@ internal class `Mass quote placed on and added to empty book` : StringSpec({
             val result = command.execute(repo.read(bookId)) commitOrThrow repo
 
             val expectedBookEntries = List.of(
-                Tuple3(0, EventId(2), BUY),
-                Tuple3(0, EventId(3), SELL),
-                Tuple3(1, EventId(4), BUY),
-                Tuple3(1, EventId(5), SELL)
-            ).map { expectedBookEntry(command = command, entryIndex = it.a, eventId = it.b, side = it.c) }
+                Tuple2(0, BUY),
+                Tuple2(0, SELL),
+                Tuple2(1, BUY),
+                Tuple2(1, SELL)
+            ).map { expectedBookEntry(command = command, entryIndex = it.a, eventId = EventId(1), side = it.b) }
 
             with(result) {
                 events shouldBe List.of(

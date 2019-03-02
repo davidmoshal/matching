@@ -1,6 +1,9 @@
 package jasition.matching.domain.scenario.trading
 
-import arrow.core.*
+import arrow.core.Tuple2
+import arrow.core.Tuple4
+import arrow.core.Tuple5
+import arrow.core.Tuple8
 import io.kotlintest.data.forall
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
@@ -97,20 +100,20 @@ internal class `Aggressor order partial filled against passive quotes then added
             val result = command.execute(repo.read(bookId)) commitOrThrow repo
 
             val oldBookEntries = List.of(
-                Tuple3(0, EventId(2), BUY),
-                Tuple3(0, EventId(3), SELL),
-                Tuple3(1, EventId(4), BUY),
-                Tuple3(1, EventId(5), SELL)
+                Tuple2(0, BUY),
+                Tuple2(0, SELL),
+                Tuple2(1, BUY),
+                Tuple2(1, SELL)
             ).map {
-                expectedBookEntry(command = oldCommand, entryIndex = it.a, eventId = it.b, side = it.c)
+                expectedBookEntry(command = oldCommand, entryIndex = it.a, eventId = EventId(1), side = it.b)
             }
 
-            var tradeEventId = 6L
-            val entryAddedToBookEventId = tradeEventId  + expectedTrades.size() + 1
+            var expectedOrderPlacedEventId = 6L
+            var tradeEventId = expectedOrderPlacedEventId
             val lastNewBookEntry = expectedTrades.last().let {
                 expectedBookEntry(
                     command = command,
-                    eventId = EventId(entryAddedToBookEventId),
+                    eventId = EventId(expectedOrderPlacedEventId),
                     sizes = EntrySizes(available = it.e, traded = it.f, cancelled = 0),
                     status = it.d
                 )
@@ -118,7 +121,7 @@ internal class `Aggressor order partial filled against passive quotes then added
 
             with(result) {
                 events shouldBe List.of<Event<BookId, Books>>(
-                    expectedOrderPlacedEvent(command, EventId(6))
+                    expectedOrderPlacedEvent(command, EventId(expectedOrderPlacedEventId))
                 ).appendAll(expectedTrades.map { trade ->
                     tradeEventId++
 
@@ -150,7 +153,7 @@ internal class `Aggressor order partial filled against passive quotes then added
                 }).append(
                     EntryAddedToBookEvent(
                         bookId = bookId,
-                        eventId = EventId(entryAddedToBookEventId),
+                        eventId = EventId(tradeEventId + 1),
                         entry = lastNewBookEntry
                     )
                 )

@@ -2,14 +2,8 @@ package jasition.matching.domain.trade.event
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
-import io.mockk.every
-import io.mockk.spyk
-import io.vavr.collection.List
 import jasition.cqrs.EventId
-import jasition.cqrs.Transaction
 import jasition.matching.domain.*
-import jasition.matching.domain.book.BookId
-import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
@@ -57,9 +51,6 @@ internal class TradeEventPropertyTest : StringSpec({
     "Has Event ID as Event ID" {
         event.eventId() shouldBe eventId
     }
-    "Is a Side-effect event" {
-        event.isPrimary() shouldBe false
-    }
 })
 
 internal class TradeSideEntryTest : StringSpec({
@@ -82,53 +73,6 @@ internal class TradeSideEntryTest : StringSpec({
             price = entry.price,
             whenSubmitted = entry.whenSubmitted,
             eventId = entry.eventId
-        )
-    }
-})
-
-internal class `When a trade has happened between an aggressor and a passive entry` : StringSpec({
-    val eventId = EventId(3)
-    val bookId = BookId("book")
-    val aggressor = TradeSideEntry(
-        requestId = ClientRequestId("req1"),
-        whoRequested = Client(firmId = "firm1", firmClientId = "client1"),
-        isQuote = false,
-        entryType = EntryType.LIMIT,
-        side = Side.BUY,
-        sizes = EntrySizes(10, traded = 10, cancelled = 0),
-        price = Price(20),
-        timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-        status = EntryStatus.PARTIAL_FILL,
-        eventId = EventId(2),
-        whenSubmitted = Instant.now()
-    )
-    val passive = aggressor.copy(
-        requestId = ClientRequestId("req2"),
-        whoRequested = Client(firmId = "firm2", firmClientId = "client2"),
-        side = Side.SELL,
-        sizes = EntrySizes(0, traded = 10, cancelled = 0),
-        eventId = EventId(1)
-    )
-    val event = TradeEvent(
-        bookId = bookId,
-        whenHappened = Instant.now(),
-        eventId = eventId,
-        size = 10,
-        price = Price(20),
-        aggressor = aggressor,
-        passive = passive
-    )
-    val originalBooks = spyk(Books(bookId))
-    val booksWithEventIdVerified = spyk(Books(bookId))
-    val booksWithPassiveUpdated = spyk(Books(bookId))
-
-    every { originalBooks.verifyEventId(eventId) } returns eventId
-    every { originalBooks.copy(lastEventId = eventId) } returns booksWithEventIdVerified
-
-    "Then both the aggressor, the passive and the last event ID of the book are updated" {
-        event.play(originalBooks) shouldBe Transaction(
-            aggregate = booksWithPassiveUpdated,
-            events = List.empty()
         )
     }
 })

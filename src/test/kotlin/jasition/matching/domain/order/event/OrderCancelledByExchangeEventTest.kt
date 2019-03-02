@@ -32,9 +32,6 @@ internal class OrderCancelledByExchangeEventPropertyTest : StringSpec({
     "Has Event ID as Event ID" {
         event.eventId() shouldBe eventId
     }
-    "Is a Primary event" {
-        event.isPrimary() shouldBe false
-    }
 })
 
 internal class `Given an order is cancelled by the Exchange` : StringSpec({
@@ -76,22 +73,19 @@ internal class `Given an order is cancelled by the Exchange` : StringSpec({
     val actual = event.play(books)
 
     "The opposite-side book is not affected" {
-        actual.aggregate.sellLimitBook.entries.size() shouldBe 0
-    }
-    "No side-effect has happened" {
-        actual.events.size() shouldBe 0
+        actual.sellLimitBook.entries.size() shouldBe 0
     }
     "The entry removed from the same-side book" {
-        actual.aggregate.buyLimitBook.entries.containsValue(entry) shouldBe false
+        actual.buyLimitBook.entries.containsValue(entry) shouldBe false
     }
     "Entries of different firm client not affected" {
-        actual.aggregate.buyLimitBook.entries.containsValue(entryOfOtherFirmButSameRequestId) shouldBe true
+        actual.buyLimitBook.entries.containsValue(entryOfOtherFirmButSameRequestId) shouldBe true
     }
     "Entries of different request ID not affected" {
-        actual.aggregate.buyLimitBook.entries.containsValue(entryOfSameFirmClientButDifferentRequestId) shouldBe true
+        actual.buyLimitBook.entries.containsValue(entryOfSameFirmClientButDifferentRequestId) shouldBe true
     }
     "Entries of different request ID and different firm client not affected" {
-        actual.aggregate.buyLimitBook.entries.containsValue(entryOfDifferentFirmClientAndRequestId) shouldBe true
+        actual.buyLimitBook.entries.containsValue(entryOfDifferentFirmClientAndRequestId) shouldBe true
     }
 })
 

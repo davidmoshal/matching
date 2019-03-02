@@ -2,7 +2,6 @@ package jasition.matching.domain.order.event
 
 import jasition.cqrs.Event
 import jasition.cqrs.EventId
-import jasition.cqrs.Transaction
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.*
@@ -26,23 +25,12 @@ data class OrderCancelledByExchangeEvent(
 ) : Event<BookId, Books> {
     override fun aggregateId(): BookId = bookId
     override fun eventId(): EventId = eventId
-    override fun isPrimary(): Boolean = false
-
     //TODO unit test
-    override fun play_2_(aggregate: Books): Books =
+    override fun play(aggregate: Books): Books =
         aggregate.removeBookEntries(eventId = aggregate.verifyEventId(eventId),
             side = side,
             predicate = Predicate {
                 it.whoRequested == whoRequested
                         && (it.requestId.current == requestId.current)
             })
-
-    override fun play(aggregate: Books): Transaction<BookId, Books> = Transaction(
-        aggregate.removeBookEntries(eventId = aggregate.verifyEventId(eventId),
-            side = side,
-            predicate = Predicate {
-                it.whoRequested == whoRequested
-                        && (it.requestId.current == requestId.current)
-            })
-    )
 }

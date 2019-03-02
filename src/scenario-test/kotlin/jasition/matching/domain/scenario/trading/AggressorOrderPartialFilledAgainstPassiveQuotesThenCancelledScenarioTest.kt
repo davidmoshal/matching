@@ -1,6 +1,9 @@
 package jasition.matching.domain.scenario.trading
 
-import arrow.core.*
+import arrow.core.Tuple2
+import arrow.core.Tuple4
+import arrow.core.Tuple5
+import arrow.core.Tuple8
 import io.kotlintest.data.forall
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
@@ -96,12 +99,12 @@ internal class `Aggressor order partial filled against passive quotes then cance
             val result = command.execute(repo.read(bookId)) commitOrThrow repo
 
             val oldBookEntries = List.of(
-                Tuple3(0, EventId(2), BUY),
-                Tuple3(0, EventId(3), SELL),
-                Tuple3(1, EventId(4), BUY),
-                Tuple3(1, EventId(5), SELL)
+                Tuple2(0,BUY),
+                Tuple2(0,SELL),
+                Tuple2(1,BUY),
+                Tuple2(1,SELL)
             ).map {
-                expectedBookEntry(command = oldCommand, entryIndex = it.a, eventId = it.b, side = it.c)
+                expectedBookEntry(command = oldCommand, entryIndex = it.a, eventId = EventId(1), side = it.b)
             }
 
             var tradeEventId = 6L

@@ -5,7 +5,6 @@ import io.vavr.collection.Seq
 import jasition.cqrs.Event
 import jasition.cqrs.EventId
 import jasition.cqrs.Transaction
-import jasition.cqrs.Transaction_2_
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.LimitBook
@@ -26,32 +25,20 @@ fun matchAndFinalise(
     return result.aggressor.timeInForce.finalise(result)
 }
 
-fun matchAndFinalise_2_(
-    bookEntry: BookEntry,
-    books: Books
-): Transaction_2_<BookId, Books> {
-    val result = match_2_(
-        aggressor = bookEntry,
-        books = books
-    )
-
-    return result.aggressor.timeInForce.finalise_2_(result)
-}
-
-fun match_2_(
+fun match(
     aggressor: BookEntry,
     books: Books,
     lastEventId: EventId = books.lastEventId,
     events: List<Event<BookId, Books>> = List.empty()
-): MatchingResult_2_ {
+): MatchingResult {
     val limitBook = aggressor.side.oppositeSideBook(books)
 
     if (cannotMatchAnyFurther(aggressor, limitBook)) {
-        return MatchingResult_2_(aggressor, Transaction_2_(books, events))
+        return MatchingResult(aggressor, Transaction(books, events))
     }
 
     val nextMatch = findNextMatch(aggressor, limitBook.entries.values())
-        ?: return MatchingResult_2_(aggressor, Transaction_2_(books, events))
+        ?: return MatchingResult(aggressor, Transaction(books, events))
 
     val eventId = lastEventId.next()
     val tradeSize = getTradeSize(aggressor.sizes, nextMatch.passive.sizes)
@@ -66,49 +53,13 @@ fun match_2_(
         aggressor = tradedAggressor.toTradeSideEntry(eventId = eventId),
         passive = tradedPassive.toTradeSideEntry()
     )
-    val result = tradeEvent.play_2_(books)
-
-    return match_2_(
-        aggressor = tradedAggressor,
-        books = result,
-        lastEventId = eventId,
-        events = events.append(tradeEvent)
-    )
-}
-
-@Deprecated("Old CQRS semantics")
-fun match(
-    aggressor: BookEntry,
-    books: Books,
-    events: List<Event<BookId, Books>> = List.empty()
-): MatchingResult {
-    val limitBook = aggressor.side.oppositeSideBook(books)
-
-    if (cannotMatchAnyFurther(aggressor, limitBook)) {
-        return MatchingResult(aggressor, Transaction(books, events))
-    }
-
-    val nextMatch = findNextMatch(aggressor, limitBook.entries.values())
-        ?: return MatchingResult(aggressor, Transaction(books, events))
-
-    val tradeSize = getTradeSize(aggressor.sizes, nextMatch.passive.sizes)
-    val tradedAggressor = aggressor.traded(tradeSize)
-    val tradedPassive = nextMatch.passive.traded(tradeSize)
-    val tradeEvent = TradeEvent(
-        bookId = books.bookId,
-        eventId = books.lastEventId.next(),
-        size = tradeSize,
-        price = nextMatch.tradePrice,
-        whenHappened = aggressor.key.whenSubmitted,
-        aggressor = tradedAggressor.toTradeSideEntry(),
-        passive = tradedPassive.toTradeSideEntry()
-    )
     val result = tradeEvent.play(books)
 
     return match(
         aggressor = tradedAggressor,
-        books = result.aggregate,
-        events = events.append(tradeEvent).appendAll(result.events)
+        books = result,
+        lastEventId = eventId,
+        events = events.append(tradeEvent)
     )
 }
 
@@ -155,5 +106,3 @@ private fun findPassive(passives: Seq<BookEntry>, offset: Int): BookEntry? =
 data class Match(val passive: BookEntry, val tradePrice: Price)
 
 data class MatchingResult(val aggressor: BookEntry, val transaction: Transaction<BookId, Books>)
-
-data class MatchingResult_2_(val aggressor: BookEntry, val transaction: Transaction_2_<BookId, Books>)

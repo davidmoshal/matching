@@ -83,6 +83,33 @@ fun expectedBookEntry(
         )
     }
 
+fun expectedBookEntry(
+    command: PlaceMassQuoteCommand,
+    eventId: EventId,
+    entry: QuoteEntry,
+    side: Side,
+    sizes: EntrySizes = EntrySizes(side.priceWithSize(entry)?.size ?: 0),
+    status: EntryStatus = NEW
+): BookEntry =
+    with(command) {
+        BookEntry(
+            price = side.priceWithSize(entry)?.price,
+            whenSubmitted = whenRequested,
+            eventId = eventId,
+            requestId = ClientRequestId(
+                current = entry.quoteEntryId,
+                collectionId = entry.quoteSetId,
+                parentId = quoteId
+            ),
+            whoRequested = whoRequested,
+            isQuote = true,
+            entryType = EntryType.LIMIT,
+            side = side,
+            timeInForce = timeInForce,
+            sizes = sizes,
+            status = status
+        )
+    }
 
 fun expectedBookEntry(
     event: MassQuotePlacedEvent,

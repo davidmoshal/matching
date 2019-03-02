@@ -8,7 +8,7 @@ import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import io.kotlintest.tables.row
 import io.vavr.collection.List
-import jasition.cqrs.Command_2_
+import jasition.cqrs.Command
 import jasition.cqrs.Event
 import jasition.cqrs.EventId
 import jasition.cqrs.commitOrThrow
@@ -99,12 +99,12 @@ internal class `Aggressor order partial filled against passive orders then added
                     size = it.d,
                     price = Price(it.e),
                     whoRequested = Client(firmId = "firm1", firmClientId = "client1")
-                ) as Command_2_<BookId, Books>
+                ) as Command<BookId, Books>
             }
 
             val repo = aRepoWithABooks(
                 bookId = bookId,
-                commands = oldCommands as List<Command_2_<BookId, Books>>
+                commands = oldCommands as List<Command<BookId, Books>>
             )
             val command = randomPlaceOrderCommand(
                 bookId = bookId,
@@ -118,20 +118,21 @@ internal class `Aggressor order partial filled against passive orders then added
 
             val result = command.execute(repo.read(bookId)) commitOrThrow repo
 
-            var oldBookEventId = 1L
+            var oldBookEventId = 0L
             val oldBookEntries = oldCommands.map {
                 expectedBookEntry(
                     command = it as PlaceOrderCommand,
-                    eventId = EventId(oldBookEventId++ * oldEntries.size())
+                    eventId = EventId((oldBookEventId++ * 2) + 1)
                 )
             }
 
-            var tradeEventId = 5L
+            var expectedOrderPlacedEventId = 5L
+            var tradeEventId = expectedOrderPlacedEventId
             val entryAddedToBookEventId = tradeEventId + expectedTrades.size() + 1
             val lastNewBookEntry = expectedTrades.last().let {
                 expectedBookEntry(
                     command = command,
-                    eventId = EventId(entryAddedToBookEventId),
+                    eventId = EventId(expectedOrderPlacedEventId),
                     sizes = EntrySizes(available = it.e, traded = it.f, cancelled = 0),
                     status = it.d
                 )
@@ -139,7 +140,7 @@ internal class `Aggressor order partial filled against passive orders then added
 
             with(result) {
                 events shouldBe List.of<Event<BookId, Books>>(
-                    expectedOrderPlacedEvent(command, EventId(5))
+                    expectedOrderPlacedEvent(command, EventId(expectedOrderPlacedEventId))
                 ).appendAll(expectedTrades.map { trade ->
                     tradeEventId++
 

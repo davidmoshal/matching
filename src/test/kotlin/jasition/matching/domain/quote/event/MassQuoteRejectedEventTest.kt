@@ -5,7 +5,10 @@ import io.kotlintest.specs.StringSpec
 import io.vavr.collection.List
 import jasition.cqrs.EventId
 import jasition.matching.domain.*
-import jasition.matching.domain.book.entry.*
+import jasition.matching.domain.book.entry.Price
+import jasition.matching.domain.book.entry.PriceWithSize
+import jasition.matching.domain.book.entry.Side
+import jasition.matching.domain.book.entry.TimeInForce
 import jasition.matching.domain.quote.QuoteModelType
 import java.time.Instant
 
@@ -39,9 +42,6 @@ internal class MassQuoteRejectedEventPropertyTest : StringSpec({
     "Has Event ID as Event ID" {
         event.eventId() shouldBe eventId
     }
-    "Is a Primary event" {
-        event.isPrimary() shouldBe true
-    }
 })
 
 
@@ -70,13 +70,10 @@ internal class `Given a mass quote is rejected by an empty book` : StringSpec({
     val result = event.play(books)
 
     "Then the BUY book is still empty" {
-        result.aggregate.buyLimitBook.entries.size() shouldBe 0
+        result.buyLimitBook.entries.size() shouldBe 0
     }
     "Then the SELL book is still empty" {
-        result.aggregate.sellLimitBook.entries.size() shouldBe 0
-    }
-    "Then no entries were added" {
-        result.events shouldBe List.empty()
+        result.sellLimitBook.entries.size() shouldBe 0
     }
 })
 
@@ -120,30 +117,9 @@ internal class `Given a mass quote is rejected by a book with existing entries` 
     val result = event.play(books)
 
     "Then the BUY book is still empty" {
-        result.aggregate.buyLimitBook.entries.size() shouldBe 0
+        result.buyLimitBook.entries.size() shouldBe 0
     }
     "Then all the previous order remains in the SELL book" {
-        result.aggregate.sellLimitBook.entries.values() shouldBe List.of(existingEntry)
-    }
-    "Then the existing quote entry is removed and no new entries were added" {
-        result.events shouldBe List.of(
-            MassQuoteCancelledEvent(
-                eventId = EventId(2),
-                entries = List.of(
-                    removedEntry.copy(
-                        status = EntryStatus.CANCELLED,
-                        sizes = removedEntry.sizes.copy(
-                            available = 0,
-                            traded = 0,
-                            cancelled = removedEntry.sizes.available
-                        )
-                    )
-                ),
-                primary = false,
-                whoRequested = event.whoRequested,
-                whenHappened = event.whenHappened,
-                bookId = books.bookId
-            )
-        )
+        result.sellLimitBook.entries.values() shouldBe List.of(existingEntry)
     }
 })

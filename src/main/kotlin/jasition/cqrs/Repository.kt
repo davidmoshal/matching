@@ -62,3 +62,31 @@ class ConcurrentRepository<K, A : Aggregate<K>> (initialSize : Int) : Repository
 
     override fun delete(aggregateId: K): A? = delegate.remove(aggregateId)
 }
+
+interface RepositoryUpdateFunction {
+    fun <K, A : Aggregate<K>> update(aggregate: A, repository: Repository<K, A>)
+}
+
+object CreateOrUpdateFunction : RepositoryUpdateFunction {
+    override fun <K, A : Aggregate<K>> update(aggregate: A, repository: Repository<K, A>) {
+        repository.createOrUpdate(aggregate)
+    }
+}
+
+object CreateIfAbsentFunction : RepositoryUpdateFunction {
+    override fun <K, A : Aggregate<K>> update(aggregate: A, repository: Repository<K, A>) {
+        repository.createIfAbsent(aggregate)
+    }
+}
+
+object UpdateIfPresentFunction : RepositoryUpdateFunction {
+    override fun <K, A : Aggregate<K>> update(aggregate: A, repository: Repository<K, A>) {
+        repository.updateIfPresent(aggregate)
+    }
+}
+
+object DeleteFunction : RepositoryUpdateFunction {
+    override fun <K, A : Aggregate<K>> update(aggregate: A, repository: Repository<K, A>) {
+        repository.delete(aggregate.aggregateId())
+    }
+}

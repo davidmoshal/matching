@@ -134,7 +134,7 @@ internal class BooksTest : StringSpec({
             .addBookEntry(buyEntry)
             .addBookEntry(sellEntry)
             .addBookEntry(excludedEntry)
-            .removeBookEntries(excludedEntry.key.eventId, List.of(buyEntry, sellEntry)) shouldBe books.copy(
+            .removeBookEntries(List.of(buyEntry, sellEntry), excludedEntry.key.eventId) shouldBe books.copy(
             buyLimitBook = LimitBook(Side.BUY),
             sellLimitBook = LimitBook(Side.SELL).add(excludedEntry),
             lastEventId = excludedEntry.key.eventId

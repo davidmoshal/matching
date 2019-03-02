@@ -48,13 +48,13 @@ internal class `Aggressor takes better execution price` : StringSpec({
 
             val oldBookEntry = expectedBookEntry(
                 command = oldCommand,
-                eventId = EventId(2),
+                eventId = EventId(1),
                 sizes = EntrySizes(available = 0, traded = oldCommand.size, cancelled = 0),
                 status = FILLED
             )
             val newBookEntry = expectedBookEntry(
                 command = command,
-                eventId = EventId(4),
+                eventId = EventId(3),
                 sizes = EntrySizes(available = 0, traded = command.size, cancelled = 0),
                 status = FILLED
             )
@@ -68,7 +68,7 @@ internal class `Aggressor takes better execution price` : StringSpec({
                         size = command.size,
                         price = oldCommand.price ?: Price(0),
                         whenHappened = command.whenRequested,
-                        aggressor = expectedTradeSideEntry(bookEntry = newBookEntry),
+                        aggressor = expectedTradeSideEntry(bookEntry = newBookEntry, eventId = EventId(4)),
                         passive = expectedTradeSideEntry(bookEntry = oldBookEntry)
                     )
                 )

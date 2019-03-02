@@ -1,12 +1,15 @@
 package jasition.matching.domain.scenario.trading
 
-import arrow.core.*
+import arrow.core.Tuple2
+import arrow.core.Tuple4
+import arrow.core.Tuple5
+import arrow.core.Tuple9
 import io.kotlintest.data.forall
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import io.kotlintest.tables.row
 import io.vavr.collection.List
-import jasition.cqrs.Command_2_
+import jasition.cqrs.Command
 import jasition.cqrs.Event
 import jasition.cqrs.EventId
 import jasition.cqrs.commitOrThrow
@@ -67,12 +70,12 @@ internal class `Multiple level quote entries executed in natural order` : String
                     size = it.d,
                     price = Price(it.e),
                     whoRequested = Client(firmId = "firm1", firmClientId = "client1")
-                ) as Command_2_<BookId, Books>
+                ) as Command<BookId, Books>
             }
 
             val repo = aRepoWithABooks(
                 bookId = bookId,
-                commands = oldCommands as List<Command_2_<BookId, Books>>
+                commands = oldCommands as List<Command<BookId, Books>>
             )
             val command = randomPlaceMassQuoteCommand(
                 bookId = bookId, entries = newEntries,
@@ -81,21 +84,21 @@ internal class `Multiple level quote entries executed in natural order` : String
 
             val result = command.execute(repo.read(bookId)) commitOrThrow repo
 
-            var oldBookEventId = 1L
+            var oldBookEventId = 0L
             val oldBookEntries = oldCommands.map {
                 expectedBookEntry(
                     command = it as PlaceOrderCommand,
-                    eventId = EventId(oldBookEventId++ * oldEntries.size())
+                    eventId = EventId((oldBookEventId++ * 2) + 1L)
                 )
             }
 
             var newBookEntries = List.of(
-                Tuple3(0, EventId(7), BUY),
-                Tuple3(0, EventId(8), SELL),
-                Tuple3(1, EventId(9), BUY),
-                Tuple3(1, EventId(10), SELL)
+                Tuple2(0, BUY),
+                Tuple2(0, SELL),
+                Tuple2(1, BUY),
+                Tuple2(1, SELL)
             ).map {
-                expectedBookEntry(command = command, entryIndex = it.a, eventId = it.b, side = it.c)
+                expectedBookEntry(command = command, entryIndex = it.a, eventId = EventId(5), side = it.b)
             }
 
             expectedTrades.forEach { t ->

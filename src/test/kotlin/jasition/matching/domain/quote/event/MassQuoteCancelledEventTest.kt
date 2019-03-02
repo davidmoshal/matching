@@ -19,7 +19,6 @@ internal class MassQuoteCancelledEventPropertyTest : StringSpec({
         bookId = bookId,
         whenHappened = Instant.now(),
         eventId = eventId,
-        primary = false,
         whoRequested = aFirmWithoutClient(),
         entries = List.of(aBookEntry(eventId = eventId, isQuote = true))
     )
@@ -28,12 +27,6 @@ internal class MassQuoteCancelledEventPropertyTest : StringSpec({
     }
     "Has Event ID as Event ID" {
         event.eventId() shouldBe eventId
-    }
-    "Is a Primary event if specified" {
-        event.copy(primary = true).isPrimary() shouldBe true
-    }
-    "Is a Side-effect event if specified" {
-        event.copy(primary = false).isPrimary() shouldBe false
     }
 })
 

@@ -43,8 +43,8 @@ internal class `No trade if prices do not cross` : StringSpec({
 
             val result = command.execute(repo.read(bookId)) commitOrThrow repo
 
-            val oldBookEntry = expectedBookEntry(oldCommand, EventId(2))
-            val newBookEntry = expectedBookEntry(command, EventId(4))
+            val oldBookEntry = expectedBookEntry(oldCommand, EventId(1))
+            val newBookEntry = expectedBookEntry(command, EventId(3))
 
             with(result) {
                 events shouldBe List.of(

@@ -61,45 +61,6 @@ data class QuoteEntry(
         return entries
     }
 
-    fun toBookEntries_2_(
-        whenHappened: Instant,
-        eventId: EventId,
-        quoteId: String,
-        whoRequested: Client,
-        timeInForce: TimeInForce
-    ): Seq<BookEntry> {
-        var entries = List.empty<BookEntry>()
-        bid?.let {
-            entries = entries.append(
-                toBookEntry(
-                    side = Side.BUY,
-                    size = it.size,
-                    price = it.price,
-                    whenHappened = whenHappened,
-                    eventId = eventId,
-                    quoteId = quoteId,
-                    whoRequested = whoRequested,
-                    timeInForce = timeInForce
-                )
-            )
-        }
-        offer?.let {
-            entries = entries.append(
-                toBookEntry(
-                    side = Side.SELL,
-                    size = it.size,
-                    price = it.price,
-                    whenHappened = whenHappened,
-                    eventId = eventId,
-                    quoteId = quoteId,
-                    whoRequested = whoRequested,
-                    timeInForce = timeInForce
-                )
-            )
-        }
-        return entries
-    }
-
     fun toBookEntry(
         side: Side,
         size: Int,
@@ -132,8 +93,7 @@ fun cancelExistingQuotes(
     books: Books,
     eventId: EventId,
     whoRequested: Client,
-    whenHappened: Instant,
-    primary: Boolean
+    whenHappened: Instant
 ): MassQuoteCancelledEvent? {
     val toBeRemoved = books
         .findBookEntries(Predicate { p -> p.whoRequested == whoRequested && p.isQuote })
@@ -146,7 +106,6 @@ fun cancelExistingQuotes(
         // TODO: revise for newer Jacoco version - Below is equivalence to above but Jacoco cannot reach 100% coverage with the function reference
 //        entries = toBeRemoved.map(BookEntry::cancelled),
         bookId = books.bookId,
-        primary = primary,
         whoRequested = whoRequested,
         whenHappened = whenHappened
     )

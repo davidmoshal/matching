@@ -1,12 +1,15 @@
 package jasition.matching.domain.scenario.trading
 
-import arrow.core.*
+import arrow.core.Tuple2
+import arrow.core.Tuple4
+import arrow.core.Tuple5
+import arrow.core.Tuple9
 import io.kotlintest.data.forall
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import io.kotlintest.tables.row
 import io.vavr.collection.List
-import jasition.cqrs.Command_2_
+import jasition.cqrs.Command
 import jasition.cqrs.Event
 import jasition.cqrs.EventId
 import jasition.cqrs.commitOrThrow
@@ -66,12 +69,12 @@ internal class `Aggressor one level offer partial filled against passive orders`
                     size = it.d,
                     price = Price(it.e),
                     whoRequested = Client(firmId = "firm1", firmClientId = "client1")
-                ) as Command_2_<BookId, Books>
+                ) as Command<BookId, Books>
             }
 
             val repo = aRepoWithABooks(
                 bookId = bookId,
-                commands = oldCommands as List<Command_2_<BookId, Books>>
+                commands = oldCommands as List<Command<BookId, Books>>
             )
             val command = randomPlaceMassQuoteCommand(
                 bookId = bookId, entries = newEntries,
@@ -80,19 +83,20 @@ internal class `Aggressor one level offer partial filled against passive orders`
 
             val result = command.execute(repo.read(bookId)) commitOrThrow repo
 
-            var oldBookEventId = 1L
+            var oldBookEventId = 0L
             val oldBookEntries = oldCommands.map {
                 expectedBookEntry(
                     command = it as PlaceOrderCommand,
-                    eventId = EventId(oldBookEventId++ * oldEntries.size())
+                    eventId = EventId((oldBookEventId++ * 2) + 1)
                 )
             }
 
+            val expctedMassQuotePlacedEventId = EventId(5)
             var newBookEntries = List.of(
-                Tuple3(0, EventId(6), BUY),
-                Tuple3(0, EventId(8), SELL)
+                Tuple2(0, BUY),
+                Tuple2(0, SELL)
             ).map {
-                expectedBookEntry(command = command, entryIndex = it.a, eventId = it.b, side = it.c)
+                expectedBookEntry(command = command, entryIndex = it.a, eventId = expctedMassQuotePlacedEventId, side = it.b)
             }
 
             expectedTrades.forEach { t ->
@@ -112,7 +116,7 @@ internal class `Aggressor one level offer partial filled against passive orders`
             var tradeEventId = 6L
             with(result) {
                 events shouldBe List.of<Event<BookId, Books>>(
-                    expectedMassQuotePlacedEvent(command, EventId(5)),
+                    expectedMassQuotePlacedEvent(command, expctedMassQuotePlacedEventId),
                     EntryAddedToBookEvent(bookId = bookId, eventId = EventId(6), entry = newBookEntries[0])
                 ).appendAll(expectedTrades.map { trade ->
                     tradeEventId++
@@ -146,7 +150,7 @@ internal class `Aggressor one level offer partial filled against passive orders`
                     )
                 }).appendAll(
                     List.of(
-                        EntryAddedToBookEvent(bookId = bookId, eventId = EventId(8), entry = newBookEntries[1])
+                        EntryAddedToBookEvent(bookId = bookId, eventId = EventId(oldBookEntries.size() * 2 + 1 + expectedTrades.size() + 2L), entry = newBookEntries[1])
                     )
                 )
             }

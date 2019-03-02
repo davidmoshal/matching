@@ -32,7 +32,7 @@ internal class `Order placed on and added to empty book` : StringSpec({
 
             val result = command.execute(repo.read(bookId)) commitOrThrow repo
 
-            val expectedBookEntry = expectedBookEntry(command, EventId(2))
+            val expectedBookEntry = expectedBookEntry(command, EventId(1))
 
             with(result) {
                 events shouldBe List.of(
