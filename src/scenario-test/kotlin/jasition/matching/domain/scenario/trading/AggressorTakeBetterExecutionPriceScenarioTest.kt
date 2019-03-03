@@ -68,7 +68,7 @@ internal class `Aggressor takes better execution price` : StringSpec({
                         size = command.size,
                         price = oldCommand.price ?: Price(0),
                         whenHappened = command.whenRequested,
-                        aggressor = expectedTradeSideEntry(bookEntry = newBookEntry, eventId = EventId(4)),
+                        aggressor = expectedTradeSideEntry(bookEntry = newBookEntry),
                         passive = expectedTradeSideEntry(bookEntry = oldBookEntry)
                     )
                 )

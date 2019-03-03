@@ -97,7 +97,7 @@ data class PlaceOrderCommand(
         books: Books,
         currentTime: Instant = Instant.now()
     ): OrderPlacedEvent = OrderPlacedEvent(
-        eventId = books.lastEventId.next(),
+        eventId = books.lastEventId.inc(),
         requestId = requestId,
         whoRequested = whoRequested,
         bookId = bookId,
@@ -119,7 +119,7 @@ data class PlaceOrderCommand(
         rejectReason: OrderRejectReason = OrderRejectReason.OTHER,
         rejectText: String?
     ): OrderRejectedEvent = OrderRejectedEvent(
-        eventId = books.lastEventId.next(),
+        eventId = books.lastEventId.inc(),
         requestId = requestId,
         whoRequested = whoRequested,
         bookId = bookId,

@@ -101,7 +101,7 @@ fun cancelExistingQuotes(
     if (toBeRemoved.isEmpty) return null
 
     return MassQuoteCancelledEvent(
-        eventId = eventId.next(),
+        eventId = eventId.inc(),
         entries = toBeRemoved.map { it.cancelled() },
         // TODO: revise for newer Jacoco version - Below is equivalence to above but Jacoco cannot reach 100% coverage with the function reference
 //        entries = toBeRemoved.map(BookEntry::cancelled),

@@ -65,7 +65,7 @@ internal class `Given there is a request to place a mass quote` : StringSpec({
                 ),
                 events = List.of(
                     MassQuotePlacedEvent(
-                        eventId = books.lastEventId.next(),
+                        eventId = books.lastEventId.inc(),
                         quoteId = command.quoteId,
                         whoRequested = command.whoRequested,
                         bookId = bookId,
@@ -97,7 +97,7 @@ internal class `Given there is a request to place a mass quote` : StringSpec({
                 ),
                 events = List.of(
                     MassQuotePlacedEvent(
-                        eventId = books.lastEventId.next(),
+                        eventId = books.lastEventId.inc(),
                         quoteId = command.quoteId,
                         whoRequested = command.whoRequested,
                         bookId = bookId,
@@ -132,7 +132,7 @@ internal class `Given there is a request to place a mass quote` : StringSpec({
                 ),
                 events = List.of(
                     MassQuotePlacedEvent(
-                        eventId = books.lastEventId.next(),
+                        eventId = books.lastEventId.inc(),
                         quoteId = command.quoteId,
                         whoRequested = command.whoRequested,
                         bookId = bookId,
@@ -161,7 +161,7 @@ internal class `Given there is a request to place a mass quote` : StringSpec({
                 ),
                 events = List.of(
                     MassQuoteRejectedEvent(
-                        eventId = books.lastEventId.next(),
+                        eventId = books.lastEventId.inc(),
                         quoteId = command.quoteId,
                         whoRequested = command.whoRequested,
                         bookId = BookId(wrongBookId),
@@ -203,7 +203,7 @@ internal class `Given there is a request to place a mass quote` : StringSpec({
                     ),
                     events = List.of(
                         MassQuoteRejectedEvent(
-                            eventId = books.lastEventId.next(),
+                            eventId = books.lastEventId.inc(),
                             quoteId = command.quoteId,
                             whoRequested = command.whoRequested,
                             bookId = bookId,
@@ -240,7 +240,7 @@ internal class `Given there is a request to place a mass quote` : StringSpec({
                     ),
                     events = List.of(
                         MassQuoteRejectedEvent(
-                            eventId = books.lastEventId.next(),
+                            eventId = books.lastEventId.inc(),
                             quoteId = command.quoteId,
                             whoRequested = command.whoRequested,
                             bookId = bookId,
@@ -269,7 +269,7 @@ internal class `Given there is a request to place a mass quote` : StringSpec({
                 ),
                 events = List.of(
                     MassQuoteRejectedEvent(
-                        eventId = books.lastEventId.next(),
+                        eventId = books.lastEventId.inc(),
                         quoteId = command.quoteId,
                         whoRequested = command.whoRequested,
                         bookId = bookId,

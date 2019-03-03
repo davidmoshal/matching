@@ -126,12 +126,12 @@ internal class `Aggressor order partial filled against passive orders then cance
                 )
             }
 
-            var tradeEventId = 5L
-            val entryAddedToBookEventId = tradeEventId + expectedTrades.size() + 1
+            val orderPlacedEventId = EventId(5)
+            var eventId = orderPlacedEventId
             val lastNewBookEntry = expectedTrades.last().let {
                 expectedBookEntry(
                     command = command,
-                    eventId = EventId(entryAddedToBookEventId),
+                    eventId = orderPlacedEventId,
                     sizes = EntrySizes(available = it.e, traded = it.f, cancelled = 0),
                     status = it.d
                 )
@@ -139,20 +139,18 @@ internal class `Aggressor order partial filled against passive orders then cance
 
             with(result) {
                 events shouldBe List.of<Event<BookId, Books>>(
-                    expectedOrderPlacedEvent(command, EventId(5))
+                    expectedOrderPlacedEvent(command, orderPlacedEventId)
                 ).appendAll(expectedTrades.map { trade ->
-                    tradeEventId++
-
                     TradeEvent(
                         bookId = command.bookId,
-                        eventId = EventId(tradeEventId),
+                        eventId = ++eventId,
                         size = trade.b,
                         price = Price(trade.c),
                         whenHappened = command.whenRequested,
                         aggressor = expectedTradeSideEntry(
                             bookEntry = expectedBookEntry(
                                 command = command,
-                                eventId = EventId(tradeEventId),
+                                eventId = orderPlacedEventId,
                                 sizes = EntrySizes(available = trade.e, traded = trade.f, cancelled = 0),
                                 status = trade.d
                             )
@@ -171,7 +169,7 @@ internal class `Aggressor order partial filled against passive orders then cance
                 }).append(
                     expectedOrderCancelledByExchangeEvent(
                         bookId = bookId,
-                        eventId = EventId(entryAddedToBookEventId),
+                        eventId = ++eventId,
                         entry = lastNewBookEntry
                     )
                 )

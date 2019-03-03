@@ -131,7 +131,7 @@ data class PlaceMassQuoteCommand(
         quoteRejectReason: QuoteRejectReason,
         quoteRejectText: String
     ): MassQuoteRejectedEvent = MassQuoteRejectedEvent(
-        eventId = books.lastEventId.next(),
+        eventId = books.lastEventId.inc(),
         bookId = books.bookId,
         quoteId = quoteId,
         whoRequested = whoRequested,
@@ -144,7 +144,7 @@ data class PlaceMassQuoteCommand(
     )
 
     private fun toPlacedEvent(books: Books): MassQuotePlacedEvent = MassQuotePlacedEvent(
-        eventId = books.lastEventId.next(),
+        eventId = books.lastEventId.inc(),
         bookId = books.bookId,
         quoteId = quoteId,
         whoRequested = whoRequested,

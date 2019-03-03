@@ -67,7 +67,7 @@ internal class MatchingTest : StringSpec({
             transaction = Transaction(aggregate = books, events = existingEvents)
         )
     }
-    "Stop matching when there is no more next match in the opposite-side book" {
+    "Stop matching when there is no more inc match in the opposite-side book" {
         val books = aBooks(bookId, List.of(aBookEntry(side = Side.SELL, whoRequested = client, price = Price(35))))
         val aggressor = aBookEntry(side = Side.BUY, whoRequested = otherClient, price = Price(30))
         match(
@@ -112,7 +112,7 @@ internal class MatchingTest : StringSpec({
                         size = tradeSize,
                         price = tradePrice,
                         whenHappened = aggressor.key.whenSubmitted,
-                        aggressor = tradedAggressor.toTradeSideEntry(EventId(2)),
+                        aggressor = tradedAggressor.toTradeSideEntry(),
                         passive = tradedPassive.toTradeSideEntry()
                     )
                 )
@@ -154,7 +154,7 @@ internal class MatchingTest : StringSpec({
                         size = tradeSize,
                         price = Price(35),
                         whenHappened = aggressor.key.whenSubmitted,
-                        aggressor = tradedAggressor.toTradeSideEntry(EventId(2)),
+                        aggressor = tradedAggressor.toTradeSideEntry(),
                         passive = tradedPassive.toTradeSideEntry()
                     )
                 )
@@ -173,7 +173,7 @@ internal class MatchingTest : StringSpec({
         )
         val passive2 = passive.copy(
             sizes = EntrySizes(tradeSize2 + 10),
-            key = passive.key.copy(eventId = passive.key.eventId.next())
+            key = passive.key.copy(eventId = passive.key.eventId.inc())
         )
         val books = aBooks(bookId, List.of(passive, passive2))
         val aggressor = aBookEntry(
@@ -204,7 +204,7 @@ internal class MatchingTest : StringSpec({
                             size = tradeSize,
                             price = Price(35),
                             whenHappened = aggressor.key.whenSubmitted,
-                            aggressor = tradedAggressor.toTradeSideEntry(EventId(3)),
+                            aggressor = tradedAggressor.toTradeSideEntry(),
                             passive = tradedPassive.toTradeSideEntry()
                         ),
                         TradeEvent(
@@ -213,7 +213,7 @@ internal class MatchingTest : StringSpec({
                             size = tradeSize2,
                             price = Price(35),
                             whenHappened = aggressor.key.whenSubmitted,
-                            aggressor = tradedAggressor2.toTradeSideEntry(EventId(4)),
+                            aggressor = tradedAggressor2.toTradeSideEntry(),
                             passive = tradedPassive2.toTradeSideEntry()
                         )
                     )

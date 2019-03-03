@@ -209,7 +209,7 @@ fun expectedTradeSideEntry(
 
 fun expectedOrderCancelledByExchangeEvent(
     event: OrderPlacedEvent,
-    eventId: EventId = event.eventId.next(),
+    eventId: EventId = event.eventId.inc(),
     tradedSize: Int = event.sizes.traded,
     cancelledSize: Int = event.sizes.available + event.sizes.cancelled
 ): OrderCancelledByExchangeEvent {

@@ -15,7 +15,7 @@ enum class TimeInForce(val code: String) {
             with(result) {
                 with(transaction) {
                     return if (canStayOnBook(aggressor.sizes)) {
-                        val eventId = aggregate.lastEventId.next()
+                        val eventId = aggregate.lastEventId.inc()
                         val addedEvent = EntryAddedToBookEvent(
                             bookId = aggregate.bookId,
                             eventId = eventId,
@@ -41,7 +41,7 @@ enum class TimeInForce(val code: String) {
                 return if (aggressor.sizes.available > 0) {
                     with(transaction) {
                         val cancelledEvent = aggressor.toOrderCancelledByExchangeEvent(
-                                eventId = aggregate.lastEventId.next(),
+                                eventId = aggregate.lastEventId.inc(),
                                 bookId = aggregate.bookId
 
                         )

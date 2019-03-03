@@ -13,7 +13,7 @@ data class EventId(val value: Long) : Comparable<EventId> {
         if (value < 0) throw IllegalArgumentException("Event ID must be non-negative. value=$value")
     }
 
-    fun next(): EventId = EventId(if (value == Long.MAX_VALUE) 0 else value + 1)
+    operator fun inc(): EventId = EventId(if (value == Long.MAX_VALUE) 0 else value + 1)
 
     fun isNextOf(other: EventId): Boolean =
         if (value == 0L && other.value == Long.MAX_VALUE) true

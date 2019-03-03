@@ -181,23 +181,22 @@ internal class `Aggressor order filled against passive quotes` : StringSpec({
                 expectedBookEntry(command = oldCommand, entryIndex = it.a, eventId = EventId(1), side = it.b)
             }
 
-            var tradeEventId = 6L
+            val orderPlacedEventId = EventId(6)
+            var eventId = orderPlacedEventId
             with(result) {
                 events shouldBe List.of<Event<BookId, Books>>(
-                    expectedOrderPlacedEvent(command, EventId(6))
+                    expectedOrderPlacedEvent(command, orderPlacedEventId)
                 ).appendAll(expectedTrades.map { trade ->
-                    tradeEventId++
-
                     TradeEvent(
                         bookId = command.bookId,
-                        eventId = EventId(tradeEventId),
+                        eventId = ++eventId,
                         size = trade.b,
                         price = Price(trade.c),
                         whenHappened = command.whenRequested,
                         aggressor = expectedTradeSideEntry(
                             bookEntry = expectedBookEntry(
                                 command = command,
-                                eventId = EventId(tradeEventId),
+                                eventId = orderPlacedEventId,
                                 sizes = EntrySizes(available = trade.e, traded = trade.f, cancelled = 0),
                                 status = trade.d
                             )

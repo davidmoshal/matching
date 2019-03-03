@@ -91,12 +91,12 @@ internal class `Aggressor one level offer partial filled against passive orders`
                 )
             }
 
-            val expctedMassQuotePlacedEventId = EventId(5)
+            val massQuotePlacedEventId = EventId(5)
             var newBookEntries = List.of(
                 Tuple2(0, BUY),
                 Tuple2(0, SELL)
             ).map {
-                expectedBookEntry(command = command, entryIndex = it.a, eventId = expctedMassQuotePlacedEventId, side = it.b)
+                expectedBookEntry(command = command, entryIndex = it.a, eventId = massQuotePlacedEventId, side = it.b)
             }
 
             expectedTrades.forEach { t ->
@@ -113,17 +113,15 @@ internal class `Aggressor one level offer partial filled against passive orders`
             }
 
 
-            var tradeEventId = 6L
+            var eventId = EventId(6)
             with(result) {
                 events shouldBe List.of<Event<BookId, Books>>(
-                    expectedMassQuotePlacedEvent(command, expctedMassQuotePlacedEventId),
+                    expectedMassQuotePlacedEvent(command, massQuotePlacedEventId),
                     EntryAddedToBookEvent(bookId = bookId, eventId = EventId(6), entry = newBookEntries[0])
                 ).appendAll(expectedTrades.map { trade ->
-                    tradeEventId++
-
                     TradeEvent(
                         bookId = command.bookId,
-                        eventId = EventId(tradeEventId),
+                        eventId = ++eventId,
                         size = trade.c,
                         price = Price(trade.d),
                         whenHappened = command.whenRequested,
@@ -132,7 +130,7 @@ internal class `Aggressor one level offer partial filled against passive orders`
                                 command = command,
                                 entryIndex = 0,
                                 side = SELL,
-                                eventId = EventId(tradeEventId),
+                                eventId = massQuotePlacedEventId,
                                 sizes = EntrySizes(available = trade.f, traded = trade.g, cancelled = 0),
                                 status = trade.e
                             )

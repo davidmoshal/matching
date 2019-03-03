@@ -40,7 +40,7 @@ fun match(
     val nextMatch = findNextMatch(aggressor, limitBook.entries.values())
         ?: return MatchingResult(aggressor, Transaction(books, events))
 
-    val eventId = lastEventId.next()
+    val eventId = lastEventId.inc()
     val tradeSize = getTradeSize(aggressor.sizes, nextMatch.passive.sizes)
     val tradedAggressor = aggressor.traded(tradeSize)
     val tradedPassive = nextMatch.passive.traded(tradeSize)
@@ -50,7 +50,7 @@ fun match(
         size = tradeSize,
         price = nextMatch.tradePrice,
         whenHappened = aggressor.key.whenSubmitted,
-        aggressor = tradedAggressor.toTradeSideEntry(eventId = eventId),
+        aggressor = tradedAggressor.toTradeSideEntry(),
         passive = tradedPassive.toTradeSideEntry()
     )
     val result = tradeEvent.play(books)

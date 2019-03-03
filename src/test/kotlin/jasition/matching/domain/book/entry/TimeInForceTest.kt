@@ -62,11 +62,11 @@ internal class TimeInForceTest : StringSpec({
         val result = MatchingResult(aggressor, Transaction(books, existingEvents))
 
         TimeInForce.IMMEDIATE_OR_CANCEL.finalise(result) shouldBe Transaction(
-            books.copy(lastEventId = books.lastEventId.next()),
+            books.copy(lastEventId = books.lastEventId.inc()),
             existingEvents.append(
                 expectedOrderCancelledByExchangeEvent(
                     entry = aggressor,
-                    eventId = books.lastEventId.next(), bookId = books.bookId
+                    eventId = books.lastEventId.inc(), bookId = books.bookId
                 )
             )
         )

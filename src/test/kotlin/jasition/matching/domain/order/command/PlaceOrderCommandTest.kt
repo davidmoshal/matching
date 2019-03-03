@@ -31,7 +31,7 @@ internal class `Given there is a request to place an order` : StringSpec({
     "When the request is valid, then the order is placed" {
         command.validate(books) shouldBe Either.right(
             OrderPlacedEvent(
-                eventId = books.lastEventId.next(),
+                eventId = books.lastEventId.inc(),
                 requestId = command.requestId,
                 whoRequested = command.whoRequested,
                 bookId = command.bookId,
@@ -49,7 +49,7 @@ internal class `Given there is a request to place an order` : StringSpec({
         val wrongBookId = "Wrong ID"
         command.copy(bookId = BookId(wrongBookId)).validate(books) shouldBe Either.left(
             OrderRejectedEvent(
-                eventId = books.lastEventId.next(),
+                eventId = books.lastEventId.inc(),
                 requestId = command.requestId,
                 whoRequested = command.whoRequested,
                 bookId = BookId(wrongBookId),
@@ -67,7 +67,7 @@ internal class `Given there is a request to place an order` : StringSpec({
     "When the request uses negative sizes, then the order is rejected" {
         command.copy(size = -1).validate(books) shouldBe Either.left(
             OrderRejectedEvent(
-                eventId = books.lastEventId.next(),
+                eventId = books.lastEventId.inc(),
                 requestId = command.requestId,
                 whoRequested = command.whoRequested,
                 bookId = command.bookId,
@@ -85,7 +85,7 @@ internal class `Given there is a request to place an order` : StringSpec({
     "When the effective trading status disallows placing order, then the order is rejected" {
         command.validate(books.copy(tradingStatuses = TradingStatuses(TradingStatus.NOT_AVAILABLE_FOR_TRADING))) shouldBe Either.left(
             OrderRejectedEvent(
-                eventId = books.lastEventId.next(),
+                eventId = books.lastEventId.inc(),
                 requestId = command.requestId,
                 whoRequested = command.whoRequested,
                 bookId = command.bookId,

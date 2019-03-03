@@ -92,13 +92,14 @@ internal class `Multiple level quote entries executed in natural order` : String
                 )
             }
 
+            val massQuotePlacedEventId = EventId(5)
             var newBookEntries = List.of(
                 Tuple2(0, BUY),
                 Tuple2(0, SELL),
                 Tuple2(1, BUY),
                 Tuple2(1, SELL)
             ).map {
-                expectedBookEntry(command = command, entryIndex = it.a, eventId = EventId(5), side = it.b)
+                expectedBookEntry(command = command, entryIndex = it.a, eventId = massQuotePlacedEventId, side = it.b)
             }
 
             expectedTrades.forEach { t ->
@@ -115,16 +116,14 @@ internal class `Multiple level quote entries executed in natural order` : String
             }
 
 
-            var tradeEventId = 5L
+            var eventId = massQuotePlacedEventId
             with(result) {
                 events shouldBe List.of<Event<BookId, Books>>(
-                    expectedMassQuotePlacedEvent(command, EventId(5))
+                    expectedMassQuotePlacedEvent(command, massQuotePlacedEventId)
                 ).appendAll(expectedTrades.map { trade ->
-                    tradeEventId++
-
                     TradeEvent(
                         bookId = command.bookId,
-                        eventId = EventId(tradeEventId),
+                        eventId = ++eventId,
                         size = trade.c,
                         price = Price(trade.d),
                         whenHappened = command.whenRequested,
@@ -133,7 +132,7 @@ internal class `Multiple level quote entries executed in natural order` : String
                                 command = command,
                                 entryIndex = 0,
                                 side = BUY,
-                                eventId = EventId(tradeEventId),
+                                eventId = massQuotePlacedEventId,
                                 sizes = EntrySizes(available = trade.f, traded = trade.g, cancelled = 0),
                                 status = trade.e
                             )
