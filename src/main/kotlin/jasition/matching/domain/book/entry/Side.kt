@@ -20,7 +20,6 @@ enum class Side {
         override fun oppositeSideBook(books: Books): LimitBook = books.buyLimitBook
     };
 
-    //TODO: Unit test
     abstract fun oppositeSide(): Side
 
     abstract fun comparatorMultiplier(): Int

@@ -27,7 +27,6 @@ infix fun <K, A : Aggregate<K>> Transaction<K, A>.append(other: Transaction<K, A
         updateFunction = other.updateFunction
     )
 
-//TODO: Unit test
 infix fun <K, A : Aggregate<K>> Either<Exception, Transaction<K, A>>.commitOrThrow(
     repository: Repository<K, A>
 ): Transaction<K, A> = fold(

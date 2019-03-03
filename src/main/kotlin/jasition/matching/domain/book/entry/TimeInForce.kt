@@ -10,7 +10,6 @@ import jasition.matching.domain.trade.MatchingResult
 
 enum class TimeInForce(val code: String) {
     GOOD_TILL_CANCEL("GTC") {
-        //TODO: Unit test
         override fun finalise(result: MatchingResult): Transaction<BookId, Books> {
             with(result) {
                 with(transaction) {
@@ -35,7 +34,6 @@ enum class TimeInForce(val code: String) {
     },
 
     IMMEDIATE_OR_CANCEL("IOC") {
-        //TODO: Unit test
         override fun finalise(result: MatchingResult): Transaction<BookId, Books> {
             with(result) {
                 return if (aggressor.sizes.available > 0) {

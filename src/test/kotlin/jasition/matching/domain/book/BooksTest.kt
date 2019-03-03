@@ -44,7 +44,12 @@ internal class BooksTest : StringSpec({
     "Aggregate ID of a Books is the Book ID" {
         books.aggregateId() shouldBe books.bookId
     }
-
+    "Able to assign the next event ID to the book" {
+        var eventId = books.lastEventId
+        books.ofEventId(++eventId) shouldBe books.copy(
+            lastEventId = eventId
+        )
+    }
     "Adding BUY entry updates the BUY Limit Book and Last event ID only" {
         books.addBookEntry(buyEntry) shouldBe books.copy(
             buyLimitBook = newBuyLimitBook,

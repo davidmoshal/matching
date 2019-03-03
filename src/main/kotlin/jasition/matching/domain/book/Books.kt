@@ -79,7 +79,6 @@ data class Books(
                 )
         )
 
-    //TODO: Unit test
     fun ofEventId(eventId: EventId): Books = copy(lastEventId = verifyEventId(eventId))
 
     fun verifyEventId(eventId: EventId): EventId =
