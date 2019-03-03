@@ -29,7 +29,7 @@ internal class BooksCreatedEventPropertyTest : StringSpec({
     }
 })
 
-internal class `Given a books is created` : StringSpec({
+internal class BooksCreatedEventTest : StringSpec({
     val eventId = EventId(0)
     val bookId = aBookId()
     val event = BooksCreatedEvent(
@@ -39,7 +39,7 @@ internal class `Given a books is created` : StringSpec({
         tradingStatuses = aTradingStatuses()
     )
 
-    "Then the books is created with correct properties" {
+    "The books is created with correct properties" {
         event.play(aBooks(bookId)) shouldBe Books(
             bookId = bookId,
             buyLimitBook = LimitBook(Side.BUY),

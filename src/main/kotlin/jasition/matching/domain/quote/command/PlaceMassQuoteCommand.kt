@@ -9,7 +9,6 @@ import jasition.cqrs.Transaction
 import jasition.cqrs.append
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
-import jasition.matching.domain.book.BooksNotFoundException
 import jasition.matching.domain.book.entry.PriceWithSize
 import jasition.matching.domain.book.entry.TimeInForce
 import jasition.matching.domain.client.Client
@@ -33,7 +32,7 @@ data class PlaceMassQuoteCommand(
 ) : Command<BookId, Books> {
 
     override fun execute(aggregate: Books?): Either<Exception, Transaction<BookId, Books>> {
-        if (aggregate == null) return Either.left(BooksNotFoundException("Books $bookId not found"))
+        if (aggregate == null) return Either.left(IllegalArgumentException("Books $bookId not found"))
 
         val cancelledEvent = cancelExistingQuotes(
             books = aggregate,

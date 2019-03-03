@@ -11,6 +11,9 @@ internal class SideTest : StringSpec({
     val books = aBooks(aBookId())
         .copy(buyLimitBook = buyLimitBook, sellLimitBook = sellLimitBook)
 
+    "Opposite side of BUY is SELL" {
+        Side.BUY.oppositeSide() shouldBe Side.SELL
+    }
     "BUY side has -1 as the comparator multiplier"{
         Side.BUY.comparatorMultiplier() shouldBe -1
     }
@@ -31,6 +34,9 @@ internal class SideTest : StringSpec({
     }
     "Returns null if the BID side is absent in a quote entry" {
         Side.BUY.priceWithSize(aQuoteEntry(bid = null)) shouldBe null
+    }
+    "Opposite side of SELL is BUY" {
+        Side.SELL.oppositeSide() shouldBe Side.BUY
     }
     "SELL side has 1 as the comparator multiplier"{
         Side.SELL.comparatorMultiplier() shouldBe 1

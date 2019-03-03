@@ -1,7 +1,13 @@
 package jasition.cqrs
 
+import arrow.core.Either
 import io.kotlintest.shouldBe
+import io.kotlintest.shouldThrow
 import io.kotlintest.specs.StringSpec
+import io.mockk.confirmVerified
+import io.mockk.mockk
+import io.mockk.spyk
+import io.mockk.verify
 import io.vavr.collection.List
 
 internal class TransactionTest : StringSpec({
@@ -22,6 +28,25 @@ internal class TransactionTest : StringSpec({
             newAggregate,
             List.of<Event<Int, TestAggregate>>(event1, event2, event3, event4)
         )
+    }
+    "Throws exception if the result is left of Either" {
+        val repository = mockk<Repository<Int, TestAggregate>>()
+
+        shouldThrow<Exception> {
+            Either.left(Exception("nothing")) commitOrThrow repository
+        }
+    }
+    "Updates aggregate in the repository if the result is right of Either" {
+        val repository = spyk<Repository<Int, TestAggregate>>()
+        val transaction = Transaction(
+            aggregate = originalAggregate,
+            events = List.empty()
+        )
+
+        Either.right(transaction) commitOrThrow repository
+
+        verify { repository.createOrUpdate(originalAggregate) }
+        confirmVerified(repository)
     }
 })
 

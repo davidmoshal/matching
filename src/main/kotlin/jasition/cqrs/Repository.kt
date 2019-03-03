@@ -39,7 +39,6 @@ interface Repository<K, A : Aggregate<K>> {
     fun delete(aggregateId : K) : A?
 }
 
-//TODO: Unit test
 class ConcurrentRepository<K, A : Aggregate<K>> (initialSize : Int) : Repository<K, A> {
     constructor() : this (256)
 

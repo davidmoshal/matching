@@ -39,7 +39,7 @@ internal class FindNextMatchTest : StringSpec({
             )
         ) shouldBe null
     }
-    "Found the first passive entry as the inc matched" {
+    "Found the first passive entry as the next matched" {
         val passive = entry.copy(
             side = Side.SELL,
             key = entryKey.copy(price = Price(10)),
@@ -56,7 +56,7 @@ internal class FindNextMatchTest : StringSpec({
             )
         ) shouldBe Match(passive, Price(10))
     }
-    "Skipped the first passive entry due to same firm whoRequested and found the second as the inc matched" {
+    "Skipped the first passive entry due to same firm whoRequested and found the second as the next matched" {
         val passive = entry.copy(
             side = Side.SELL,
             key = entryKey.copy(price = Price(10)),
@@ -73,7 +73,7 @@ internal class FindNextMatchTest : StringSpec({
             )
         ) shouldBe Match(passive, Price(10))
     }
-    "Skipped the first passive entry due to same firm (firm against whoRequested) and found the second as the inc matched" {
+    "Skipped the first passive entry due to same firm (firm against whoRequested) and found the second as the next matched" {
         val passive = entry.copy(
             side = Side.SELL,
             key = entryKey.copy(price = Price(10)),
@@ -90,7 +90,7 @@ internal class FindNextMatchTest : StringSpec({
             )
         ) shouldBe Match(passive, Price(10))
     }
-    "Skipped the first passive entry due to both are quote and found the second as the inc matched" {
+    "Skipped the first passive entry due to both are quote and found the second as the next matched" {
         val passive = entry.copy(
             side = Side.SELL,
             key = entryKey.copy(price = Price(10)),
@@ -110,7 +110,7 @@ internal class FindNextMatchTest : StringSpec({
             )
         ) shouldBe Match(passive, Price(10))
     }
-    "Skipped the first passive entry due to no trade price found and found the second as the inc matched" {
+    "Skipped the first passive entry due to no trade price found and found the second as the next matched" {
         val passive = entry.copy(
             side = Side.SELL,
             key = entryKey.copy(price = Price(10)),

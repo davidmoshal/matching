@@ -24,7 +24,7 @@ import jasition.matching.domain.quote.event.MassQuoteRejectedEvent
 import jasition.matching.domain.quote.event.QuoteRejectReason
 import java.time.Instant
 
-internal class `Given there is a request to place a mass quote` : StringSpec({
+internal class PlaceMassQuoteCommandTest : StringSpec({
     val bookId = aBookId()
     val books = aBooks(bookId)
     val command = PlaceMassQuoteCommand(

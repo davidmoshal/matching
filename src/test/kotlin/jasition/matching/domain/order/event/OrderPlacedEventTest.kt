@@ -46,3 +46,24 @@ internal class OrderPlacedEventPropertyTest : StringSpec({
         )
     }
 })
+
+internal class OrderPlacedEventTest : StringSpec({
+    val eventId = anEventId()
+    val bookId = aBookId()
+    val event = OrderPlacedEvent(
+        requestId = aClientRequestId(),
+        whoRequested = aFirmWithClient(),
+        bookId = bookId,
+        entryType = EntryType.LIMIT,
+        side = Side.BUY,
+        price = aPrice(),
+        timeInForce = TimeInForce.GOOD_TILL_CANCEL,
+        whenHappened = Instant.now(),
+        eventId = eventId,
+        sizes = anEntrySizes()
+    )
+    val books = aBooks(bookId = bookId)
+    "Has Book ID as Aggregate ID" {
+        event.play(books) shouldBe books.ofEventId(eventId)
+    }
+})

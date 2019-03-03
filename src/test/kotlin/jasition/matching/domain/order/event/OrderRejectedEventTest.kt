@@ -34,7 +34,7 @@ internal class OrderRejectedEventPropertyTest : StringSpec({
     }
 })
 
-internal class `Given an order is rejected` : StringSpec({
+internal class OrderRejectedEventTest : StringSpec({
     val eventId = EventId(1)
     val bookId = aBookId()
     val books = aBooks(bookId)

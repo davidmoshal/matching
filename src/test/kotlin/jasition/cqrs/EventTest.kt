@@ -12,13 +12,13 @@ internal class EventIdTest : StringSpec({
             EventId(-1)
         }
     }
-    "Increments the value by one for the inc Event ID"{
+    "Increments the value by one for the next event ID"{
         EventId(1).inc() shouldBe EventId(2)
     }
-    "Rotates the inc value to zero if the current Event ID is the maximum Long value"{
+    "Rotates the next value to zero if the current Event ID is the maximum Long value"{
         EventId(Long.MAX_VALUE).inc() shouldBe EventId(0)
     }
-    "Recognises that Event ID (n + 1) is the inc value of n"{
+    "Recognises that Event ID (n + 1) is the next value of n"{
         forall(
             row(8L, 6L, false),
             row(8L, 7L, true),
@@ -39,10 +39,10 @@ internal class EventIdTest : StringSpec({
             EventId(a).isNextOf(EventId(b)) shouldBe result
         }
     }
-    "Recognises that Event ID 0 is the inc value of the maximum Long value"{
+    "Recognises that Event ID 0 is the next value of the maximum Long value"{
         EventId(0L).isNextOf(EventId(Long.MAX_VALUE)) shouldBe true
     }
-    "Evaluates that bigger Event ID is after smaller except 0 is the inc of Long.MAX_VALUE"{
+    "Evaluates that bigger Event ID is after smaller except 0 is the next of Long.MAX_VALUE"{
         forall(
             row(8L, 6L, 1),
             row(8L, 7L, 1),

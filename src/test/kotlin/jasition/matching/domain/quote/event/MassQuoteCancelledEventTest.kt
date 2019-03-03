@@ -30,7 +30,7 @@ internal class MassQuoteCancelledEventPropertyTest : StringSpec({
     }
 })
 
-internal class `Given entries are removed from a book` : StringSpec({
+internal class MassQuoteCancelledEventTest : StringSpec({
     val bookId = aBookId()
     val eventId = anEventId()
     val entry = aBookEntry(eventId = eventId)
@@ -38,7 +38,7 @@ internal class `Given entries are removed from a book` : StringSpec({
     val newBooks = spyk(Books(bookId))
     every { originalBooks.addBookEntry(entry) } returns newBooks
 
-    "Then the entries are absent in the book " {
+    "The entries are absent in the book " {
 
     }
 

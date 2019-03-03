@@ -88,8 +88,8 @@ fun findNextMatch(
     }
 }
 
-private fun cannotMatchAnyFurther(aggressor: BookEntry, limitBook: LimitBook, offset: Int = 0) =
-    aggressor.sizes.available <= 0 || limitBook.entries.isEmpty || limitBook.entries.size() <= offset
+private fun cannotMatchAnyFurther(aggressor: BookEntry, limitBook: LimitBook): Boolean =
+    aggressor.sizes.available <= 0 || limitBook.entries.isEmpty
 
 private fun cannotMatchTheseTwoClients(aggressor: Client, passive: Client): Boolean =
     sameFirmAndSameFirmClient(aggressor, passive) || sameFirmButPossibleFirmAgainstClient(aggressor, passive)

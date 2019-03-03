@@ -13,7 +13,7 @@ import jasition.matching.domain.order.event.OrderRejectReason
 import jasition.matching.domain.order.event.OrderRejectedEvent
 import java.time.Instant
 
-internal class `Given there is a request to place an order` : StringSpec({
+internal class PlaceOrderCommandTest : StringSpec({
     val bookId = aBookId()
     val books = aBooks(bookId)
     val command = PlaceOrderCommand(

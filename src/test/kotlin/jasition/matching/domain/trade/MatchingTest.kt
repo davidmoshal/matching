@@ -43,6 +43,7 @@ internal class MatchingTest : StringSpec({
     val client = aFirmWithClient()
     val otherClient = anotherFirmWithClient()
     val existingEvents = List.of(mockk<OrderPlacedEvent>(), mockk<TradeEvent>())
+
     "Stop matching when there is no available sizes in the aggressor" {
         val books = aBooks(bookId, List.of(aBookEntry(side = Side.SELL, whoRequested = client)))
         val aggressor = aBookEntry(side = Side.BUY, whoRequested = otherClient, sizes = EntrySizes(0))
@@ -67,7 +68,7 @@ internal class MatchingTest : StringSpec({
             transaction = Transaction(aggregate = books, events = existingEvents)
         )
     }
-    "Stop matching when there is no more inc match in the opposite-side book" {
+    "Stop matching when there is no more next match in the opposite-side book" {
         val books = aBooks(bookId, List.of(aBookEntry(side = Side.SELL, whoRequested = client, price = Price(35))))
         val aggressor = aBookEntry(side = Side.BUY, whoRequested = otherClient, price = Price(30))
         match(

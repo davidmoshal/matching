@@ -77,7 +77,7 @@ internal class `Given a mass quote is rejected by an empty book` : StringSpec({
     }
 })
 
-internal class `Given a mass quote is rejected by a book with existing entries` : StringSpec({
+internal class MassQuoteRejectedEventTest : StringSpec({
     val existingEntry = aBookEntry(
         eventId = EventId(0),
         side = Side.SELL,
@@ -116,10 +116,10 @@ internal class `Given a mass quote is rejected by a book with existing entries` 
     )
     val result = event.play(books)
 
-    "Then the BUY book is still empty" {
+    "The BUY book is still empty" {
         result.buyLimitBook.entries.size() shouldBe 0
     }
-    "Then all the previous order remains in the SELL book" {
+    "All the previous order remains in the SELL book" {
         result.sellLimitBook.entries.values() shouldBe List.of(existingEntry)
     }
 })

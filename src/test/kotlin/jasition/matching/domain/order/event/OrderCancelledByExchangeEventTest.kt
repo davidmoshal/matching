@@ -34,7 +34,7 @@ internal class OrderCancelledByExchangeEventPropertyTest : StringSpec({
     }
 })
 
-internal class `Given an order is cancelled by the Exchange` : StringSpec({
+internal class OrderCancelledByExchangeEventTest : StringSpec({
     val bookId = aBookId()
     val requestId = aClientRequestId()
     val whoRequested = aFirmWithClient()

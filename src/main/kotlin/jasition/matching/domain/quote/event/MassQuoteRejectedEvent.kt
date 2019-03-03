@@ -26,16 +26,19 @@ data class MassQuoteRejectedEvent(
 ) : Event<BookId, Books> {
     override fun aggregateId(): BookId = bookId
     override fun eventId(): EventId = eventId
-    //TODO unit test
     override fun play(aggregate: Books): Books {
         val books = aggregate.copy(lastEventId = aggregate.verifyEventId(eventId))
 
-        return cancelExistingQuotes(
+        val cancelledEvent = cancelExistingQuotes(
             books = books,
             eventId = eventId,
             whoRequested = whoRequested,
-            whenHappened = whenHappened
-        )?.play(books) ?: books
+            whenHappened = whenHappened)
+
+        //TODO: Replace by elvis operator when its code coverage can be accurately measured
+        return if (cancelledEvent != null) {
+            cancelledEvent.play(books)
+        } else books
     }
 }
 
