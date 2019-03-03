@@ -7,6 +7,7 @@ import jasition.cqrs.Transaction
 import jasition.cqrs.append
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
+import jasition.matching.domain.book.BooksNotFoundException
 import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
@@ -28,7 +29,7 @@ data class PlaceOrderCommand(
     val whenRequested: Instant
 ) : Command<BookId, Books> {
     override fun execute(aggregate: Books?): Either<Exception, Transaction<BookId, Books>> {
-        if (aggregate == null) return Either.left(IllegalArgumentException("Books $bookId not found"))
+        if (aggregate == null) return Either.left(BooksNotFoundException("Books $bookId not found"))
 
         val rejection = rejectDueToUnknownSymbol(aggregate)
             ?: rejectDueToIncorrectSize(aggregate)
@@ -45,20 +46,6 @@ data class PlaceOrderCommand(
             Transaction<BookId, Books>(placedAggregate, List.of(placedEvent))
                 .append(matchAndFinalise(placedEvent.toBookEntry(), placedAggregate))
         )
-    }
-
-    fun validate(
-        books: Books
-    ): Either<OrderRejectedEvent, OrderPlacedEvent> {
-        val rejection =
-            rejectDueToUnknownSymbol(books)
-                ?: rejectDueToIncorrectSize(books)
-                ?: rejectDueToExchangeClosed(books)
-
-        if (rejection != null) {
-            return Either.left(rejection)
-        }
-        return Either.right(toPlacedEvent(books = books, currentTime = whenRequested))
     }
 
     private fun rejectDueToUnknownSymbol(books: Books): OrderRejectedEvent? =

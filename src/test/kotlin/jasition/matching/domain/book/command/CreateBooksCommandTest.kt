@@ -20,11 +20,9 @@ internal class CreateBooksCommandTest : StringSpec({
         defaultTradingStatus = TradingStatus.NOT_AVAILABLE_FOR_TRADING
     )
 
-    "Throws exception if the books already existed" {
-        val result = command.execute(aBooks(bookId = bookId))
-
-        result.isLeft() shouldBe true
-        result.swap().toOption().orNull() should beOfType<BooksAlreadyExistsException>()
+    "Exception if the books already existed" {
+        command.execute(aBooks(bookId = bookId))
+            .swap().toOption().orNull() should beOfType<BooksAlreadyExistsException>()
     }
     "Books created if the books did not exist" {
         command.execute(null) shouldBe Either.right(
