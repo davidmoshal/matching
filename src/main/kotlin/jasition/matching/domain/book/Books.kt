@@ -85,3 +85,7 @@ data class Books(
         if (eventId.isNextOf(lastEventId)) eventId
         else throw IllegalArgumentException("Incoming Entry is not the next expected event ID. lastEventId=$lastEventId, incomingEventId=$eventId")
 }
+
+class BooksAlreadyExistsException(message: String) : Exception(message)
+
+class BooksNotFoundException(message: String) : Exception(message)
