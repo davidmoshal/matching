@@ -3,6 +3,7 @@ package jasition.matching.domain
 import jasition.cqrs.EventId
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.entry.*
+import jasition.matching.domain.book.entry.EntryStatus.CANCELLED
 import jasition.matching.domain.book.entry.EntryStatus.NEW
 import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.order.command.PlaceOrderCommand
@@ -208,31 +209,6 @@ fun expectedTradeSideEntry(
 }
 
 fun expectedOrderCancelledByExchangeEvent(
-    event: OrderPlacedEvent,
-    eventId: EventId = event.eventId.inc(),
-    tradedSize: Int = event.sizes.traded,
-    cancelledSize: Int = event.sizes.available + event.sizes.cancelled
-): OrderCancelledByExchangeEvent {
-    return OrderCancelledByExchangeEvent(
-        eventId = eventId,
-        requestId = event.requestId,
-        whoRequested = event.whoRequested,
-        bookId = event.bookId,
-        entryType = event.entryType,
-        side = event.side,
-        sizes = EntrySizes(
-            available = 0,
-            traded = tradedSize,
-            cancelled = cancelledSize
-        ),
-        price = event.price,
-        timeInForce = event.timeInForce,
-        status = EntryStatus.CANCELLED,
-        whenHappened = event.whenHappened
-    )
-}
-
-fun expectedOrderCancelledByExchangeEvent(
     entry: BookEntry,
     eventId: EventId,
     bookId: BookId,
@@ -343,5 +319,16 @@ fun expectedMassQuoteRejectedEvent(
         whenHappened = whenRequested,
         quoteRejectReason = expectedQuoteRejectReason,
         quoteRejectText = expectedQuoteRejectText
+    )
+}
+
+fun expectedCancelledBookEntry(entry: BookEntry): BookEntry {
+    return entry.copy(
+        status = CANCELLED,
+        sizes = EntrySizes(
+            available = 0,
+            traded = entry.sizes.traded,
+            cancelled = entry.sizes.cancelled + entry.sizes.available
+        )
     )
 }

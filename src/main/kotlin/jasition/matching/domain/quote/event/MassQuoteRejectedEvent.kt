@@ -35,7 +35,7 @@ data class MassQuoteRejectedEvent(
             whoRequested = whoRequested,
             whenHappened = whenHappened)
 
-        //TODO: Replace by elvis operator when its code coverage can be accurately measured
+        //TODO: Replace by Elvis operator when its code coverage can be accurately measured
         return if (cancelledEvent != null) {
             cancelledEvent.play(books)
         } else books

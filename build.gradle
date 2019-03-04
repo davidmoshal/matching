@@ -106,7 +106,7 @@ compileScenarioTestKotlin {
 }
 
 jacoco {
-    toolVersion = "0.8.2"
+    toolVersion = "0.8.3"
     reportsDir = file("$buildDir/reports/coverage")
 }
 
@@ -133,7 +133,7 @@ jacocoTestCoverageVerification {
         rule {
             element = 'CLASS'
             limit {
-                minimum = 0 //TODO Set it back to 1 (100%)
+                minimum = 1
             }
             excludes = [
                     "*.scneario.*",

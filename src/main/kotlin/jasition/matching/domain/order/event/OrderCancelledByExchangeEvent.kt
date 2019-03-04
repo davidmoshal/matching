@@ -25,7 +25,6 @@ data class OrderCancelledByExchangeEvent(
 ) : Event<BookId, Books> {
     override fun aggregateId(): BookId = bookId
     override fun eventId(): EventId = eventId
-    //TODO unit test
     override fun play(aggregate: Books): Books =
         aggregate.removeBookEntries(eventId = aggregate.verifyEventId(eventId),
             side = side,

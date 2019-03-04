@@ -103,7 +103,7 @@ fun cancelExistingQuotes(
     return MassQuoteCancelledEvent(
         eventId = eventId.inc(),
         entries = toBeRemoved.map { it.cancelled() },
-        // TODO: revise for newer Jacoco version - Below is equivalence to above but Jacoco cannot reach 100% coverage with the function reference
+        //TODO: Replace by Function reference when its code coverage can be accurately measured
 //        entries = toBeRemoved.map(BookEntry::cancelled),
         bookId = books.bookId,
         whoRequested = whoRequested,
