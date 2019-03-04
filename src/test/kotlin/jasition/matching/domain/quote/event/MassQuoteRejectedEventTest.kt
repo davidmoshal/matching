@@ -6,8 +6,8 @@ import io.vavr.collection.List
 import jasition.cqrs.EventId
 import jasition.matching.domain.*
 import jasition.matching.domain.book.entry.Price
-import jasition.matching.domain.book.entry.PriceWithSize
 import jasition.matching.domain.book.entry.Side
+import jasition.matching.domain.book.entry.SizeAtPrice
 import jasition.matching.domain.book.entry.TimeInForce
 import jasition.matching.domain.quote.QuoteModelType
 import java.time.Instant
@@ -26,11 +26,11 @@ internal class MassQuoteRejectedEventPropertyTest : StringSpec({
         timeInForce = TimeInForce.GOOD_TILL_CANCEL,
         entries = List.of(
             aQuoteEntry(
-                bid = PriceWithSize(size = 4, price = Price(9)),
-                offer = PriceWithSize(size = 4, price = Price(10))
+                bid = SizeAtPrice(size = 4, price = Price(9)),
+                offer = SizeAtPrice(size = 4, price = Price(10))
             ), aQuoteEntry(
-                bid = PriceWithSize(size = 5, price = Price(8)),
-                offer = PriceWithSize(size = 5, price = Price(11))
+                bid = SizeAtPrice(size = 5, price = Price(8)),
+                offer = SizeAtPrice(size = 5, price = Price(11))
             )
         ),
         quoteRejectReason = QuoteRejectReason.DUPLICATE_QUOTE,
@@ -57,11 +57,11 @@ internal class `Given a mass quote is rejected by an empty book` : StringSpec({
         timeInForce = TimeInForce.GOOD_TILL_CANCEL,
         entries = List.of(
             aQuoteEntry(
-                bid = PriceWithSize(size = 4, price = Price(9)),
-                offer = PriceWithSize(size = 4, price = Price(10))
+                bid = SizeAtPrice(size = 4, price = Price(9)),
+                offer = SizeAtPrice(size = 4, price = Price(10))
             ), aQuoteEntry(
-                bid = PriceWithSize(size = 5, price = Price(8)),
-                offer = PriceWithSize(size = 5, price = Price(11))
+                bid = SizeAtPrice(size = 5, price = Price(8)),
+                offer = SizeAtPrice(size = 5, price = Price(11))
             )
         ),
         quoteRejectReason = QuoteRejectReason.EXCHANGE_CLOSED,
@@ -104,11 +104,11 @@ internal class MassQuoteRejectedEventTest : StringSpec({
         timeInForce = TimeInForce.GOOD_TILL_CANCEL,
         entries = List.of(
             aQuoteEntry(
-                bid = PriceWithSize(size = 4, price = Price(9)),
-                offer = PriceWithSize(size = 4, price = Price(10))
+                bid = SizeAtPrice(size = 4, price = Price(9)),
+                offer = SizeAtPrice(size = 4, price = Price(10))
             ), aQuoteEntry(
-                bid = PriceWithSize(size = 5, price = Price(8)),
-                offer = PriceWithSize(size = 5, price = Price(11))
+                bid = SizeAtPrice(size = 5, price = Price(8)),
+                offer = SizeAtPrice(size = 5, price = Price(11))
             )
         ),
         quoteRejectReason = QuoteRejectReason.EXCHANGE_CLOSED,

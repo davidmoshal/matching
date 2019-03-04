@@ -7,14 +7,14 @@ import jasition.matching.domain.quote.QuoteEntry
 enum class Side {
     BUY {
         override fun oppositeSide(): Side = Side.SELL
-        override fun priceWithSize(quoteEntry: QuoteEntry): PriceWithSize? = quoteEntry.bid
+        override fun sizeAtPrice(quoteEntry: QuoteEntry): SizeAtPrice? = quoteEntry.bid
         override fun comparatorMultiplier(): Int = -1
         override fun sameSideBook(books: Books): LimitBook = books.buyLimitBook
         override fun oppositeSideBook(books: Books): LimitBook = books.sellLimitBook
     },
     SELL {
         override fun oppositeSide(): Side = Side.BUY
-        override fun priceWithSize(quoteEntry: QuoteEntry): PriceWithSize? = quoteEntry.offer
+        override fun sizeAtPrice(quoteEntry: QuoteEntry): SizeAtPrice? = quoteEntry.offer
         override fun comparatorMultiplier(): Int = 1
         override fun sameSideBook(books: Books): LimitBook = books.sellLimitBook
         override fun oppositeSideBook(books: Books): LimitBook = books.buyLimitBook
@@ -28,5 +28,5 @@ enum class Side {
 
     abstract fun oppositeSideBook(books: Books): LimitBook
 
-    abstract fun priceWithSize(quoteEntry: QuoteEntry): PriceWithSize?
+    abstract fun sizeAtPrice(quoteEntry: QuoteEntry): SizeAtPrice?
 }

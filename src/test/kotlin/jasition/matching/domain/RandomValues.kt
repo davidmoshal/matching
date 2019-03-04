@@ -73,8 +73,8 @@ fun randomPlaceMassQuoteCommand(
         QuoteEntry(
             quoteEntryId = randomId(),
             quoteSetId = randomId(),
-            bid = PriceWithSize(Price(it.b), it.a),
-            offer = PriceWithSize(Price(it.d), it.c)
+            bid = SizeAtPrice(size = it.a, price = Price(it.b)),
+            offer = SizeAtPrice(size = it.c, price = Price(it.d))
         )
     }.toList()
 )
@@ -95,8 +95,14 @@ fun randomPlaceMassQuoteCommand(
     val entryList = Array.range(0, depth)
         .map {
             aQuoteEntry(
-                bid = PriceWithSize(randomPrice(from = minBuy.value, until = maxBuy.value), randomSize()),
-                offer = PriceWithSize(randomPrice(from = minSell.value, until = maxSell.value), randomSize())
+                bid = SizeAtPrice(
+                    size = randomSize(),
+                    price = randomPrice(from = minBuy.value, until = maxBuy.value)
+                ),
+                offer = SizeAtPrice(
+                    size = randomSize(),
+                    price = randomPrice(from = minSell.value, until = maxSell.value)
+                )
             )
         }
     return PlaceMassQuoteCommand(

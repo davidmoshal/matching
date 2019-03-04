@@ -61,12 +61,12 @@ fun expectedBookEntry(
     eventId: EventId,
     entryIndex: Int,
     side: Side,
-    sizes: EntrySizes = EntrySizes(side.priceWithSize(command.entries[entryIndex])?.size ?: 0),
+    sizes: EntrySizes = EntrySizes(side.sizeAtPrice(command.entries[entryIndex])?.size ?: 0),
     status: EntryStatus = NEW
 ): BookEntry =
     with(command) {
         BookEntry(
-            price = side.priceWithSize(entries[entryIndex])?.price,
+            price = side.sizeAtPrice(entries[entryIndex])?.price,
             whenSubmitted = whenRequested,
             eventId = eventId,
             requestId = ClientRequestId(
@@ -89,12 +89,12 @@ fun expectedBookEntry(
     eventId: EventId,
     entry: QuoteEntry,
     side: Side,
-    sizes: EntrySizes = EntrySizes(side.priceWithSize(entry)?.size ?: 0),
+    sizes: EntrySizes = EntrySizes(side.sizeAtPrice(entry)?.size ?: 0),
     status: EntryStatus = NEW
 ): BookEntry =
     with(command) {
         BookEntry(
-            price = side.priceWithSize(entry)?.price,
+            price = side.sizeAtPrice(entry)?.price,
             whenSubmitted = whenRequested,
             eventId = eventId,
             requestId = ClientRequestId(
@@ -117,11 +117,11 @@ fun expectedBookEntry(
     quoteEntry: QuoteEntry,
     side: Side,
     eventId: EventId = event.eventId,
-    sizes: EntrySizes = EntrySizes(side.priceWithSize(quoteEntry)!!.size),
+    sizes: EntrySizes = EntrySizes(side.sizeAtPrice(quoteEntry)!!.size),
     status: EntryStatus = NEW
 ): BookEntry =
     BookEntry(
-        price = side.priceWithSize(quoteEntry)?.price,
+        price = side.sizeAtPrice(quoteEntry)?.price,
         whenSubmitted = event.whenHappened,
         eventId = eventId,
         requestId = expectedClientRequestId(event, quoteEntry),
@@ -149,7 +149,7 @@ fun expectedTradeSideEntry(
         entryType = EntryType.LIMIT,
         sizes = sizes,
         side = side,
-        price = side.priceWithSize(quoteEntry)?.price,
+        price = side.sizeAtPrice(quoteEntry)?.price,
         timeInForce = event.timeInForce,
         whenSubmitted = event.whenHappened,
         eventId = eventId,

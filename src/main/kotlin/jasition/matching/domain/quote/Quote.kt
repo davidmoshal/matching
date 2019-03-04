@@ -14,8 +14,8 @@ import java.util.function.Predicate
 data class QuoteEntry(
     val quoteEntryId: String,
     val quoteSetId: String,
-    val bid: PriceWithSize?,
-    val offer: PriceWithSize?
+    val bid: SizeAtPrice?,
+    val offer: SizeAtPrice?
 ) {
 
     fun toClientRequestId(quoteId: String): ClientRequestId = ClientRequestId(

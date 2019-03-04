@@ -15,8 +15,8 @@ internal class QuoteEntryTest : StringSpec({
     val whenHappened = Instant.now()
     val eventId = anEventId()
     val timeInForce = TimeInForce.GOOD_TILL_CANCEL
-    val bid = PriceWithSize(randomPrice(), randomSize())
-    val offer = PriceWithSize(randomPrice(), randomSize())
+    val bid = SizeAtPrice(size = randomSize(), price = randomPrice())
+    val offer = SizeAtPrice(size = randomSize(), price = randomPrice())
 
     val expectedBuyEntry = BookEntry(
         price = bid.price,

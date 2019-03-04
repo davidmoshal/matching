@@ -13,7 +13,4 @@ class PriceComparator(private val multiplier: Int = 1) : Comparator<Price> {
     override fun compare(o1: Price, o2: Price): Int = multiplier * o1.value.compareTo(o2.value)
 }
 
-/**
- * TODO : replace it by SizeAndPrice
- */
-data class PriceWithSize(val price: Price, val size: Int)
+data class SizeAtPrice(val size: Int, val price: Price)

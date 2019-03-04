@@ -12,9 +12,9 @@ import jasition.cqrs.EventId
 import jasition.cqrs.Transaction
 import jasition.matching.domain.*
 import jasition.matching.domain.book.*
-import jasition.matching.domain.book.entry.PriceWithSize
 import jasition.matching.domain.book.entry.Side.BUY
 import jasition.matching.domain.book.entry.Side.SELL
+import jasition.matching.domain.book.entry.SizeAtPrice
 import jasition.matching.domain.book.entry.TimeInForce
 import jasition.matching.domain.book.event.EntryAddedToBookEvent
 import jasition.matching.domain.quote.QuoteModelType
@@ -35,12 +35,12 @@ internal class PlaceMassQuoteCommandTest : StringSpec({
         timeInForce = TimeInForce.GOOD_TILL_CANCEL,
         entries = List.of(
             aQuoteEntry(
-                bid = PriceWithSize(randomPrice(from = 11, until = 12), randomSize()),
-                offer = PriceWithSize(randomPrice(from = 13, until = 14), randomSize())
+                bid = SizeAtPrice(size = randomSize(), price = randomPrice(from = 11, until = 12)),
+                offer = SizeAtPrice(size = randomSize(), price = randomPrice(from = 13, until = 14))
             ),
             aQuoteEntry(
-                bid = PriceWithSize(randomPrice(from = 9, until = 10), randomSize()),
-                offer = PriceWithSize(randomPrice(from = 15, until = 16), randomSize())
+                bid = SizeAtPrice(size = randomSize(), price = randomPrice(from = 9, until = 10)),
+                offer = SizeAtPrice(size = randomSize(), price = randomPrice(from = 15, until = 16))
             )
         ), whenRequested = Instant.now()
     )
@@ -272,8 +272,8 @@ internal class PlaceMassQuoteCommandTest : StringSpec({
         "When the request has non-positive sizes (bid=$bidSize, offer=$offerSize), the mass quote is rejected" {
             val newEntries = List.of(
                 aQuoteEntry(
-                    bid = PriceWithSize(randomPrice(from = 10, until = 12), bidSize),
-                    offer = PriceWithSize(randomPrice(from = 13, until = 15), offerSize)
+                    bid = SizeAtPrice(size = bidSize, price = randomPrice(from = 10, until = 12)),
+                    offer = SizeAtPrice(size = offerSize, price = randomPrice(from = 13, until = 15))
                 )
             )
             command.copy(

@@ -183,8 +183,8 @@ fun countEventsByClass(events: Seq<Event<BookId, Books>>) =
 fun aQuoteEntry(
     quoteEntryId: String = randomId(),
     quoteSetId: String = "1",
-    bid: PriceWithSize? = null,
-    offer: PriceWithSize? = null
+    bid: SizeAtPrice? = null,
+    offer: SizeAtPrice? = null
 ): QuoteEntry = QuoteEntry(
     quoteEntryId = quoteEntryId,
     quoteSetId = quoteSetId,
@@ -198,8 +198,8 @@ fun aQuoteEntry(
     offerPrice: Long = Random.nextLong(),
     offerSize: Int? = randomSize()
 ): QuoteEntry = aQuoteEntry(
-    bid = bidSize?.let { PriceWithSize(Price(bidPrice), it) },
-    offer = offerSize?.let { PriceWithSize(Price(offerPrice), it) }
+    bid = bidSize?.let { SizeAtPrice(size = it, price = Price(bidPrice)) },
+    offer = offerSize?.let { SizeAtPrice(size = it, price = Price(offerPrice)) }
 )
 
 fun quoteEntriesAsString(entries: List<Tuple4<Int, Long, Int, Long>>): String? =

@@ -48,17 +48,17 @@ public class PlaceOrderOnBookWithEntriesBenchmarkTest {
     @State(Scope.Benchmark)
     public static class Precondition {
         Books book = aBooksWithEntries(List.of(
-                aPriceWithSize(9, 10),
-                aPriceWithSize(8, 10),
-                aPriceWithSize(7, 10),
-                aPriceWithSize(6, 10),
-                aPriceWithSize(5, 10)
+                aSizeAtPrice(9, 10),
+                aSizeAtPrice(8, 10),
+                aSizeAtPrice(7, 10),
+                aSizeAtPrice(6, 10),
+                aSizeAtPrice(5, 10)
         ), List.of(
-                aPriceWithSize(11, 10),
-                aPriceWithSize(12, 10),
-                aPriceWithSize(13, 10),
-                aPriceWithSize(14, 10),
-                aPriceWithSize(15, 10)
+                aSizeAtPrice(11, 10),
+                aSizeAtPrice(12, 10),
+                aSizeAtPrice(13, 10),
+                aSizeAtPrice(14, 10),
+                aSizeAtPrice(15, 10)
         ));
         PlaceOrderCommand commandNoMatch = aPlaceOrderCommand(BUY, 10, 10);
         PlaceOrderCommand commandOneMatch = aPlaceOrderCommand(BUY, 11, 10);

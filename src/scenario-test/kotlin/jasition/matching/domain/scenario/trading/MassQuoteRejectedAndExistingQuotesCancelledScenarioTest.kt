@@ -56,7 +56,7 @@ internal class `Mass quote rejected and existing quotes cancelled` : StringSpec(
                     sizes = EntrySizes(
                         available = 0,
                         traded = 0,
-                        cancelled = it.b.priceWithSize(oldCommand.entries[it.a])?.size ?: 0
+                        cancelled = it.b.sizeAtPrice(oldCommand.entries[it.a])?.size ?: 0
                     ),
                     status = CANCELLED
                 )

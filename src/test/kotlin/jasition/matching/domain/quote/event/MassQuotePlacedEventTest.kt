@@ -6,8 +6,8 @@ import io.vavr.collection.List
 import jasition.cqrs.EventId
 import jasition.matching.domain.*
 import jasition.matching.domain.book.entry.Price
-import jasition.matching.domain.book.entry.PriceWithSize
 import jasition.matching.domain.book.entry.Side
+import jasition.matching.domain.book.entry.SizeAtPrice
 import jasition.matching.domain.book.entry.TimeInForce
 import jasition.matching.domain.quote.QuoteModelType
 import java.time.Instant
@@ -26,12 +26,12 @@ internal class MassQuotePlacedEventPropertyTest : StringSpec({
         entries = List.of(
             aQuoteEntry(
                 quoteEntryId = "qe1",
-                bid = PriceWithSize(size = 4, price = Price(9)),
-                offer = PriceWithSize(size = 4, price = Price(10))
+                bid = SizeAtPrice(size = 4, price = Price(9)),
+                offer = SizeAtPrice(size = 4, price = Price(10))
             ), aQuoteEntry(
                 quoteEntryId = "qe2",
-                bid = PriceWithSize(size = 5, price = Price(8)),
-                offer = PriceWithSize(size = 5, price = Price(11))
+                bid = SizeAtPrice(size = 5, price = Price(8)),
+                offer = SizeAtPrice(size = 5, price = Price(11))
             )
         )
     )

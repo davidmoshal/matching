@@ -28,11 +28,11 @@ internal class CancelExistingQuotesTest : StringSpec({
         timeInForce = TimeInForce.GOOD_TILL_CANCEL,
         entries = List.of(
             aQuoteEntry(
-                bid = PriceWithSize(size = 4, price = Price(9)),
-                offer = PriceWithSize(size = 5, price = Price(10))
+                bid = SizeAtPrice(size = 4, price = Price(9)),
+                offer = SizeAtPrice(size = 5, price = Price(10))
             ), aQuoteEntry(
-                bid = PriceWithSize(size = 6, price = Price(8)),
-                offer = PriceWithSize(size = 7, price = Price(11))
+                bid = SizeAtPrice(size = 6, price = Price(8)),
+                offer = SizeAtPrice(size = 7, price = Price(11))
             )
         )
     )

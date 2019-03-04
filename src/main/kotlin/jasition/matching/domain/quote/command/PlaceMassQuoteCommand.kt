@@ -10,7 +10,7 @@ import jasition.cqrs.append
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.BooksNotFoundException
-import jasition.matching.domain.book.entry.PriceWithSize
+import jasition.matching.domain.book.entry.SizeAtPrice
 import jasition.matching.domain.book.entry.TimeInForce
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.quote.QuoteEntry
@@ -129,8 +129,8 @@ data class PlaceMassQuoteCommand(
     private fun findNonPositiveSize(quoteEntry: QuoteEntry): Int? =
         findNonPositiveSize(quoteEntry.bid) ?: findNonPositiveSize(quoteEntry.offer)
 
-    private fun findNonPositiveSize(priceWithSize: PriceWithSize?): Int? =
-        priceWithSize?.let { if (it.size <= 0) it.size else null }
+    private fun findNonPositiveSize(sizeAtPrice: SizeAtPrice?): Int? =
+        sizeAtPrice?.let { if (it.size <= 0) it.size else null }
 
     private fun toRejectedEvent(
         books: Books,
