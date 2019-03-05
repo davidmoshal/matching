@@ -80,11 +80,11 @@ data class Books(
         )
 
     fun ofEventId(eventId: EventId): Books = copy(lastEventId = verifyEventId(eventId))
-
-    fun verifyEventId(eventId: EventId): EventId =
-        if (eventId.isNextOf(lastEventId)) eventId
-        else throw IllegalArgumentException("Incoming Entry is not the next expected event ID. lastEventId=$lastEventId, incomingEventId=$eventId")
 }
+
+infix fun Books.verifyEventId(eventId: EventId) :EventId =
+    if (eventId.isNextOf(lastEventId)) eventId
+    else throw IllegalArgumentException("Incoming Entry is not the next expected event ID. lastEventId=$lastEventId, incomingEventId=$eventId")
 
 class BooksAlreadyExistsException(message: String) : Exception(message)
 

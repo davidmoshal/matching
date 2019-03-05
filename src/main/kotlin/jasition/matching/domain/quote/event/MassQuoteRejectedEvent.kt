@@ -6,6 +6,7 @@ import jasition.cqrs.EventId
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.TimeInForce
+import jasition.matching.domain.book.verifyEventId
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.quote.QuoteEntry
 import jasition.matching.domain.quote.QuoteModelType
@@ -27,7 +28,7 @@ data class MassQuoteRejectedEvent(
     override fun aggregateId(): BookId = bookId
     override fun eventId(): EventId = eventId
     override fun play(aggregate: Books): Books {
-        val books = aggregate.copy(lastEventId = aggregate.verifyEventId(eventId))
+        val books = aggregate.copy(lastEventId = aggregate verifyEventId eventId)
 
         val cancelledEvent = cancelExistingQuotes(
             books = books,

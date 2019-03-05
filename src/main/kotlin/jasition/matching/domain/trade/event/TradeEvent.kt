@@ -5,6 +5,7 @@ import jasition.cqrs.EventId
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.*
+import jasition.matching.domain.book.verifyEventId
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
 import java.time.Instant
@@ -22,7 +23,7 @@ data class TradeEvent(
     override fun aggregateId(): BookId = bookId
     override fun eventId(): EventId = eventId
     override fun play(aggregate: Books): Books {
-        aggregate.verifyEventId(eventId)
+        aggregate verifyEventId eventId
 
         return updateOrRemoveEntry(updateOrRemoveEntry(aggregate, aggressor), passive)
     }

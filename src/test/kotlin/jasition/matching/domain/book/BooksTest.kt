@@ -63,23 +63,22 @@ internal class BooksTest : StringSpec({
         )
     }
     "Accepts event ID (last event ID + 1)" {
-        books.copy(lastEventId = EventId(4))
-            .verifyEventId(eventId = EventId(5)) shouldBe EventId(5)
+        books.copy(lastEventId = EventId(4)) verifyEventId EventId(5) shouldBe EventId(5)
     }
     "Rejects event IDs other than (last event ID + 1)" {
         val newBooks = books.copy(lastEventId = EventId(4))
         forall(
+            row(0L),
             row(2L),
             row(3L),
             row(4L),
             row(6L),
             row(7L)
         ) { nextEventId ->
-            shouldThrow<IllegalArgumentException> { newBooks.verifyEventId(EventId(nextEventId)) }
+            shouldThrow<IllegalArgumentException> { newBooks verifyEventId EventId(nextEventId) }
         }
     }
     "Able to find the entries fulfilling the predicate" {
-
         Books(aBookId())
             .addBookEntry(buyEntry)
             .addBookEntry(sellEntry)
