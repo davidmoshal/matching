@@ -3,7 +3,6 @@ package jasition.matching.domain.book.event
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import jasition.cqrs.EventId
-import jasition.cqrs.Transaction
 import jasition.matching.domain.aBookId
 import jasition.matching.domain.aBooks
 import jasition.matching.domain.aTradingStatuses
@@ -28,12 +27,9 @@ internal class BooksCreatedEventPropertyTest : StringSpec({
     "Has Event ID as Event ID" {
         event.eventId() shouldBe eventId
     }
-    "Is a Primary event" {
-        event.isPrimary() shouldBe true
-    }
 })
 
-internal class `Given a books is created` : StringSpec({
+internal class BooksCreatedEventTest : StringSpec({
     val eventId = EventId(0)
     val bookId = aBookId()
     val event = BooksCreatedEvent(
@@ -43,16 +39,14 @@ internal class `Given a books is created` : StringSpec({
         tradingStatuses = aTradingStatuses()
     )
 
-    "Then the books is created with correct properties" {
-        event.play(aBooks(bookId)) shouldBe Transaction(
-            aggregate = Books(
-                bookId = bookId,
-                buyLimitBook = LimitBook(Side.BUY),
-                sellLimitBook = LimitBook(Side.SELL),
-                businessDate = event.businessDate,
-                tradingStatuses = event.tradingStatuses,
-                lastEventId = eventId
-            )
+    "The books is created with correct properties" {
+        event.play(aBooks(bookId)) shouldBe Books(
+            bookId = bookId,
+            buyLimitBook = LimitBook(Side.BUY),
+            sellLimitBook = LimitBook(Side.SELL),
+            businessDate = event.businessDate,
+            tradingStatuses = event.tradingStatuses,
+            lastEventId = eventId
         )
     }
 })

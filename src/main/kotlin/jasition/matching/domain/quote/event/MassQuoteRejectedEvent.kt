@@ -3,11 +3,10 @@ package jasition.matching.domain.quote.event
 import io.vavr.collection.Seq
 import jasition.cqrs.Event
 import jasition.cqrs.EventId
-import jasition.cqrs.Transaction
-import jasition.cqrs.playAndAppend
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.TimeInForce
+import jasition.matching.domain.book.verifyEventId
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.quote.QuoteEntry
 import jasition.matching.domain.quote.QuoteModelType
@@ -28,22 +27,19 @@ data class MassQuoteRejectedEvent(
 ) : Event<BookId, Books> {
     override fun aggregateId(): BookId = bookId
     override fun eventId(): EventId = eventId
-    override fun isPrimary(): Boolean = true
+    override fun play(aggregate: Books): Books {
+        val books = aggregate.copy(lastEventId = aggregate verifyEventId eventId)
 
-    override fun play(aggregate: Books): Transaction<BookId, Books> {
-        val books = aggregate.copy(lastEventId = aggregate.verifyEventId(eventId))
-        val event = cancelExistingQuotes(
+        val cancelledEvent = cancelExistingQuotes(
             books = books,
             eventId = eventId,
             whoRequested = whoRequested,
-            whenHappened = whenHappened,
-            primary = false
-        )
+            whenHappened = whenHappened)
 
-        return if (event != null) event playAndAppend books else Transaction(books)
-
-// TODO: revise for newer Jacoco version - Below is equivalence to above but Jacoco cannot reach 100% coverage with the let function
-//        return event?.playAndAppend(books) ?: Transaction(books)
+        //TODO: Replace by Elvis operator when its code coverage can be accurately measured
+        return if (cancelledEvent != null) {
+            cancelledEvent.play(books)
+        } else books
     }
 }
 

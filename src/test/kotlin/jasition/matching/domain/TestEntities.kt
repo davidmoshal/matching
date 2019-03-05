@@ -1,14 +1,19 @@
 @file:JvmName("TestEntities")
+
 package jasition.matching.domain
 
+import arrow.core.Tuple2
+import arrow.core.Tuple4
+import arrow.core.Tuple5
 import io.vavr.collection.List
 import io.vavr.collection.Seq
-import jasition.cqrs.Event
-import jasition.cqrs.EventId
+import jasition.cqrs.*
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.TradingStatus
+import jasition.matching.domain.book.TradingStatus.OPEN_FOR_TRADING
 import jasition.matching.domain.book.TradingStatuses
+import jasition.matching.domain.book.command.CreateBooksCommand
 import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
@@ -16,6 +21,23 @@ import jasition.matching.domain.order.event.OrderPlacedEvent
 import jasition.matching.domain.quote.QuoteEntry
 import java.time.Instant
 import kotlin.random.Random
+
+fun aRepoWithABooks(
+    bookId: BookId,
+    defaultTradingStatus: TradingStatus = OPEN_FOR_TRADING,
+    commands: Seq<Command<BookId, Books>> = List.empty()
+): Repository<BookId, Books> {
+    val repository = ConcurrentRepository<BookId, Books>()
+
+    CreateBooksCommand(bookId = bookId, defaultTradingStatus = defaultTradingStatus)
+        .execute(null) commitOrThrow repository
+
+    commands.forEach {
+        it.execute(repository.read(bookId)) commitOrThrow repository
+    }
+
+    return repository
+}
 
 fun aBooks(bookId: BookId, bookEntries: Seq<BookEntry> = List.empty()): Books =
     aBooksWithEntities(Books(bookId), bookEntries)
@@ -147,7 +169,7 @@ fun aTradingStatuses(
     manual: TradingStatus? = null,
     fastMarket: TradingStatus? = null,
     scheduled: TradingStatus? = null,
-    default: TradingStatus = TradingStatus.OPEN_FOR_TRADING
+    default: TradingStatus = OPEN_FOR_TRADING
 ): TradingStatuses = TradingStatuses(
     manual = manual,
     fastMarket = fastMarket,
@@ -161,8 +183,8 @@ fun countEventsByClass(events: Seq<Event<BookId, Books>>) =
 fun aQuoteEntry(
     quoteEntryId: String = randomId(),
     quoteSetId: String = "1",
-    bid: PriceWithSize? = null,
-    offer: PriceWithSize? = null
+    bid: SizeAtPrice? = null,
+    offer: SizeAtPrice? = null
 ): QuoteEntry = QuoteEntry(
     quoteEntryId = quoteEntryId,
     quoteSetId = quoteSetId,
@@ -176,7 +198,22 @@ fun aQuoteEntry(
     offerPrice: Long = Random.nextLong(),
     offerSize: Int? = randomSize()
 ): QuoteEntry = aQuoteEntry(
-    bid = bidSize?.let { PriceWithSize(Price(bidPrice), it) },
-    offer = offerSize?.let { PriceWithSize(Price(offerPrice), it) }
+    bid = bidSize?.let { SizeAtPrice(size = it, price = Price(bidPrice)) },
+    offer = offerSize?.let { SizeAtPrice(size = it, price = Price(offerPrice)) }
 )
+
+fun quoteEntriesAsString(entries: List<Tuple4<Int, Long, Int, Long>>): String? =
+    entries.map { "(BUY ${it.a} at ${it.b} SELL ${it.c} at ${it.d})" }
+    .intersperse(", ")
+    .fold("") { s1, s2 -> s1 + s2 }
+
+fun orderEntriesAsString(entries: List<Tuple5<Side, EntryType, TimeInForce, Int, Long>>): String? =
+    entries.map { "(${it.a} ${it.b} ${it.c.code} ${it.d} at ${it.e})" }
+    .intersperse(", ")
+    .fold("") { s1, s2 -> s1 + s2 }
+
+fun tradesAsString(expectedTrade: List<Tuple2<Int, Long>>): String? =
+    expectedTrade.map { "(${it.a} at ${it.b})" }
+        .intersperse(", ")
+        .fold("") { s1, s2 -> s1 + s2 }
 

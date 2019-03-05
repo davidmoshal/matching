@@ -19,7 +19,6 @@ internal class MassQuoteCancelledEventPropertyTest : StringSpec({
         bookId = bookId,
         whenHappened = Instant.now(),
         eventId = eventId,
-        primary = false,
         whoRequested = aFirmWithoutClient(),
         entries = List.of(aBookEntry(eventId = eventId, isQuote = true))
     )
@@ -29,15 +28,9 @@ internal class MassQuoteCancelledEventPropertyTest : StringSpec({
     "Has Event ID as Event ID" {
         event.eventId() shouldBe eventId
     }
-    "Is a Primary event if specified" {
-        event.copy(primary = true).isPrimary() shouldBe true
-    }
-    "Is a Side-effect event if specified" {
-        event.copy(primary = false).isPrimary() shouldBe false
-    }
 })
 
-internal class `Given entries are removed from a book` : StringSpec({
+internal class MassQuoteCancelledEventTest : StringSpec({
     val bookId = aBookId()
     val eventId = anEventId()
     val entry = aBookEntry(eventId = eventId)
@@ -45,7 +38,7 @@ internal class `Given entries are removed from a book` : StringSpec({
     val newBooks = spyk(Books(bookId))
     every { originalBooks.addBookEntry(entry) } returns newBooks
 
-    "Then the entries are absent in the book " {
+    "The entries are absent in the book " {
 
     }
 

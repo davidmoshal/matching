@@ -24,6 +24,7 @@
  */
 package jasition.matching.domain.benchmark;
 
+import arrow.core.Either;
 import io.vavr.collection.List;
 import jasition.cqrs.Transaction;
 import jasition.matching.domain.book.BookId;
@@ -34,32 +35,30 @@ import org.openjdk.jmh.annotations.*;
 import java.util.concurrent.TimeUnit;
 
 import static jasition.matching.domain.PreconditionSetup.*;
-import static jasition.matching.domain.TestExecutor.validateAndPlay;
 import static jasition.matching.domain.book.entry.Side.BUY;
 
 public class PlaceOrderOnBookWithEntriesBenchmarkTest {
     // Can verify the test correctness here
     public static void main(String[] args) {
         Precondition precondition = new Precondition();
-        Transaction<BookId, Books> transaction = validateAndPlay(precondition.commandFiveMatchesAndAddedToBook, precondition.book);
+        Either<Exception, Transaction<BookId, Books>> transaction = precondition.commandFiveMatchesAndAddedToBook.execute(precondition.book);
         System.out.println(precondition.book);
-        System.out.println(transaction.getEvents());
     }
 
     @State(Scope.Benchmark)
     public static class Precondition {
         Books book = aBooksWithEntries(List.of(
-                aPriceWithSize(9, 10),
-                aPriceWithSize(8, 10),
-                aPriceWithSize(7, 10),
-                aPriceWithSize(6, 10),
-                aPriceWithSize(5, 10)
+                aSizeAtPrice(9, 10),
+                aSizeAtPrice(8, 10),
+                aSizeAtPrice(7, 10),
+                aSizeAtPrice(6, 10),
+                aSizeAtPrice(5, 10)
         ), List.of(
-                aPriceWithSize(11, 10),
-                aPriceWithSize(12, 10),
-                aPriceWithSize(13, 10),
-                aPriceWithSize(14, 10),
-                aPriceWithSize(15, 10)
+                aSizeAtPrice(11, 10),
+                aSizeAtPrice(12, 10),
+                aSizeAtPrice(13, 10),
+                aSizeAtPrice(14, 10),
+                aSizeAtPrice(15, 10)
         ));
         PlaceOrderCommand commandNoMatch = aPlaceOrderCommand(BUY, 10, 10);
         PlaceOrderCommand commandOneMatch = aPlaceOrderCommand(BUY, 11, 10);
@@ -72,7 +71,7 @@ public class PlaceOrderOnBookWithEntriesBenchmarkTest {
     @BenchmarkMode(Mode.SampleTime)
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void orderPlacedOnBookOfFiveEntriesNoMatch(Precondition precondition) {
-        validateAndPlay(precondition.commandNoMatch, precondition.book);
+        precondition.commandNoMatch.execute(precondition.book);
 
     }
 
@@ -80,14 +79,14 @@ public class PlaceOrderOnBookWithEntriesBenchmarkTest {
     @BenchmarkMode(Mode.SampleTime)
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void orderPlacedOnBookOfFiveEntriesOneMatch(Precondition precondition) {
-        validateAndPlay(precondition.commandOneMatch, precondition.book);
+        precondition.commandOneMatch.execute(precondition.book);
     }
 
     @Benchmark
     @BenchmarkMode(Mode.SampleTime)
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void orderPlacedOnBookOfFiveEntriesThreeMatches(Precondition precondition) {
-        validateAndPlay(precondition.commandThreeMatches, precondition.book);
+        precondition.commandThreeMatches.execute(precondition.book);
 
     }
 
@@ -95,13 +94,13 @@ public class PlaceOrderOnBookWithEntriesBenchmarkTest {
     @BenchmarkMode(Mode.SampleTime)
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void orderPlacedOnBookOfFiveEntriesFiveMatches(Precondition precondition) {
-        validateAndPlay(precondition.commandFiveMatches, precondition.book);
+        precondition.commandFiveMatches.execute(precondition.book);
     }
 
     @Benchmark
     @BenchmarkMode(Mode.SampleTime)
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void orderPlacedOnBookOfFiveEntriesThreeMatchesAndAddedToBook(Precondition precondition) {
-        validateAndPlay(precondition.commandFiveMatchesAndAddedToBook, precondition.book);
+        precondition.commandFiveMatchesAndAddedToBook.execute(precondition.book);
     }
 }

@@ -3,6 +3,7 @@ package jasition.matching.domain.trade
 import io.vavr.collection.List
 import io.vavr.collection.Seq
 import jasition.cqrs.Event
+import jasition.cqrs.EventId
 import jasition.cqrs.Transaction
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
@@ -27,6 +28,7 @@ fun matchAndFinalise(
 fun match(
     aggressor: BookEntry,
     books: Books,
+    lastEventId: EventId = books.lastEventId,
     events: List<Event<BookId, Books>> = List.empty()
 ): MatchingResult {
     val limitBook = aggressor.side.oppositeSideBook(books)
@@ -38,12 +40,13 @@ fun match(
     val nextMatch = findNextMatch(aggressor, limitBook.entries.values())
         ?: return MatchingResult(aggressor, Transaction(books, events))
 
+    val eventId = lastEventId.inc()
     val tradeSize = getTradeSize(aggressor.sizes, nextMatch.passive.sizes)
     val tradedAggressor = aggressor.traded(tradeSize)
     val tradedPassive = nextMatch.passive.traded(tradeSize)
     val tradeEvent = TradeEvent(
         bookId = books.bookId,
-        eventId = books.lastEventId.next(),
+        eventId = eventId,
         size = tradeSize,
         price = nextMatch.tradePrice,
         whenHappened = aggressor.key.whenSubmitted,
@@ -54,8 +57,9 @@ fun match(
 
     return match(
         aggressor = tradedAggressor,
-        books = result.aggregate,
-        events = events.append(tradeEvent).appendAll(result.events)
+        books = result,
+        lastEventId = eventId,
+        events = events.append(tradeEvent)
     )
 }
 
@@ -84,7 +88,7 @@ fun findNextMatch(
     }
 }
 
-private fun cannotMatchAnyFurther(aggressor: BookEntry, limitBook: LimitBook) =
+private fun cannotMatchAnyFurther(aggressor: BookEntry, limitBook: LimitBook): Boolean =
     aggressor.sizes.available <= 0 || limitBook.entries.isEmpty
 
 private fun cannotMatchTheseTwoClients(aggressor: Client, passive: Client): Boolean =

@@ -23,13 +23,14 @@ data class Books(
 ) : Aggregate<BookId> {
     override fun aggregateId(): BookId = bookId
 
-    fun addBookEntry(entry: BookEntry): Books = copy(
-        buyLimitBook = if (Side.BUY == entry.side) buyLimitBook.add(entry) else buyLimitBook,
-        sellLimitBook = if (Side.SELL == entry.side) sellLimitBook.add(entry) else sellLimitBook,
-        lastEventId = entry.key.eventId
-    )
+    fun addBookEntry(entry: BookEntry, eventId: EventId = entry.key.eventId): Books =
+        copy(
+            buyLimitBook = if (Side.BUY == entry.side) buyLimitBook.add(entry) else buyLimitBook,
+            sellLimitBook = if (Side.SELL == entry.side) sellLimitBook.add(entry) else sellLimitBook,
+            lastEventId = eventId
+        )
 
-    fun removeBookEntries(eventId: EventId, entries: Seq<BookEntry>): Books =
+    fun removeBookEntries(entries: Seq<BookEntry>, eventId: EventId): Books =
         copy(
             buyLimitBook = buyLimitBook.removeAll(entries),
             sellLimitBook = sellLimitBook.removeAll(entries),
@@ -62,7 +63,8 @@ data class Books(
     fun removeBookEntries(
         eventId: EventId,
         side: Side,
-        predicate: Predicate<BookEntry>): Books =
+        predicate: Predicate<BookEntry>
+    ): Books =
         copy(
             buyLimitBook = if (Side.BUY == side) buyLimitBook.removeAll(predicate) else buyLimitBook,
             sellLimitBook = if (Side.SELL == side) sellLimitBook.removeAll(predicate) else sellLimitBook,
@@ -77,7 +79,13 @@ data class Books(
                 )
         )
 
-    fun verifyEventId(eventId: EventId): EventId =
-        if (eventId.isNextOf(lastEventId)) eventId
-        else throw IllegalArgumentException("Incoming Entry is not the next expected event ID. lastEventId=$lastEventId, incomingEventId=$eventId")
+    fun ofEventId(eventId: EventId): Books = copy(lastEventId = verifyEventId(eventId))
 }
+
+infix fun Books.verifyEventId(eventId: EventId) :EventId =
+    if (eventId.isNextOf(lastEventId)) eventId
+    else throw IllegalArgumentException("Incoming Entry is not the next expected event ID. lastEventId=$lastEventId, incomingEventId=$eventId")
+
+class BooksAlreadyExistsException(message: String) : Exception(message)
+
+class BooksNotFoundException(message: String) : Exception(message)

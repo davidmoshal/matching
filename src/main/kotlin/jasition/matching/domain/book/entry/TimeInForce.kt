@@ -1,19 +1,32 @@
 package jasition.matching.domain.book.entry
 
+import io.vavr.collection.List
 import jasition.cqrs.Transaction
-import jasition.cqrs.playAndAppend
+import jasition.cqrs.append
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
+import jasition.matching.domain.book.event.EntryAddedToBookEvent
 import jasition.matching.domain.trade.MatchingResult
 
 enum class TimeInForce(val code: String) {
     GOOD_TILL_CANCEL("GTC") {
         override fun finalise(result: MatchingResult): Transaction<BookId, Books> {
             with(result) {
-                return if (canStayOnBook(aggressor.sizes))
-                    transaction.copy(aggregate = transaction.aggregate.addBookEntry(aggressor))
-                else
-                    transaction
+                with(transaction) {
+                    return if (canStayOnBook(aggressor.sizes)) {
+                        val eventId = aggregate.lastEventId.inc()
+                        val addedEvent = EntryAddedToBookEvent(
+                            bookId = aggregate.bookId,
+                            eventId = eventId,
+                            entry = aggressor
+                        )
+
+                        val addedBooks = addedEvent.play(aggregate)
+                        append(Transaction<BookId, Books>(aggregate = addedBooks, events = List.of(addedEvent)))
+                    } else
+                        this
+
+                }
             }
         }
 
@@ -25,12 +38,15 @@ enum class TimeInForce(val code: String) {
             with(result) {
                 return if (aggressor.sizes.available > 0) {
                     with(transaction) {
-                        return append(
-                            aggressor.toOrderCancelledByExchangeEvent(
-                                eventId = aggregate.lastEventId.next(),
+                        val cancelledEvent = aggressor.toOrderCancelledByExchangeEvent(
+                                eventId = aggregate.lastEventId.inc(),
                                 bookId = aggregate.bookId
-                            ) playAndAppend aggregate
+
                         )
+
+                        val cancelledBooks = cancelledEvent.play(aggregate)
+
+                        append(Transaction<BookId, Books>(aggregate = cancelledBooks, events = List.of(cancelledEvent)))
                     }
                 } else transaction
             }

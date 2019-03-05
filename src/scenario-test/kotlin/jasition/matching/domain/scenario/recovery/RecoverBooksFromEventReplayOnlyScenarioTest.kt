@@ -2,70 +2,79 @@ package jasition.matching.domain.scenario.recovery
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.FeatureSpec
-import jasition.cqrs.playAndAppend
-import jasition.cqrs.recovery.replay
-import jasition.cqrs.thenPlay
+import jasition.cqrs.ConcurrentRepository
+import jasition.cqrs.append
+import jasition.cqrs.commitOrThrow
+import jasition.cqrs.play
 import jasition.matching.domain.*
-import jasition.matching.domain.book.TradingStatus
+import jasition.matching.domain.book.BookId
+import jasition.matching.domain.book.Books
+import jasition.matching.domain.book.TradingStatus.OPEN_FOR_TRADING
 import jasition.matching.domain.book.command.CreateBooksCommand
+import java.time.Duration
+import java.time.Instant
 import kotlin.random.Random
 
 internal class `Recover books from replaying events only` : FeatureSpec({
     val bookId = aBookId()
-    val initialBooks = aBooks(bookId)
 
-    val booksCreatedEvent = CreateBooksCommand(
-        bookId = bookId,
-        defaultTradingStatus = TradingStatus.OPEN_FOR_TRADING
-    ).validate()
+    val repository = ConcurrentRepository<BookId, Books>()
 
-    var latest = booksCreatedEvent playAndAppend initialBooks
+    val initial = CreateBooksCommand(bookId = bookId, defaultTradingStatus = OPEN_FOR_TRADING)
+        .execute(null) commitOrThrow repository
 
     var orderCommandCount = 0
     var massQuoteCommandCount = 0
 
-    println("About to start validating the commands and playing the events to create the book state")
+    println("About to start validating the commands and playing the events to create the book state\n")
 
-    for (i in 0 until Random.nextInt(50, 100)) {
+    var latest = initial
+    for (i in 0 until 10000) {
         val orderOrQuote = Random.nextBoolean()
-        if (orderOrQuote) {
+
+        val command = if (orderOrQuote) {
             orderCommandCount++
-            randomPlaceOrderCommand(bookId = bookId, size = randomSize(from = -5, until = 30))
-                .validate(latest.aggregate)
-                .fold({ rejected ->
-                    latest = latest thenPlay rejected
-                }, { placed ->
-                    latest = latest thenPlay placed
-                })
+            randomPlaceOrderCommand(
+                bookId = bookId,
+                size = randomSize(from = -5, until = 30)
+            )
         } else {
             massQuoteCommandCount++
-            randomPlaceMassQuoteCommand(bookId = bookId, whoRequested = aFirmWithoutClient())
-                .validate(latest.aggregate)
-                .fold({ rejected ->
-                    latest = latest thenPlay rejected
-                }, { placed ->
-                    latest = latest thenPlay placed
-                })
+            randomPlaceMassQuoteCommand(
+                bookId = bookId,
+                whoRequested = aFirmWithoutClient()
+            )
         }
+
+        latest = latest.append(command.execute(repository.read(bookId)) commitOrThrow repository)
     }
-    println("Book state created. noOfEvents=${latest.events.size()}")
+    println("Book state created. noOfEvents=${latest.events.size()},  eventCountByType=${countEventsByClass(latest.events)}\n")
 
     feature("Recover from event re-playing") {
         scenario("Recover the books that was created by $orderCommandCount orders and $massQuoteCommandCount mass quotes with random values (Placed, Rejected and Trade)") {
 
-            val (aggregate, events) = latest
+            printBooksOverview("Current books", latest.aggregate)
 
-            println(
-                "Books to recover: lastEventId=${aggregate.lastEventId}" +
-                        ", buyBookDepth=${aggregate.buyLimitBook.entries.size()}" +
-                        ", sellBookDepth=${aggregate.sellLimitBook.entries.size()}" +
-                        ", eventCountByType=${countEventsByClass(events)}"
-            )
+            val start = Instant.now()
 
-            replay(initial = initialBooks, events = events) shouldBe aggregate
+            val recovered = latest.events play initial.aggregate
+
+            val end = Instant.now()
+            printBooksOverview("Recovered books", recovered)
+            println("Time spent = ${Duration.between(start, end).toMillis()} millis")
+            recovered shouldBe latest.aggregate
         }
     }
 })
+
+fun printBooksOverview(name: String, aggregate: Books) {
+    println(
+        name +
+                ": lastEventId=${aggregate.lastEventId}" +
+                ", buyBookDepth=${aggregate.buyLimitBook.entries.size()}" +
+                ", sellBookDepth=${aggregate.sellLimitBook.entries.size()}\n"
+    )
+}
 
 
 

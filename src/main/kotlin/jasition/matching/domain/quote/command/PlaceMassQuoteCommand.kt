@@ -1,18 +1,25 @@
 package jasition.matching.domain.quote.command
 
 import arrow.core.Either
+import io.vavr.collection.List
 import io.vavr.collection.Seq
 import jasition.cqrs.Command
+import jasition.cqrs.Event
+import jasition.cqrs.Transaction
+import jasition.cqrs.append
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
-import jasition.matching.domain.book.entry.PriceWithSize
+import jasition.matching.domain.book.BooksNotFoundException
+import jasition.matching.domain.book.entry.SizeAtPrice
 import jasition.matching.domain.book.entry.TimeInForce
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.quote.QuoteEntry
 import jasition.matching.domain.quote.QuoteModelType
+import jasition.matching.domain.quote.cancelExistingQuotes
 import jasition.matching.domain.quote.event.MassQuotePlacedEvent
 import jasition.matching.domain.quote.event.MassQuoteRejectedEvent
 import jasition.matching.domain.quote.event.QuoteRejectReason
+import jasition.matching.domain.trade.matchAndFinalise
 import java.time.Instant
 
 data class PlaceMassQuoteCommand(
@@ -23,22 +30,47 @@ data class PlaceMassQuoteCommand(
     val timeInForce: TimeInForce = TimeInForce.GOOD_TILL_CANCEL,
     val entries: Seq<QuoteEntry>,
     val whenRequested: Instant
-) : Command {
+) : Command<BookId, Books> {
 
-    fun validate(
-        books: Books
-    ): Either<MassQuoteRejectedEvent, MassQuotePlacedEvent> {
-        val rejection =
-            rejectDueToUnknownSymbol(books)
-                ?: rejectDueToIncorrectSizes(books)
-                ?: rejectDueToCrossedPrices(books)
-                ?: rejectDueToExchangeClosed(books)
+    override fun execute(aggregate: Books?): Either<Exception, Transaction<BookId, Books>> {
+        if (aggregate == null) return Either.left(BooksNotFoundException("Books $bookId not found"))
 
-        if (rejection != null) {
-            return Either.left(rejection)
+        val cancelledEvent = cancelExistingQuotes(
+            books = aggregate,
+            eventId = aggregate.lastEventId,
+            whoRequested = whoRequested,
+            whenHappened = whenRequested
+        )
+
+        //TODO: Replace by Elvis operator when its code coverage can be accurately measured
+        val events =
+            if (cancelledEvent != null)
+                List.of<Event<BookId, Books>>(cancelledEvent)
+            else List.empty()
+
+        ///TODO: Replace by Elvis operator when its code coverage can be accurately measured
+        val cancelledBooks =
+            if (cancelledEvent != null)
+                cancelledEvent.play(aggregate)
+            else aggregate
+
+        val rejection = rejectDueToUnknownSymbol(cancelledBooks)
+            ?: rejectDueToIncorrectSizes(cancelledBooks)
+            ?: rejectDueToCrossedPrices(cancelledBooks)
+            ?: rejectDueToExchangeClosed(cancelledBooks)
+
+        rejection?.run {
+            return Either.right(Transaction(play(cancelledBooks), events.append(this)))
         }
 
-        return Either.right(toPlacedEvent(books))
+        val placedEvent = toPlacedEvent(cancelledBooks)
+        val placedBooks = placedEvent.play(cancelledBooks)
+
+        val initial = Transaction(placedBooks, events.append(placedEvent))
+
+        return Either.right(placedEvent.toBookEntries().fold(initial) { txn, entry ->
+            txn append matchAndFinalise(entry, txn.aggregate)
+        })
     }
 
     private fun rejectDueToUnknownSymbol(books: Books): MassQuoteRejectedEvent? =
@@ -97,15 +129,15 @@ data class PlaceMassQuoteCommand(
     private fun findNonPositiveSize(quoteEntry: QuoteEntry): Int? =
         findNonPositiveSize(quoteEntry.bid) ?: findNonPositiveSize(quoteEntry.offer)
 
-    private fun findNonPositiveSize(priceWithSize: PriceWithSize?): Int? =
-        priceWithSize?.let { if (it.size <= 0) it.size else null }
+    private fun findNonPositiveSize(sizeAtPrice: SizeAtPrice?): Int? =
+        sizeAtPrice?.let { if (it.size <= 0) it.size else null }
 
     private fun toRejectedEvent(
         books: Books,
         quoteRejectReason: QuoteRejectReason,
         quoteRejectText: String
     ): MassQuoteRejectedEvent = MassQuoteRejectedEvent(
-        eventId = books.lastEventId.next(),
+        eventId = books.lastEventId.inc(),
         bookId = books.bookId,
         quoteId = quoteId,
         whoRequested = whoRequested,
@@ -118,7 +150,7 @@ data class PlaceMassQuoteCommand(
     )
 
     private fun toPlacedEvent(books: Books): MassQuotePlacedEvent = MassQuotePlacedEvent(
-        eventId = books.lastEventId.next(),
+        eventId = books.lastEventId.inc(),
         bookId = books.bookId,
         quoteId = quoteId,
         whoRequested = whoRequested,

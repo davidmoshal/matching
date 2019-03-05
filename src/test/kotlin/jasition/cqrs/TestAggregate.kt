@@ -1,10 +1,10 @@
 package jasition.cqrs
 
-import io.vavr.collection.List
 
-
-internal class TestAggregate(val aggregateId: Int = 1,
-                             val value: String = "test") : Aggregate<Int> {
+internal class TestAggregate(
+    val aggregateId: Int = 1,
+    val value: String = "test"
+) : Aggregate<Int> {
     override fun aggregateId(): Int = aggregateId
 }
 
@@ -14,9 +14,7 @@ internal data class TestEvent(
 ) : Event<Int, TestAggregate> {
     override fun aggregateId(): Int = aggregateId
     override fun eventId(): EventId = eventId
-    override fun isPrimary(): Boolean = false
-    override fun play(aggregate: TestAggregate): Transaction<Int, TestAggregate> =
-        Transaction(aggregate)
+    override fun play(aggregate: TestAggregate): TestAggregate = aggregate
 }
 
 internal data class TestPrimaryEvent(
@@ -25,20 +23,16 @@ internal data class TestPrimaryEvent(
 ) : Event<Int, TestAggregate> {
     override fun aggregateId(): Int = aggregateId
     override fun eventId(): EventId = eventId
-    override fun isPrimary(): Boolean = true
-    override fun play(aggregate: TestAggregate): Transaction<Int, TestAggregate> =
-        Transaction(aggregate)
+    override fun play(aggregate: TestAggregate): TestAggregate = aggregate
 }
 
 internal data class TestPrimaryEvent2(
     val aggregateId: Int = 1,
     val eventId: EventId,
     val updatedAggregate: TestAggregate,
-    val sideEffectEvent : TestEvent
+    val sideEffectEvent: TestEvent
 ) : Event<Int, TestAggregate> {
     override fun aggregateId(): Int = aggregateId
     override fun eventId(): EventId = eventId
-    override fun isPrimary(): Boolean = true
-    override fun play(aggregate: TestAggregate): Transaction<Int, TestAggregate> =
-        Transaction(updatedAggregate, List.of<Event<Int, TestAggregate>>(sideEffectEvent))
+    override fun play(aggregate: TestAggregate): TestAggregate = aggregate
 }

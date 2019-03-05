@@ -1,9 +1,14 @@
 package jasition.cqrs
 
+import arrow.core.Either
 import io.kotlintest.shouldBe
+import io.kotlintest.shouldThrow
 import io.kotlintest.specs.StringSpec
+import io.mockk.confirmVerified
+import io.mockk.mockk
+import io.mockk.spyk
+import io.mockk.verify
 import io.vavr.collection.List
-import jasition.matching.domain.anEventId
 
 internal class TransactionTest : StringSpec({
     val event1 = TestEvent(eventId = EventId(1))
@@ -15,29 +20,33 @@ internal class TransactionTest : StringSpec({
     val originalEvents: List<Event<Int, TestAggregate>> = List.of(event1, event2)
     val originalTransaction = Transaction(originalAggregate, originalEvents)
 
-    "Appends new events after the original" {
-        originalTransaction.append(event3, event4) shouldBe Transaction(
-            originalAggregate,
-            List.of<Event<Int, TestAggregate>>(event1, event2, event3, event4)
-        )
-    }
     "When appending transaction, uses new aggregate and appends new events after original events" {
         val newAggregate = TestAggregate(value = "new")
         val newEvents: List<Event<Int, TestAggregate>> = List.of(event3, event4)
 
-        originalTransaction.append(Transaction(newAggregate, newEvents)) shouldBe Transaction(
+        originalTransaction append Transaction(newAggregate, newEvents) shouldBe Transaction(
             newAggregate,
             List.of<Event<Int, TestAggregate>>(event1, event2, event3, event4)
         )
     }
-    "Playing an event after a transaction uses new aggregate and appends new events after the event played after the original events" {
-        val newAggregate = TestAggregate(value = "new")
-        val event = TestPrimaryEvent2(
-            updatedAggregate = newAggregate,
-            sideEffectEvent = event3, eventId = anEventId()
+    "Throws exception if the result is left of Either" {
+        val repository = mockk<Repository<Int, TestAggregate>>()
+
+        shouldThrow<Exception> {
+            Either.left(Exception("nothing")) commitOrThrow repository
+        }
+    }
+    "Updates aggregate in the repository if the result is right of Either" {
+        val repository = spyk<Repository<Int, TestAggregate>>()
+        val transaction = Transaction(
+            aggregate = originalAggregate,
+            events = List.empty()
         )
 
-        originalTransaction thenPlay event shouldBe Transaction(newAggregate, originalEvents.append(event).append(event3))
+        Either.right(transaction) commitOrThrow repository
+
+        verify { repository.createOrUpdate(originalAggregate) }
+        confirmVerified(repository)
     }
 })
 

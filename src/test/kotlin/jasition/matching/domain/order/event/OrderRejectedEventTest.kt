@@ -2,7 +2,6 @@ package jasition.matching.domain.order.event
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
-import io.vavr.collection.List
 import jasition.cqrs.EventId
 import jasition.matching.domain.*
 import jasition.matching.domain.book.entry.EntryType
@@ -33,12 +32,9 @@ internal class OrderRejectedEventPropertyTest : StringSpec({
     "Has Event ID as Event ID" {
         event.eventId() shouldBe eventId
     }
-    "Is a Primary event" {
-        event.isPrimary() shouldBe true
-    }
 })
 
-internal class `Given an order is rejected` : StringSpec({
+internal class OrderRejectedEventTest : StringSpec({
     val eventId = EventId(1)
     val bookId = aBookId()
     val books = aBooks(bookId)
@@ -60,9 +56,6 @@ internal class `Given an order is rejected` : StringSpec({
     val actual = event.play(books)
 
     "The books only have the last event ID updated" {
-        actual.aggregate shouldBe books.copy(lastEventId = eventId)
-    }
-    "There is no side effect" {
-        actual.events shouldBe List.empty()
+        actual shouldBe books.copy(lastEventId = eventId)
     }
 })

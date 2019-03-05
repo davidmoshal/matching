@@ -14,8 +14,8 @@ import java.util.function.Predicate
 data class QuoteEntry(
     val quoteEntryId: String,
     val quoteSetId: String,
-    val bid: PriceWithSize?,
-    val offer: PriceWithSize?
+    val bid: SizeAtPrice?,
+    val offer: SizeAtPrice?
 ) {
 
     fun toClientRequestId(quoteId: String): ClientRequestId = ClientRequestId(
@@ -61,7 +61,7 @@ data class QuoteEntry(
         return entries
     }
 
-    private fun toBookEntry(
+    fun toBookEntry(
         side: Side,
         size: Int,
         price: Price?,
@@ -93,8 +93,7 @@ fun cancelExistingQuotes(
     books: Books,
     eventId: EventId,
     whoRequested: Client,
-    whenHappened: Instant,
-    primary: Boolean
+    whenHappened: Instant
 ): MassQuoteCancelledEvent? {
     val toBeRemoved = books
         .findBookEntries(Predicate { p -> p.whoRequested == whoRequested && p.isQuote })
@@ -102,12 +101,11 @@ fun cancelExistingQuotes(
     if (toBeRemoved.isEmpty) return null
 
     return MassQuoteCancelledEvent(
-        eventId = eventId.next(),
+        eventId = eventId.inc(),
         entries = toBeRemoved.map { it.cancelled() },
-        // TODO: revise for newer Jacoco version - Below is equivalence to above but Jacoco cannot reach 100% coverage with the function reference
+        //TODO: Replace by Function reference when its code coverage can be accurately measured
 //        entries = toBeRemoved.map(BookEntry::cancelled),
         bookId = books.bookId,
-        primary = primary,
         whoRequested = whoRequested,
         whenHappened = whenHappened
     )

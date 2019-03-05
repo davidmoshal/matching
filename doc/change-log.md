@@ -1,5 +1,6 @@
 # Change log
 
+* **2019-03-05 - Major CQRS-ES refactor to get rid of recursion and business logic when handling events. Also this has speed up recovery by 10 times from my experiment**
 * **2019-01-21 - Added Immediate-or-cancel time-in-force**
 * **2019-01-20 - Added Micro-benchmarking**
 * **2019-01-09 - Added Code Coverage check**

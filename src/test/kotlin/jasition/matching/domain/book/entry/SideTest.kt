@@ -11,6 +11,9 @@ internal class SideTest : StringSpec({
     val books = aBooks(aBookId())
         .copy(buyLimitBook = buyLimitBook, sellLimitBook = sellLimitBook)
 
+    "Opposite side of BUY is SELL" {
+        Side.BUY.oppositeSide() shouldBe Side.SELL
+    }
     "BUY side has -1 as the comparator multiplier"{
         Side.BUY.comparatorMultiplier() shouldBe -1
     }
@@ -23,14 +26,17 @@ internal class SideTest : StringSpec({
     "Returns the BID side of a quote entry" {
         val price = randomPrice()
         val size = randomSize()
-        Side.BUY.priceWithSize(
+        Side.BUY.sizeAtPrice(
             aQuoteEntry(
-                bid = PriceWithSize(price = price, size = size)
+                bid = SizeAtPrice(price = price, size = size)
             )
-        ) shouldBe PriceWithSize(price = price, size = size)
+        ) shouldBe SizeAtPrice(price = price, size = size)
     }
     "Returns null if the BID side is absent in a quote entry" {
-        Side.BUY.priceWithSize(aQuoteEntry(bid = null)) shouldBe null
+        Side.BUY.sizeAtPrice(aQuoteEntry(bid = null)) shouldBe null
+    }
+    "Opposite side of SELL is BUY" {
+        Side.SELL.oppositeSide() shouldBe Side.BUY
     }
     "SELL side has 1 as the comparator multiplier"{
         Side.SELL.comparatorMultiplier() shouldBe 1
@@ -44,11 +50,11 @@ internal class SideTest : StringSpec({
     "Returns the OFFER side of a quote entry" {
         val price = randomPrice()
         val size = randomSize()
-        Side.SELL.priceWithSize(
-            aQuoteEntry(offer = PriceWithSize(price = price, size = size))
-        ) shouldBe PriceWithSize(price = price, size = size)
+        Side.SELL.sizeAtPrice(
+            aQuoteEntry(offer = SizeAtPrice(size = size, price = price))
+        ) shouldBe SizeAtPrice(size = size, price = price)
     }
     "Returns null if the OFFER side is absent in a quote entry" {
-        Side.SELL.priceWithSize(aQuoteEntry(offer = null)) shouldBe null
+        Side.SELL.sizeAtPrice(aQuoteEntry(offer = null)) shouldBe null
     }
 })

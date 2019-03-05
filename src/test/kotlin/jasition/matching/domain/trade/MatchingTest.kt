@@ -43,6 +43,7 @@ internal class MatchingTest : StringSpec({
     val client = aFirmWithClient()
     val otherClient = anotherFirmWithClient()
     val existingEvents = List.of(mockk<OrderPlacedEvent>(), mockk<TradeEvent>())
+
     "Stop matching when there is no available sizes in the aggressor" {
         val books = aBooks(bookId, List.of(aBookEntry(side = Side.SELL, whoRequested = client)))
         val aggressor = aBookEntry(side = Side.BUY, whoRequested = otherClient, sizes = EntrySizes(0))
@@ -173,7 +174,7 @@ internal class MatchingTest : StringSpec({
         )
         val passive2 = passive.copy(
             sizes = EntrySizes(tradeSize2 + 10),
-            key = passive.key.copy(eventId = passive.key.eventId.next())
+            key = passive.key.copy(eventId = passive.key.eventId.inc())
         )
         val books = aBooks(bookId, List.of(passive, passive2))
         val aggressor = aBookEntry(

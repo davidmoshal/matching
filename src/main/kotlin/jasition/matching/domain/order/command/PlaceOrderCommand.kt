@@ -1,15 +1,20 @@
 package jasition.matching.domain.order.command
 
 import arrow.core.Either
+import io.vavr.collection.List
 import jasition.cqrs.Command
+import jasition.cqrs.Transaction
+import jasition.cqrs.append
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
+import jasition.matching.domain.book.BooksNotFoundException
 import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.order.event.OrderPlacedEvent
 import jasition.matching.domain.order.event.OrderRejectReason
 import jasition.matching.domain.order.event.OrderRejectedEvent
+import jasition.matching.domain.trade.matchAndFinalise
 import java.time.Instant
 
 data class PlaceOrderCommand(
@@ -22,20 +27,25 @@ data class PlaceOrderCommand(
     val price: Price?,
     val timeInForce: TimeInForce,
     val whenRequested: Instant
-) : Command {
+) : Command<BookId, Books> {
+    override fun execute(aggregate: Books?): Either<Exception, Transaction<BookId, Books>> {
+        if (aggregate == null) return Either.left(BooksNotFoundException("Books $bookId not found"))
 
-    fun validate(
-        books: Books
-    ): Either<OrderRejectedEvent, OrderPlacedEvent> {
-        val rejection =
-            rejectDueToUnknownSymbol(books)
-                ?: rejectDueToIncorrectSize(books)
-                ?: rejectDueToExchangeClosed(books)
+        val rejection = rejectDueToUnknownSymbol(aggregate)
+            ?: rejectDueToIncorrectSize(aggregate)
+            ?: rejectDueToExchangeClosed(aggregate)
 
-        if (rejection != null) {
-            return Either.left(rejection)
+        rejection?.let {
+            return Either.right(Transaction<BookId, Books>(it.play(aggregate), List.of(it)))
         }
-        return Either.right(toPlacedEvent(books = books, currentTime = whenRequested))
+
+        val placedEvent = toPlacedEvent(books = aggregate, currentTime = whenRequested)
+        val placedAggregate = placedEvent.play(aggregate)
+
+        return Either.right(
+            Transaction<BookId, Books>(placedAggregate, List.of(placedEvent))
+                .append(matchAndFinalise(placedEvent.toBookEntry(), placedAggregate))
+        )
     }
 
     private fun rejectDueToUnknownSymbol(books: Books): OrderRejectedEvent? =
@@ -73,7 +83,7 @@ data class PlaceOrderCommand(
         books: Books,
         currentTime: Instant = Instant.now()
     ): OrderPlacedEvent = OrderPlacedEvent(
-        eventId = books.lastEventId.next(),
+        eventId = books.lastEventId.inc(),
         requestId = requestId,
         whoRequested = whoRequested,
         bookId = bookId,
@@ -95,7 +105,7 @@ data class PlaceOrderCommand(
         rejectReason: OrderRejectReason = OrderRejectReason.OTHER,
         rejectText: String?
     ): OrderRejectedEvent = OrderRejectedEvent(
-        eventId = books.lastEventId.next(),
+        eventId = books.lastEventId.inc(),
         requestId = requestId,
         whoRequested = whoRequested,
         bookId = bookId,

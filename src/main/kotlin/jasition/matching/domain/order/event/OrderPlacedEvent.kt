@@ -2,13 +2,11 @@ package jasition.matching.domain.order.event
 
 import jasition.cqrs.Event
 import jasition.cqrs.EventId
-import jasition.cqrs.Transaction
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
-import jasition.matching.domain.trade.matchAndFinalise
 import java.time.Instant
 
 data class OrderPlacedEvent(
@@ -26,14 +24,7 @@ data class OrderPlacedEvent(
 ) : Event<BookId, Books> {
     override fun aggregateId(): BookId = bookId
     override fun eventId(): EventId = eventId
-    override fun isPrimary(): Boolean = true
-
-    override fun play(aggregate: Books): Transaction<BookId, Books> {
-        return matchAndFinalise(
-            bookEntry = toBookEntry(),
-            books = aggregate.copy(lastEventId = aggregate.verifyEventId(eventId))
-        )
-    }
+    override fun play(aggregate: Books): Books = aggregate.ofEventId(eventId)
 
     fun toBookEntry(): BookEntry = BookEntry(
         price = price,

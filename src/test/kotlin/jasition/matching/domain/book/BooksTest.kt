@@ -44,7 +44,12 @@ internal class BooksTest : StringSpec({
     "Aggregate ID of a Books is the Book ID" {
         books.aggregateId() shouldBe books.bookId
     }
-
+    "Able to assign the next event ID to the book" {
+        var eventId = books.lastEventId
+        books.ofEventId(++eventId) shouldBe books.copy(
+            lastEventId = eventId
+        )
+    }
     "Adding BUY entry updates the BUY Limit Book and Last event ID only" {
         books.addBookEntry(buyEntry) shouldBe books.copy(
             buyLimitBook = newBuyLimitBook,
@@ -58,23 +63,22 @@ internal class BooksTest : StringSpec({
         )
     }
     "Accepts event ID (last event ID + 1)" {
-        books.copy(lastEventId = EventId(4))
-            .verifyEventId(eventId = EventId(5)) shouldBe EventId(5)
+        books.copy(lastEventId = EventId(4)) verifyEventId EventId(5) shouldBe EventId(5)
     }
     "Rejects event IDs other than (last event ID + 1)" {
         val newBooks = books.copy(lastEventId = EventId(4))
         forall(
+            row(0L),
             row(2L),
             row(3L),
             row(4L),
             row(6L),
             row(7L)
         ) { nextEventId ->
-            shouldThrow<IllegalArgumentException> { newBooks.verifyEventId(EventId(nextEventId)) }
+            shouldThrow<IllegalArgumentException> { newBooks verifyEventId EventId(nextEventId) }
         }
     }
     "Able to find the entries fulfilling the predicate" {
-
         Books(aBookId())
             .addBookEntry(buyEntry)
             .addBookEntry(sellEntry)
@@ -134,7 +138,7 @@ internal class BooksTest : StringSpec({
             .addBookEntry(buyEntry)
             .addBookEntry(sellEntry)
             .addBookEntry(excludedEntry)
-            .removeBookEntries(excludedEntry.key.eventId, List.of(buyEntry, sellEntry)) shouldBe books.copy(
+            .removeBookEntries(List.of(buyEntry, sellEntry), excludedEntry.key.eventId) shouldBe books.copy(
             buyLimitBook = LimitBook(Side.BUY),
             sellLimitBook = LimitBook(Side.SELL).add(excludedEntry),
             lastEventId = excludedEntry.key.eventId

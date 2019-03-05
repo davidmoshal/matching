@@ -2,10 +2,10 @@ package jasition.matching.domain.trade.event
 
 import jasition.cqrs.Event
 import jasition.cqrs.EventId
-import jasition.cqrs.Transaction
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.entry.*
+import jasition.matching.domain.book.verifyEventId
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
 import java.time.Instant
@@ -22,30 +22,33 @@ data class TradeEvent(
 ) : Event<BookId, Books> {
     override fun aggregateId(): BookId = bookId
     override fun eventId(): EventId = eventId
-    override fun isPrimary(): Boolean = false
+    override fun play(aggregate: Books): Books {
+        aggregate verifyEventId eventId
 
-    override fun play(aggregate: Books): Transaction<BookId, Books> {
-        aggregate.verifyEventId(eventId)
-
-        return Transaction(updateBooks(aggregate, passive))
+        return updateOrRemoveEntry(updateOrRemoveEntry(aggregate, aggressor), passive)
     }
 
-    private fun updateBooks(aggregate: Books, sideEntry: TradeSideEntry): Books =
-        if (sideEntry.timeInForce.canStayOnBook(sideEntry.sizes))
+    private fun updateOrRemoveEntry(
+        aggregate: Books,
+        entry: TradeSideEntry
+    ): Books {
+        return if (entry.status.isFinal())
+            aggregate.removeBookEntry(
+                eventId = eventId,
+                side = entry.side,
+                bookEntryKey = entry.toBookEntryKey()
+            )
+        else
             aggregate.updateBookEntry(eventId = eventId,
-                side = sideEntry.side,
-                bookEntryKey = sideEntry.toBookEntryKey(),
+                side = entry.side,
+                bookEntryKey = entry.toBookEntryKey(),
                 updater = Function {
                     it.copy(
-                        sizes = sideEntry.sizes,
-                        status = sideEntry.status
+                        sizes = entry.sizes,
+                        status = entry.status
                     )
                 })
-        else aggregate.removeBookEntry(
-            eventId = eventId,
-            side = sideEntry.side,
-            bookEntryKey = sideEntry.toBookEntryKey()
-        )
+    }
 }
 
 data class TradeSideEntry(

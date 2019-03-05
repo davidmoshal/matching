@@ -6,10 +6,12 @@ import io.kotlintest.specs.StringSpec
 import io.kotlintest.tables.row
 import io.vavr.collection.List
 import jasition.cqrs.Event
+import jasition.cqrs.EventId
 import jasition.cqrs.Transaction
 import jasition.matching.domain.*
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
+import jasition.matching.domain.book.event.EntryAddedToBookEvent
 import jasition.matching.domain.trade.MatchingResult
 import kotlin.random.Random
 
@@ -28,7 +30,10 @@ internal class TimeInForceTest : StringSpec({
 
         TimeInForce.GOOD_TILL_CANCEL.finalise(result) shouldBe Transaction(
             books.addBookEntry(aggressor),
-            existingEvents
+            existingEvents.append(EntryAddedToBookEvent(bookId = books.bookId,
+                eventId = EventId(1),
+                entry = aggressor
+            ))
         )
     }
     "Good-till-cancel does not add entries to book if available size is zero"{
@@ -57,11 +62,11 @@ internal class TimeInForceTest : StringSpec({
         val result = MatchingResult(aggressor, Transaction(books, existingEvents))
 
         TimeInForce.IMMEDIATE_OR_CANCEL.finalise(result) shouldBe Transaction(
-            books.copy(lastEventId = books.lastEventId.next()),
+            books.copy(lastEventId = books.lastEventId.inc()),
             existingEvents.append(
                 expectedOrderCancelledByExchangeEvent(
                     entry = aggressor,
-                    eventId = books.lastEventId.next(), bookId = books.bookId
+                    eventId = books.lastEventId.inc(), bookId = books.bookId
                 )
             )
         )
