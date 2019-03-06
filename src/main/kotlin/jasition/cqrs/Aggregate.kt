@@ -1,5 +1,5 @@
 package jasition.cqrs
 
-interface Aggregate<K> {
-    fun aggregateId(): K
+interface Aggregate<KEY> {
+    fun aggregateId(): KEY
 }
