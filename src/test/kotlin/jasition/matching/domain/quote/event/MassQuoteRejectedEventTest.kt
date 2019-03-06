@@ -33,8 +33,8 @@ internal class MassQuoteRejectedEventPropertyTest : StringSpec({
                 offer = SizeAtPrice(size = 5, price = Price(11))
             )
         ),
-        quoteRejectReason = QuoteRejectReason.DUPLICATE_QUOTE,
-        quoteRejectText = "for some reasons"
+        rejectReason = QuoteRejectReason.DUPLICATE_QUOTE,
+        rejectText = "for some reasons"
     )
     "Has Book ID as Aggregate ID" {
         event.aggregateId() shouldBe bookId
@@ -64,8 +64,8 @@ internal class `Given a mass quote is rejected by an empty book` : StringSpec({
                 offer = SizeAtPrice(size = 5, price = Price(11))
             )
         ),
-        quoteRejectReason = QuoteRejectReason.EXCHANGE_CLOSED,
-        quoteRejectText = "Exchange closed"
+        rejectReason = QuoteRejectReason.EXCHANGE_CLOSED,
+        rejectText = "Exchange closed"
     )
     val result = event.play(books)
 
@@ -111,8 +111,8 @@ internal class MassQuoteRejectedEventTest : StringSpec({
                 offer = SizeAtPrice(size = 5, price = Price(11))
             )
         ),
-        quoteRejectReason = QuoteRejectReason.EXCHANGE_CLOSED,
-        quoteRejectText = "Exchange closed"
+        rejectReason = QuoteRejectReason.EXCHANGE_CLOSED,
+        rejectText = "Exchange closed"
     )
     val result = event.play(books)
 

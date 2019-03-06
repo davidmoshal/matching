@@ -30,9 +30,9 @@ data class PlaceOrderCommand(
     val timeInForce: TimeInForce,
     val whenRequested: Instant
 ) : Command<BookId, Books> {
-    val validation = CompleteValidation(
+    private val validation = CompleteValidation(
         List.of(
-            SymbolMustMatch, TradingStatusAllows, HasCorrectSize, PricePresentBasedOnEntryType
+            SymbolMustMatch, TradingStatusAllows, SizesAreCorrect, PricePresentBasedOnEntryType
         ), BiFunction { left, right ->
             right.copy(
                 rejectReason = ifNotEqualsThenUse(left.rejectReason, right.rejectReason, OTHER),
@@ -103,7 +103,7 @@ data class PlaceOrderCommand(
         override fun validate(command: PlaceOrderCommand, aggregate: Books): OrderRejectedEvent? =
             if (command.bookId != aggregate.bookId)
                 command.toRejectedEvent(
-                    books = aggregate.copy(bookId = aggregate.bookId),
+                    books = aggregate,
                     currentTime = command.whenRequested,
                     rejectReason = UNKNOWN_SYMBOL,
                     rejectText = "Unknown book ID : ${command.bookId.bookId}"
@@ -123,7 +123,7 @@ data class PlaceOrderCommand(
 
     }
 
-    object HasCorrectSize : Validation<BookId, Books, PlaceOrderCommand, OrderRejectedEvent> {
+    object SizesAreCorrect : Validation<BookId, Books, PlaceOrderCommand, OrderRejectedEvent> {
         override fun validate(command: PlaceOrderCommand, aggregate: Books): OrderRejectedEvent? =
             if (command.size <= 0)
                 command.toRejectedEvent(

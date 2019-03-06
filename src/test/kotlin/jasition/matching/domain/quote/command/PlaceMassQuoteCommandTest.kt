@@ -1,6 +1,6 @@
 package jasition.matching.domain.quote.command
 
-import arrow.core.Either
+import arrow.core.Either.Companion.right
 import io.kotlintest.data.forall
 import io.kotlintest.matchers.beOfType
 import io.kotlintest.should
@@ -21,7 +21,7 @@ import jasition.matching.domain.quote.QuoteModelType
 import jasition.matching.domain.quote.event.MassQuoteCancelledEvent
 import jasition.matching.domain.quote.event.MassQuotePlacedEvent
 import jasition.matching.domain.quote.event.MassQuoteRejectedEvent
-import jasition.matching.domain.quote.event.QuoteRejectReason
+import jasition.matching.domain.quote.event.QuoteRejectReason.*
 import java.time.Instant
 
 internal class PlaceMassQuoteCommandTest : StringSpec({
@@ -60,7 +60,7 @@ internal class PlaceMassQuoteCommandTest : StringSpec({
             .swap().toOption().orNull() should beOfType<BooksNotFoundException>()
     }
     "When the request is valid, the mass quote is placed" {
-        command.execute(books) shouldBe Either.right(
+        command.execute(books) shouldBe right(
             Transaction<BookId, Books>(
                 aggregate = books.copy(
                     buyLimitBook = books.buyLimitBook.add(expectedBuyEntries[0]).add(expectedBuyEntries[1]),
@@ -109,7 +109,7 @@ internal class PlaceMassQuoteCommandTest : StringSpec({
         ).read(bookId)
 
 
-        command.execute(existingBooks) shouldBe Either.right(
+        command.execute(existingBooks) shouldBe right(
             Transaction<BookId, Books>(
                 aggregate = books.copy(
                     buyLimitBook = books.buyLimitBook
@@ -172,7 +172,7 @@ internal class PlaceMassQuoteCommandTest : StringSpec({
         val expectedEntry =
             expectedBookEntry(command = newCommand, eventId = EventId(1), side = BUY, entry = quoteEntry)
 
-        newCommand.execute(books) shouldBe Either.right(
+        newCommand.execute(books) shouldBe right(
             Transaction<BookId, Books>(
                 aggregate = books.copy(
                     buyLimitBook = books.buyLimitBook.add(expectedEntry),
@@ -207,7 +207,7 @@ internal class PlaceMassQuoteCommandTest : StringSpec({
         val expectedEntry =
             expectedBookEntry(command = newCommand, eventId = EventId(1), side = SELL, entry = quoteEntry)
 
-        newCommand.execute(books) shouldBe Either.right(
+        newCommand.execute(books) shouldBe right(
             Transaction<BookId, Books>(
                 aggregate = books.copy(
                     buyLimitBook = books.buyLimitBook,
@@ -236,7 +236,7 @@ internal class PlaceMassQuoteCommandTest : StringSpec({
     }
     "When the wrong book ID is used, then the mass quote is rejected" {
         val wrongBookId = "Wrong ID"
-        command.copy(bookId = BookId(wrongBookId)).execute(books) shouldBe Either.right(
+        command.copy(bookId = BookId(wrongBookId)).execute(books) shouldBe right(
             Transaction<BookId, Books>(
                 aggregate = books.copy(
                     buyLimitBook = books.buyLimitBook,
@@ -248,13 +248,13 @@ internal class PlaceMassQuoteCommandTest : StringSpec({
                         eventId = books.lastEventId.inc(),
                         quoteId = command.quoteId,
                         whoRequested = command.whoRequested,
-                        bookId = BookId(wrongBookId),
+                        bookId = bookId,
                         quoteModelType = command.quoteModelType,
                         timeInForce = command.timeInForce,
                         entries = command.entries,
                         whenHappened = command.whenRequested,
-                        quoteRejectReason = QuoteRejectReason.UNKNOWN_SYMBOL,
-                        quoteRejectText = "Unknown book ID : $wrongBookId"
+                        rejectReason = UNKNOWN_SYMBOL,
+                        rejectText = "Unknown book ID : $wrongBookId"
                     )
                 )
             )
@@ -278,7 +278,7 @@ internal class PlaceMassQuoteCommandTest : StringSpec({
             )
             command.copy(
                 entries = newEntries
-            ).execute(books) shouldBe Either.right(
+            ).execute(books) shouldBe right(
                 Transaction<BookId, Books>(
                     aggregate = books.copy(
                         buyLimitBook = books.buyLimitBook,
@@ -295,8 +295,8 @@ internal class PlaceMassQuoteCommandTest : StringSpec({
                             timeInForce = command.timeInForce,
                             entries = newEntries,
                             whenHappened = command.whenRequested,
-                            quoteRejectReason = QuoteRejectReason.INVALID_QUANTITY,
-                            quoteRejectText = "Quote sizes must be positive : $min"
+                            rejectReason = INVALID_QUANTITY,
+                            rejectText = "Quote sizes must be positive : $min"
                         )
                     )
                 )
@@ -315,7 +315,7 @@ internal class PlaceMassQuoteCommandTest : StringSpec({
         "When the request has crossed prices (minSell=$minSell, maxBuy=$maxBuy), the mass quote is rejected" {
             command.copy(
                 entries = newEntries
-            ).execute(books) shouldBe Either.right(
+            ).execute(books) shouldBe right(
                 Transaction<BookId, Books>(
                     aggregate = books.copy(
                         buyLimitBook = books.buyLimitBook,
@@ -332,8 +332,8 @@ internal class PlaceMassQuoteCommandTest : StringSpec({
                             timeInForce = command.timeInForce,
                             entries = newEntries,
                             whenHappened = command.whenRequested,
-                            quoteRejectReason = QuoteRejectReason.INVALID_BID_ASK_SPREAD,
-                            quoteRejectText = "Quote prices must not cross within a mass quote: lowestSellPrice=$minSell, highestBuyPrice=$maxBuy"
+                            rejectReason = INVALID_BID_ASK_SPREAD,
+                            rejectText = "Quote prices must not cross within a mass quote: lowestSellPrice=$minSell, highestBuyPrice=$maxBuy"
                         )
                     )
                 )
@@ -343,7 +343,7 @@ internal class PlaceMassQuoteCommandTest : StringSpec({
 
     "When the effective trading status disallows placing order, then the order is rejected" {
         val tradingStatuses = TradingStatuses(TradingStatus.NOT_AVAILABLE_FOR_TRADING)
-        command.execute(books.copy(tradingStatuses = tradingStatuses)) shouldBe Either.right(
+        command.execute(books.copy(tradingStatuses = tradingStatuses)) shouldBe right(
             Transaction<BookId, Books>(
                 aggregate = books.copy(
                     buyLimitBook = books.buyLimitBook,
@@ -361,12 +361,46 @@ internal class PlaceMassQuoteCommandTest : StringSpec({
                         timeInForce = command.timeInForce,
                         entries = command.entries,
                         whenHappened = command.whenRequested,
-                        quoteRejectReason = QuoteRejectReason.EXCHANGE_CLOSED,
-                        quoteRejectText = "Placing mass quote is currently not allowed : ${TradingStatus.NOT_AVAILABLE_FOR_TRADING.name}"
+                        rejectReason = EXCHANGE_CLOSED,
+                        rejectText = "Placing mass quote is currently not allowed : ${TradingStatus.NOT_AVAILABLE_FOR_TRADING.name}"
                     )
                 )
             )
         )
-
+    }
+    "When the effective trading status disallows placing order and it has negative size, then the order is rejected" {
+        val newEntries = List.of(
+            aQuoteEntry(
+                bid = SizeAtPrice(size = -1, price = randomPrice(from = 10, until = 12)),
+                offer = SizeAtPrice(size = 1, price = randomPrice(from = 13, until = 15))
+            )
+        )
+        val tradingStatuses = TradingStatuses(TradingStatus.NOT_AVAILABLE_FOR_TRADING)
+        command.copy(
+            entries = newEntries
+        ).execute(books.copy(tradingStatuses = tradingStatuses)) shouldBe right(
+            Transaction<BookId, Books>(
+                aggregate = books.copy(
+                    buyLimitBook = books.buyLimitBook,
+                    sellLimitBook = books.sellLimitBook,
+                    lastEventId = EventId(1),
+                    tradingStatuses = tradingStatuses
+                ),
+                events = List.of(
+                    MassQuoteRejectedEvent(
+                        eventId = books.lastEventId.inc(),
+                        quoteId = command.quoteId,
+                        whoRequested = command.whoRequested,
+                        bookId = bookId,
+                        quoteModelType = command.quoteModelType,
+                        timeInForce = command.timeInForce,
+                        entries = newEntries,
+                        whenHappened = command.whenRequested,
+                        rejectReason = OTHER,
+                        rejectText = "Placing mass quote is currently not allowed : NOT_AVAILABLE_FOR_TRADING; Quote sizes must be positive : -1"
+                    )
+                )
+            )
+        )
     }
 })

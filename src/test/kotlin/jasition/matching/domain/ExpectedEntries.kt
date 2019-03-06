@@ -317,8 +317,8 @@ fun expectedMassQuoteRejectedEvent(
         timeInForce = timeInForce,
         entries = entries,
         whenHappened = whenRequested,
-        quoteRejectReason = expectedQuoteRejectReason,
-        quoteRejectText = expectedQuoteRejectText
+        rejectReason = expectedQuoteRejectReason,
+        rejectText = expectedQuoteRejectText
     )
 }
 

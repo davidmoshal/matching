@@ -6,4 +6,4 @@ fun appendIfNotNullOrBlank(left: String?, right: String?, delimiter: String): St
     listOfNotNull(left, right)
         .filter(String::isNotBlank)
         .joinToString(delimiter)
-        .takeUnless(String::isNullOrBlank)
+        .takeUnless { it.isBlank() }
