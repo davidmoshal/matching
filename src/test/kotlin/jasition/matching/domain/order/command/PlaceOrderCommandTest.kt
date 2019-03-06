@@ -172,6 +172,39 @@ internal class PlaceOrderCommandTest : StringSpec({
             )
         )
     }
+    forall(
+        row(MARKET, GOOD_TILL_CANCEL, null)
+    ) { entryType, timeInForce, price ->
+        "When the request uses $entryType ${timeInForce.code}, then the order is rejected" {
+            command.copy(
+                entryType = entryType,
+                timeInForce = timeInForce,
+                price = price
+            ).execute(books) shouldBe right(
+                Transaction<BookId, Books>(
+                    aggregate = books.copy(
+                        lastEventId = EventId(1)
+                    ),
+                    events = List.of(
+                        OrderRejectedEvent(
+                            eventId = books.lastEventId.inc(),
+                            requestId = command.requestId,
+                            whoRequested = command.whoRequested,
+                            bookId = command.bookId,
+                            entryType = entryType,
+                            side = command.side,
+                            size = command.size,
+                            price = price,
+                            timeInForce = timeInForce,
+                            whenHappened = command.whenRequested,
+                            rejectReason = UNSUPPORTED_ORDER_CHARACTERISTIC,
+                            rejectText = "$entryType ${timeInForce.code} is not supported"
+                        )
+                    )
+                )
+            )
+        }
+    }
     "When the effective trading status disallows placing order and the request uses negative sizes, then the order is rejected with combined reason" {
         command.copy(size = -1).execute(books.copy(tradingStatuses = TradingStatuses(NOT_AVAILABLE_FOR_TRADING))) shouldBe right(
             Transaction<BookId, Books>(

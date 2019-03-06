@@ -340,7 +340,6 @@ internal class PlaceMassQuoteCommandTest : StringSpec({
             )
         }
     }
-
     "When the effective trading status disallows placing order, then the order is rejected" {
         val tradingStatuses = TradingStatuses(TradingStatus.NOT_AVAILABLE_FOR_TRADING)
         command.execute(books.copy(tradingStatuses = tradingStatuses)) shouldBe right(

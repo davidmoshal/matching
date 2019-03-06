@@ -2,6 +2,7 @@ package jasition.matching.domain.order.command
 
 import arrow.core.Either
 import io.vavr.collection.List
+import io.vavr.kotlin.list
 import jasition.cqrs.*
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
@@ -31,8 +32,12 @@ data class PlaceOrderCommand(
     val whenRequested: Instant
 ) : Command<BookId, Books> {
     private val validation = CompleteValidation(
-        List.of(
-            SymbolMustMatch, TradingStatusAllows, SizesAreCorrect, PricePresentBasedOnEntryType
+        list(
+            SymbolMustMatch,
+            TradingStatusAllows,
+            SizesAreCorrect,
+            PricePresentBasedOnEntryType,
+            ValidEntryTypeTimeInForceCombo
         ), BiFunction { left, right ->
             right.copy(
                 rejectReason = ifNotEqualsThenUse(left.rejectReason, right.rejectReason, OTHER),
@@ -142,6 +147,17 @@ data class PlaceOrderCommand(
                     currentTime = command.whenRequested,
                     rejectReason = UNSUPPORTED_ORDER_CHARACTERISTIC,
                     rejectText = "Price must be ${if (command.entryType.isPriceRequiredOrMustBeNull()) "pre" else "ab"}sent for ${command.entryType} order"
+                ) else null
+    }
+
+    object ValidEntryTypeTimeInForceCombo : Validation<BookId, Books, PlaceOrderCommand, OrderRejectedEvent> {
+        override fun validate(command: PlaceOrderCommand, aggregate: Books): OrderRejectedEvent? =
+            if (!EntryTypeTimeInForceCombo.isValid(command.entryType, command.timeInForce))
+                command.toRejectedEvent(
+                    books = aggregate,
+                    currentTime = command.whenRequested,
+                    rejectReason = UNSUPPORTED_ORDER_CHARACTERISTIC,
+                    rejectText = "${command.entryType} ${command.timeInForce.code} is not supported"
                 ) else null
     }
 }
