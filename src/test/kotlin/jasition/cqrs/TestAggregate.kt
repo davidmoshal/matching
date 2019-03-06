@@ -1,6 +1,7 @@
 package jasition.cqrs
 
 import arrow.core.Either
+import io.vavr.collection.List
 
 
 internal class TestAggregate(
@@ -21,7 +22,7 @@ internal data class TestEvent(
 
 internal class TestCommand : Command<Int, TestAggregate> {
     override fun execute(aggregate: TestAggregate?): Either<Exception, Transaction<Int, TestAggregate>> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return Either.right(Transaction(aggregate = aggregate!!, events = List.empty()))
     }
 
 }
@@ -35,8 +36,6 @@ internal data class TestRejectedEvent  (
 
     override fun eventId(): EventId = eventId
 
-    override fun play(aggregate: TestAggregate): TestAggregate {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun play(aggregate: TestAggregate): TestAggregate = aggregate
 
 }

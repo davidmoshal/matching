@@ -102,9 +102,7 @@ fun cancelExistingQuotes(
 
     return MassQuoteCancelledEvent(
         eventId = eventId.inc(),
-        entries = toBeRemoved.map { it.cancelled() },
-        //TODO: Replace by Function reference when its code coverage can be accurately measured
-//        entries = toBeRemoved.map(BookEntry::cancelled),
+        entries = toBeRemoved.map(BookEntry::cancelled),
         bookId = books.bookId,
         whoRequested = whoRequested,
         whenHappened = whenHappened
