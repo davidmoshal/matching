@@ -10,7 +10,11 @@ import jasition.matching.domain.trade.MatchingResult
 
 enum class TimeInForce(val code: String) {
     GOOD_TILL_CANCEL("GTC") {
-        override fun finalise(result: MatchingResult): Transaction<BookId, Books> {
+        override fun finalise(
+            originalAggressor: BookEntry,
+            originalBooks: Books,
+            result: MatchingResult
+        ): Transaction<BookId, Books> {
             with(result) {
                 with(transaction) {
                     return if (canStayOnBook(aggressor.sizes)) {
@@ -34,13 +38,17 @@ enum class TimeInForce(val code: String) {
     },
 
     IMMEDIATE_OR_CANCEL("IOC") {
-        override fun finalise(result: MatchingResult): Transaction<BookId, Books> {
+        override fun finalise(
+            originalAggressor: BookEntry,
+            originalBooks: Books,
+            result: MatchingResult
+        ): Transaction<BookId, Books> {
             with(result) {
                 return if (aggressor.sizes.available > 0) {
                     with(transaction) {
                         val cancelledEvent = aggressor.toOrderCancelledByExchangeEvent(
-                                eventId = aggregate.lastEventId.inc(),
-                                bookId = aggregate.bookId
+                            eventId = aggregate.lastEventId.inc(),
+                            bookId = aggregate.bookId
 
                         )
 
@@ -53,7 +61,34 @@ enum class TimeInForce(val code: String) {
         }
 
         override fun canStayOnBook(size: EntrySizes): Boolean = false
-    };
+    },
+    FILL_OR_KILL("FOK") {
+        override fun finalise(
+            originalAggressor: BookEntry,
+            originalBooks: Books,
+            result: MatchingResult
+        ): Transaction<BookId, Books> {
+            with(result) {
+                return if (aggressor.sizes.available != 0) {
+                    val cancelledEvent =
+                        originalAggressor.toOrderCancelledByExchangeEvent(
+                            eventId = originalBooks.lastEventId.inc(),
+                            bookId = originalBooks.bookId
+                        )
+
+                    val cancelledBooks = cancelledEvent.play(originalBooks)
+
+                    Transaction<BookId, Books>(
+                        aggregate = cancelledBooks,
+                        events = list(cancelledEvent)
+                    )
+                } else transaction
+            }
+        }
+
+        override fun canStayOnBook(size: EntrySizes): Boolean = false
+    },
+    ;
 
     abstract fun canStayOnBook(size: EntrySizes): Boolean
 
@@ -64,5 +99,9 @@ enum class TimeInForce(val code: String) {
      * the book, cancelling the remaining size of the aggressor, or cancelling the whole aggressor or
      * reverting the whole [MatchingResult].
      */
-    abstract fun finalise(result: MatchingResult): Transaction<BookId, Books>
+    abstract fun finalise(
+        originalAggressor: BookEntry,
+        originalBooks: Books,
+        result: MatchingResult
+    ): Transaction<BookId, Books>
 }

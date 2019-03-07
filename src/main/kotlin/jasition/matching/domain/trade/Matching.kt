@@ -14,15 +14,15 @@ import jasition.matching.domain.client.Client
 import jasition.matching.domain.trade.event.TradeEvent
 
 fun matchAndFinalise(
-    bookEntry: BookEntry,
+    aggressor: BookEntry,
     books: Books
 ): Transaction<BookId, Books> {
     val result = match(
-        aggressor = bookEntry,
+        aggressor = aggressor,
         books = books
     )
 
-    return result.aggressor.timeInForce.finalise(result)
+    return result.aggressor.timeInForce.finalise(aggressor, books, result)
 }
 
 fun match(

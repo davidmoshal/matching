@@ -29,7 +29,7 @@ internal class MatchAndFinaliseTest : StringSpec({
     every { match(aggressorBeforeMatch, booksBeforeMatch) } returns matchResult
     every { matchResult.aggressor } returns aggressorAfterMatch
     every { aggressorAfterMatch.timeInForce } returns timeInForce
-    every { timeInForce.finalise(matchResult) } returns transaction
+    every { timeInForce.finalise(aggressorBeforeMatch, booksBeforeMatch, matchResult) } returns transaction
 
     "Time-in-force decides the final transaction after matching completed" {
         matchAndFinalise(
