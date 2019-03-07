@@ -19,6 +19,7 @@ import jasition.matching.domain.book.entry.EntrySizes
 import jasition.matching.domain.book.entry.EntryStatus.FILLED
 import jasition.matching.domain.book.entry.EntryStatus.PARTIAL_FILL
 import jasition.matching.domain.book.entry.EntryType.LIMIT
+import jasition.matching.domain.book.entry.EntryType.MARKET
 import jasition.matching.domain.book.entry.Price
 import jasition.matching.domain.book.entry.Side.BUY
 import jasition.matching.domain.book.entry.Side.SELL
@@ -73,8 +74,23 @@ internal class `Aggressor order partial filled against passive quotes then cance
                 Tuple8(0, 6, 11L, PARTIAL_FILL, 10, 6, FILLED, 0),
                 Tuple8(2, 7, 10L, PARTIAL_FILL, 3, 13, FILLED, 0)
             )
+        ),
+        row(
+            List.of(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
+            Tuple5(BUY, MARKET, IMMEDIATE_OR_CANCEL, 16, null),
+            List.of(
+                Tuple8(1, 6, 12L, PARTIAL_FILL, 10, 6, FILLED, 0),
+                Tuple8(3, 7, 13L, PARTIAL_FILL, 3, 13, FILLED, 0)
+            )
+        ),
+        row(
+            List.of(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
+            Tuple5(SELL, MARKET, IMMEDIATE_OR_CANCEL, 16, null),
+            List.of(
+                Tuple8(0, 6, 11L, PARTIAL_FILL, 10, 6, FILLED, 0),
+                Tuple8(2, 7, 10L, PARTIAL_FILL, 3, 13, FILLED, 0)
+            )
         )
-
     ) { oldEntries, new, expectedTrades ->
         "Given a book has existing quote entries of (${quoteEntriesAsString(
             oldEntries
@@ -92,7 +108,7 @@ internal class `Aggressor order partial filled against passive quotes then cance
                 entryType = new.b,
                 timeInForce = new.c,
                 size = new.d,
-                price = Price(new.e),
+                price = new.e?.let { Price(it) },
                 whoRequested = Client(firmId = "firm2", firmClientId = randomFirmClientId())
             )
 
