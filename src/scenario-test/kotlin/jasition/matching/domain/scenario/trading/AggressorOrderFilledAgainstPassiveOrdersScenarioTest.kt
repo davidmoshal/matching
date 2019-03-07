@@ -24,8 +24,7 @@ import jasition.matching.domain.book.entry.EntryType.MARKET
 import jasition.matching.domain.book.entry.Price
 import jasition.matching.domain.book.entry.Side.BUY
 import jasition.matching.domain.book.entry.Side.SELL
-import jasition.matching.domain.book.entry.TimeInForce.GOOD_TILL_CANCEL
-import jasition.matching.domain.book.entry.TimeInForce.IMMEDIATE_OR_CANCEL
+import jasition.matching.domain.book.entry.TimeInForce.*
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.order.command.PlaceOrderCommand
 import jasition.matching.domain.trade.event.TradeEvent
@@ -44,9 +43,10 @@ internal class `Aggressor order filled against passive orders` : StringSpec({
          * Parameter dimensions
          * 1. Buy / Sell of aggressor order
          * 2. Fill / Partial-fill of passive orders
-         * 3. GTC / IOC of aggressor order
+         * 3. GTC / IOC / FOK of aggressor order
          * 4. Single / Multiple fills
          * 5. Exact / Better price executions (embedded in multiple fill cases)
+         * 6. Limit / Market of aggressor order
          */
 
         row(
@@ -70,6 +70,14 @@ internal class `Aggressor order filled against passive orders` : StringSpec({
                 Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 6, 12L),
                 Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 7, 13L)
             ),
+            Tuple5(BUY, LIMIT, FILL_OR_KILL, 6, 12L),
+            list(Tuple8(0, 6, 12L, FILLED, 0, 6, FILLED, 0))
+        ),
+        row(
+            list(
+                Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 6, 12L),
+                Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 7, 13L)
+            ),
             Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 2, 12L),
             list(Tuple8(0, 2, 12L, FILLED, 0, 2, PARTIAL_FILL, 4))
         ),
@@ -79,6 +87,14 @@ internal class `Aggressor order filled against passive orders` : StringSpec({
                 Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 7, 13L)
             ),
             Tuple5(BUY, LIMIT, IMMEDIATE_OR_CANCEL, 2, 12L),
+            list(Tuple8(0, 2, 12L, FILLED, 0, 2, PARTIAL_FILL, 4))
+        ),
+        row(
+            list(
+                Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 6, 12L),
+                Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 7, 13L)
+            ),
+            Tuple5(BUY, LIMIT, FILL_OR_KILL, 2, 12L),
             list(Tuple8(0, 2, 12L, FILLED, 0, 2, PARTIAL_FILL, 4))
         ),
         row(
@@ -102,6 +118,14 @@ internal class `Aggressor order filled against passive orders` : StringSpec({
                 Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 6, 11L),
                 Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 7, 10L)
             ),
+            Tuple5(SELL, LIMIT, FILL_OR_KILL, 6, 11L),
+            list(Tuple8(0, 6, 11L, FILLED, 0, 6, FILLED, 0))
+        ),
+        row(
+            list(
+                Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 6, 11L),
+                Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 7, 10L)
+            ),
             Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 4, 11L),
             list(Tuple8(0, 4, 11L, FILLED, 0, 4, PARTIAL_FILL, 2))
         ),
@@ -111,6 +135,14 @@ internal class `Aggressor order filled against passive orders` : StringSpec({
                 Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 7, 10L)
             ),
             Tuple5(SELL, LIMIT, IMMEDIATE_OR_CANCEL, 4, 11L),
+            list(Tuple8(0, 4, 11L, FILLED, 0, 4, PARTIAL_FILL, 2))
+        ),
+        row(
+            list(
+                Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 6, 11L),
+                Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 7, 10L)
+            ),
+            Tuple5(SELL, LIMIT, FILL_OR_KILL, 4, 11L),
             list(Tuple8(0, 4, 11L, FILLED, 0, 4, PARTIAL_FILL, 2))
         ),
         row(
@@ -140,6 +172,17 @@ internal class `Aggressor order filled against passive orders` : StringSpec({
                 Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 6, 12L),
                 Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 7, 13L)
             ),
+            Tuple5(BUY, LIMIT, FILL_OR_KILL, 13, 13L),
+            list(
+                Tuple8(0, 6, 12L, PARTIAL_FILL, 7, 6, FILLED, 0),
+                Tuple8(1, 7, 13L, FILLED, 0, 13, FILLED, 0)
+            )
+        ),
+        row(
+            list(
+                Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 6, 12L),
+                Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 7, 13L)
+            ),
             Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 10, 13L),
             list(
                 Tuple8(0, 6, 12L, PARTIAL_FILL, 4, 6, FILLED, 0),
@@ -152,6 +195,17 @@ internal class `Aggressor order filled against passive orders` : StringSpec({
                 Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 7, 13L)
             ),
             Tuple5(BUY, LIMIT, IMMEDIATE_OR_CANCEL, 10, 13L),
+            list(
+                Tuple8(0, 6, 12L, PARTIAL_FILL, 4, 6, FILLED, 0),
+                Tuple8(1, 4, 13L, FILLED, 0, 10, PARTIAL_FILL, 3)
+            )
+        ),
+        row(
+            list(
+                Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 6, 12L),
+                Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 7, 13L)
+            ),
+            Tuple5(BUY, LIMIT, FILL_OR_KILL, 10, 13L),
             list(
                 Tuple8(0, 6, 12L, PARTIAL_FILL, 4, 6, FILLED, 0),
                 Tuple8(1, 4, 13L, FILLED, 0, 10, PARTIAL_FILL, 3)
@@ -184,6 +238,17 @@ internal class `Aggressor order filled against passive orders` : StringSpec({
                 Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 6, 11L),
                 Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 7, 10L)
             ),
+            Tuple5(SELL, LIMIT, FILL_OR_KILL, 13, 10L),
+            list(
+                Tuple8(0, 6, 11L, PARTIAL_FILL, 7, 6, FILLED, 0),
+                Tuple8(1, 7, 10L, FILLED, 0, 13, FILLED, 0)
+            )
+        ),
+        row(
+            list(
+                Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 6, 11L),
+                Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 7, 10L)
+            ),
             Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 10, 10L),
             list(
                 Tuple8(0, 6, 11L, PARTIAL_FILL, 4, 6, FILLED, 0),
@@ -203,6 +268,17 @@ internal class `Aggressor order filled against passive orders` : StringSpec({
         ),
         row(
             list(
+                Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 6, 11L),
+                Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 7, 10L)
+            ),
+            Tuple5(SELL, LIMIT, FILL_OR_KILL, 10, 10L),
+            list(
+                Tuple8(0, 6, 11L, PARTIAL_FILL, 4, 6, FILLED, 0),
+                Tuple8(1, 4, 10L, FILLED, 0, 10, PARTIAL_FILL, 3)
+            )
+        ),
+        row(
+            list(
                 Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 6, 12L),
                 Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 7, 13L)
             ),
@@ -214,7 +290,23 @@ internal class `Aggressor order filled against passive orders` : StringSpec({
                 Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 6, 12L),
                 Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 7, 13L)
             ),
+            Tuple5(BUY, MARKET, FILL_OR_KILL, 6, null),
+            list(Tuple8(0, 6, 12L, FILLED, 0, 6, FILLED, 0))
+        ),
+        row(
+            list(
+                Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 6, 12L),
+                Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 7, 13L)
+            ),
             Tuple5(BUY, MARKET, IMMEDIATE_OR_CANCEL, 2, null),
+            list(Tuple8(0, 2, 12L, FILLED, 0, 2, PARTIAL_FILL, 4))
+        ),
+        row(
+            list(
+                Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 6, 12L),
+                Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 7, 13L)
+            ),
+            Tuple5(BUY, MARKET, FILL_OR_KILL, 2, null),
             list(Tuple8(0, 2, 12L, FILLED, 0, 2, PARTIAL_FILL, 4))
         ),
         row(
@@ -230,7 +322,23 @@ internal class `Aggressor order filled against passive orders` : StringSpec({
                 Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 6, 11L),
                 Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 7, 10L)
             ),
+            Tuple5(SELL, MARKET, FILL_OR_KILL, 6, null),
+            list(Tuple8(0, 6, 11L, FILLED, 0, 6, FILLED, 0))
+        ),
+        row(
+            list(
+                Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 6, 11L),
+                Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 7, 10L)
+            ),
             Tuple5(SELL, MARKET, IMMEDIATE_OR_CANCEL, 4, null),
+            list(Tuple8(0, 4, 11L, FILLED, 0, 4, PARTIAL_FILL, 2))
+        ),
+        row(
+            list(
+                Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 6, 11L),
+                Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 7, 10L)
+            ),
+            Tuple5(SELL, MARKET, FILL_OR_KILL, 4, null),
             list(Tuple8(0, 4, 11L, FILLED, 0, 4, PARTIAL_FILL, 2))
         ),
         row(
@@ -249,7 +357,29 @@ internal class `Aggressor order filled against passive orders` : StringSpec({
                 Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 6, 12L),
                 Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 7, 13L)
             ),
+            Tuple5(BUY, MARKET, FILL_OR_KILL, 13, null),
+            list(
+                Tuple8(0, 6, 12L, PARTIAL_FILL, 7, 6, FILLED, 0),
+                Tuple8(1, 7, 13L, FILLED, 0, 13, FILLED, 0)
+            )
+        ),
+        row(
+            list(
+                Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 6, 12L),
+                Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 7, 13L)
+            ),
             Tuple5(BUY, MARKET, IMMEDIATE_OR_CANCEL, 10, null),
+            list(
+                Tuple8(0, 6, 12L, PARTIAL_FILL, 4, 6, FILLED, 0),
+                Tuple8(1, 4, 13L, FILLED, 0, 10, PARTIAL_FILL, 3)
+            )
+        ),
+        row(
+            list(
+                Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 6, 12L),
+                Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 7, 13L)
+            ),
+            Tuple5(BUY, MARKET, FILL_OR_KILL, 10, null),
             list(
                 Tuple8(0, 6, 12L, PARTIAL_FILL, 4, 6, FILLED, 0),
                 Tuple8(1, 4, 13L, FILLED, 0, 10, PARTIAL_FILL, 3)
@@ -271,7 +401,29 @@ internal class `Aggressor order filled against passive orders` : StringSpec({
                 Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 6, 11L),
                 Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 7, 10L)
             ),
+            Tuple5(SELL, MARKET, FILL_OR_KILL, 13, null),
+            list(
+                Tuple8(0, 6, 11L, PARTIAL_FILL, 7, 6, FILLED, 0),
+                Tuple8(1, 7, 10L, FILLED, 0, 13, FILLED, 0)
+            )
+        ),
+        row(
+            list(
+                Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 6, 11L),
+                Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 7, 10L)
+            ),
             Tuple5(SELL, MARKET, IMMEDIATE_OR_CANCEL, 10, null),
+            list(
+                Tuple8(0, 6, 11L, PARTIAL_FILL, 4, 6, FILLED, 0),
+                Tuple8(1, 4, 10L, FILLED, 0, 10, PARTIAL_FILL, 3)
+            )
+        ),
+        row(
+            list(
+                Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 6, 11L),
+                Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 7, 10L)
+            ),
+            Tuple5(SELL, MARKET, FILL_OR_KILL, 10, null),
             list(
                 Tuple8(0, 6, 11L, PARTIAL_FILL, 4, 6, FILLED, 0),
                 Tuple8(1, 4, 10L, FILLED, 0, 10, PARTIAL_FILL, 3)
