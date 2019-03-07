@@ -6,7 +6,7 @@ import io.kotlintest.data.forall
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import io.kotlintest.tables.row
-import io.vavr.collection.List
+import io.vavr.kotlin.list
 import jasition.cqrs.EventId
 import jasition.cqrs.commitOrThrow
 import jasition.matching.domain.*
@@ -18,7 +18,7 @@ internal class `Mass quote placed on and added to empty book` : StringSpec({
     val bookId = aBookId()
 
     forall(
-        row(List.of(Tuple4(4, 10L, 4, 11L), Tuple4(5, 9L, 5, 12L)))
+        row(list(Tuple4(4, 10L, 4, 11L), Tuple4(5, 9L, 5, 12L)))
     ) { entries ->
         "Given an empty book, when a mass quote of (${quoteEntriesAsString(
             entries
@@ -28,7 +28,7 @@ internal class `Mass quote placed on and added to empty book` : StringSpec({
 
             val result = command.execute(repo.read(bookId)) commitOrThrow repo
 
-            val expectedBookEntries = List.of(
+            val expectedBookEntries = list(
                 Tuple2(0, BUY),
                 Tuple2(0, SELL),
                 Tuple2(1, BUY),
@@ -36,7 +36,7 @@ internal class `Mass quote placed on and added to empty book` : StringSpec({
             ).map { expectedBookEntry(command = command, entryIndex = it.a, eventId = EventId(1), side = it.b) }
 
             with(result) {
-                events shouldBe List.of(
+                events shouldBe list(
                     expectedMassQuotePlacedEvent(command, EventId(1)),
                     EntryAddedToBookEvent(bookId, EventId(2), expectedBookEntries[0]),
                     EntryAddedToBookEvent(bookId, EventId(3), expectedBookEntries[1]),
@@ -46,8 +46,8 @@ internal class `Mass quote placed on and added to empty book` : StringSpec({
             }
 
             repo.read(bookId).let {
-                it.buyLimitBook.entries.values() shouldBe List.of(expectedBookEntries[0], expectedBookEntries[2])
-                it.sellLimitBook.entries.values() shouldBe List.of(expectedBookEntries[1], expectedBookEntries[3])
+                it.buyLimitBook.entries.values() shouldBe list(expectedBookEntries[0], expectedBookEntries[2])
+                it.sellLimitBook.entries.values() shouldBe list(expectedBookEntries[1], expectedBookEntries[3])
             }
         }
     }

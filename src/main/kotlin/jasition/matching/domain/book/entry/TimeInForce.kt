@@ -1,6 +1,6 @@
 package jasition.matching.domain.book.entry
 
-import io.vavr.collection.List
+import io.vavr.kotlin.list
 import jasition.cqrs.Transaction
 import jasition.cqrs.append
 import jasition.matching.domain.book.BookId
@@ -22,7 +22,7 @@ enum class TimeInForce(val code: String) {
                         )
 
                         val addedBooks = addedEvent.play(aggregate)
-                        append(Transaction<BookId, Books>(aggregate = addedBooks, events = List.of(addedEvent)))
+                        append(Transaction<BookId, Books>(aggregate = addedBooks, events = list(addedEvent)))
                     } else
                         this
 
@@ -46,7 +46,7 @@ enum class TimeInForce(val code: String) {
 
                         val cancelledBooks = cancelledEvent.play(aggregate)
 
-                        append(Transaction<BookId, Books>(aggregate = cancelledBooks, events = List.of(cancelledEvent)))
+                        append(Transaction<BookId, Books>(aggregate = cancelledBooks, events = list(cancelledEvent)))
                     }
                 } else transaction
             }

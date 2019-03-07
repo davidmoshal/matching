@@ -3,6 +3,9 @@ package jasition.cqrs
 import io.vavr.collection.List
 import java.util.function.BiFunction
 
+/**
+ * [Validation] is the construct that facilitates validating a [Command] against an [Aggregate].
+ */
 interface Validation<KEY, AGG : Aggregate<KEY>, CMD : Command<KEY, AGG>, REJ : Event<KEY, AGG>> {
     fun validate(command: CMD, aggregate: AGG): REJ?
 }

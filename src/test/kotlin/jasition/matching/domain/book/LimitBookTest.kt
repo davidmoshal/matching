@@ -2,7 +2,7 @@ package jasition.matching.domain.book
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
-import io.vavr.collection.List
+import io.vavr.kotlin.list
 import jasition.cqrs.EventId
 import jasition.matching.domain.aBookEntry
 import jasition.matching.domain.book.entry.EntrySizes
@@ -21,7 +21,7 @@ internal class LimitBookTest : StringSpec({
 
         val newBook = LimitBook(Side.BUY).add(lowerPrice).add(higherPrice)
 
-        newBook.entries.values() shouldBe List.of(higherPrice, lowerPrice)
+        newBook.entries.values() shouldBe list(higherPrice, lowerPrice)
     }
     "Prioritises BUY entry of earlier submission over later given the same price"{
         val now = Instant.now()
@@ -30,7 +30,7 @@ internal class LimitBookTest : StringSpec({
 
         val newBook = LimitBook(Side.BUY).add(later).add(earlier)
 
-        newBook.entries.values() shouldBe List.of(earlier, later)
+        newBook.entries.values() shouldBe list(earlier, later)
     }
     "Prioritises BUY entry of smaller Event ID over bigger given the same price and same submission time"{
         val now = Instant.now()
@@ -39,7 +39,7 @@ internal class LimitBookTest : StringSpec({
 
         val newBook = LimitBook(Side.BUY).add(bigger).add(smaller)
 
-        newBook.entries.values() shouldBe List.of(smaller, bigger)
+        newBook.entries.values() shouldBe list(smaller, bigger)
     }
     "Replaces BUY entry of same price, same submission time, and same Event ID"{
         val now = Instant.now()
@@ -48,7 +48,7 @@ internal class LimitBookTest : StringSpec({
 
         val newBook = LimitBook(Side.BUY).add(entry1).add(entry2)
 
-        newBook.entries.values() shouldBe List.of(entry2)
+        newBook.entries.values() shouldBe list(entry2)
     }
     "Prioritises SELL entry of lower prices over higher prices"{
         val lowerPrice = aBookEntry(side = Side.SELL, price = Price(10))
@@ -56,7 +56,7 @@ internal class LimitBookTest : StringSpec({
 
         val newBook = LimitBook(Side.SELL).add(lowerPrice).add(higherPrice)
 
-        newBook.entries.values() shouldBe List.of(lowerPrice, higherPrice)
+        newBook.entries.values() shouldBe list(lowerPrice, higherPrice)
     }
     "Prioritises SELL entry of earlier submission over later given the same price"{
         val now = Instant.now()
@@ -65,7 +65,7 @@ internal class LimitBookTest : StringSpec({
 
         val newBook = LimitBook(Side.SELL).add(later).add(earlier)
 
-        newBook.entries.values() shouldBe List.of(earlier, later)
+        newBook.entries.values() shouldBe list(earlier, later)
     }
     "Prioritises SELL entry of smaller Event ID over bigger given the same price and same submission time"{
         val now = Instant.now()
@@ -74,7 +74,7 @@ internal class LimitBookTest : StringSpec({
 
         val newBook = LimitBook(Side.SELL).add(bigger).add(smaller)
 
-        newBook.entries.values() shouldBe List.of(smaller, bigger)
+        newBook.entries.values() shouldBe list(smaller, bigger)
     }
     "Replaces SELL entry of same price, same submission time, and same Event ID"{
         val now = Instant.now()
@@ -83,7 +83,7 @@ internal class LimitBookTest : StringSpec({
 
         val newBook = LimitBook(Side.SELL).add(entry1).add(entry2)
 
-        newBook.entries.values() shouldBe List.of(entry2)
+        newBook.entries.values() shouldBe list(entry2)
     }
     "Updates an entry from the book by given key"{
         val entry1 = aBookEntry(
@@ -97,7 +97,7 @@ internal class LimitBookTest : StringSpec({
             .add(entry1)
             .update(entry1.key, Function { it.copy(status = EntryStatus.CANCELLED)})
 
-        newBook.entries.values() shouldBe List.of(entry2)
+        newBook.entries.values() shouldBe list(entry2)
     }
     "Removes an entry from the book by given key"{
         val entry1 = aBookEntry(
@@ -111,7 +111,7 @@ internal class LimitBookTest : StringSpec({
             .add(entry2)
             .remove(entry1.key)
 
-        newBook.entries.values() shouldBe List.of(entry2)
+        newBook.entries.values() shouldBe list(entry2)
     }
     "Removes an entry from the book by given predicate"{
         val entry1 = aBookEntry(
@@ -132,7 +132,7 @@ internal class LimitBookTest : StringSpec({
                 result
             })
 
-        newBook.entries.values() shouldBe List.of(entry2)
+        newBook.entries.values() shouldBe list(entry2)
     }
     "Removes all entries from the book"{
         val entry1 = aBookEntry(
@@ -144,7 +144,7 @@ internal class LimitBookTest : StringSpec({
         val newBook = LimitBook(Side.SELL)
             .add(entry1)
             .add(entry2)
-            .removeAll(List.of(entry1, entry2))
+            .removeAll(list(entry1, entry2))
 
         newBook.entries.size() shouldBe 0
     }

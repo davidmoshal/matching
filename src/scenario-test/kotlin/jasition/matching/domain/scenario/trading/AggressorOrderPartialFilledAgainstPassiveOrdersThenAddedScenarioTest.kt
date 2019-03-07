@@ -8,6 +8,7 @@ import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import io.kotlintest.tables.row
 import io.vavr.collection.List
+import io.vavr.kotlin.list
 import jasition.cqrs.Command
 import jasition.cqrs.Event
 import jasition.cqrs.EventId
@@ -47,39 +48,39 @@ internal class `Aggressor order partial filled against passive orders then added
          */
 
         row(
-            List.of(
+            list(
                 Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 6, 12L),
                 Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 7, 13L)
             ),
             Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 16, 12L),
-            List.of(Tuple8(0, 6, 12L, PARTIAL_FILL, 10, 6, FILLED, 0))
+            list(Tuple8(0, 6, 12L, PARTIAL_FILL, 10, 6, FILLED, 0))
         ),
         row(
-            List.of(
+            list(
                 Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 6, 12L),
                 Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 7, 13L)
             ),
             Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 16, 13L),
-            List.of(
+            list(
                 Tuple8(0, 6, 12L, PARTIAL_FILL, 10, 6, FILLED, 0),
                 Tuple8(1, 7, 13L, PARTIAL_FILL, 3, 13, FILLED, 0)
             )
         ),
         row(
-            List.of(
+            list(
                 Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 6, 11L),
                 Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 7, 10L)
             ),
             Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 16, 11L),
-            List.of(Tuple8(0, 6, 11L, PARTIAL_FILL, 10, 6, FILLED, 0))
+            list(Tuple8(0, 6, 11L, PARTIAL_FILL, 10, 6, FILLED, 0))
         ),
         row(
-            List.of(
+            list(
                 Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 6, 11L),
                 Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 7, 10L)
             ),
             Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 16, 10L),
-            List.of(
+            list(
                 Tuple8(0, 6, 11L, PARTIAL_FILL, 10, 6, FILLED, 0),
                 Tuple8(1, 7, 10L, PARTIAL_FILL, 3, 13, FILLED, 0)
             )
@@ -177,7 +178,7 @@ internal class `Aggressor order partial filled against passive orders then added
 
             repo.read(bookId).let {
                 with(command) {
-                    side.sameSideBook(it).entries.values() shouldBe List.of(lastNewBookEntry)
+                    side.sameSideBook(it).entries.values() shouldBe list(lastNewBookEntry)
                     side.oppositeSideBook(it).entries.values() shouldBe updatedBookEntries(
                         side = side,
                         oldBookEntries = oldBookEntries,

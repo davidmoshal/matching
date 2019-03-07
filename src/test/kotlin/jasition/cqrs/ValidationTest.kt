@@ -4,6 +4,7 @@ import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import io.mockk.*
 import io.vavr.collection.List
+import io.vavr.kotlin.list
 import java.util.function.BiFunction
 
 internal class ValidationTest : StringSpec({
@@ -47,14 +48,14 @@ internal class ValidationTest : StringSpec({
         ) shouldBe null
     }
     "FailFast passes if all validations passed" {
-        FailFast(List.of(passedValidation1, passedValidation2)).validate(command, aggregate) shouldBe null
+        FailFast(list(passedValidation1, passedValidation2)).validate(command, aggregate) shouldBe null
 
         verify { passedValidation1.validate(command, aggregate) }
         verify { passedValidation2.validate(command, aggregate) }
         confirmVerified(passedValidation1, passedValidation2)
     }
     "FailFast fails if it encountered a failed validation" {
-        FailFast(List.of(passedValidation1, passedValidation2, failedValidation1)).validate(
+        FailFast(list(passedValidation1, passedValidation2, failedValidation1)).validate(
             command,
             aggregate
         ) shouldBe testRejectedEvent1
@@ -65,7 +66,7 @@ internal class ValidationTest : StringSpec({
         confirmVerified(passedValidation1, passedValidation2)
     }
     "FailFast fails if it encountered the first failed validation and the rest of validations not called" {
-        FailFast(List.of(passedValidation1, passedValidation2, failedValidation1, failedValidation2)).validate(
+        FailFast(list(passedValidation1, passedValidation2, failedValidation1, failedValidation2)).validate(
             command,
             aggregate
         ) shouldBe testRejectedEvent1
@@ -86,7 +87,7 @@ internal class ValidationTest : StringSpec({
         ) shouldBe null
     }
     "CompleteValidation passes if all validations passed" {
-        CompleteValidation(List.of(passedValidation1, passedValidation2), mergeFunction).validate(
+        CompleteValidation(list(passedValidation1, passedValidation2), mergeFunction).validate(
             command,
             aggregate
         ) shouldBe null
@@ -96,7 +97,7 @@ internal class ValidationTest : StringSpec({
         confirmVerified(passedValidation1, passedValidation2)
     }
     "CompleteValidation fails if it encountered a validation" {
-        CompleteValidation(List.of(passedValidation1, passedValidation2, failedValidation1), mergeFunction).validate(
+        CompleteValidation(list(passedValidation1, passedValidation2, failedValidation1), mergeFunction).validate(
             command,
             aggregate
         ) shouldBe testRejectedEvent1
@@ -108,7 +109,7 @@ internal class ValidationTest : StringSpec({
     }
     "CompleteValidation fails if it encountered at least one validation and the rest of failed validations are merged" {
         CompleteValidation(
-            List.of(
+            list(
                 passedValidation1,
                 passedValidation2,
                 failedValidation1,

@@ -4,7 +4,7 @@ import io.kotlintest.data.forall
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import io.kotlintest.tables.row
-import io.vavr.collection.List
+import io.vavr.kotlin.list
 import jasition.cqrs.EventId
 import jasition.cqrs.commitOrThrow
 import jasition.matching.domain.*
@@ -36,7 +36,7 @@ internal class `Order placed on and cancelled from empty book` : StringSpec({
             val result = command.execute(repo.read(bookId)) commitOrThrow repo
 
             with(result) {
-                events shouldBe List.of(
+                events shouldBe list(
                     expectedOrderPlacedEvent(command, EventId(1)),
                     expectedOrderCancelledByExchangeEvent(command, EventId(2))
                 )

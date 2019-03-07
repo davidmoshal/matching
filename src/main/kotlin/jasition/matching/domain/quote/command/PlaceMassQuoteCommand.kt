@@ -3,6 +3,7 @@ package jasition.matching.domain.quote.command
 import arrow.core.Either
 import io.vavr.collection.List
 import io.vavr.collection.Seq
+import io.vavr.kotlin.list
 import jasition.cqrs.*
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
@@ -32,7 +33,7 @@ data class PlaceMassQuoteCommand(
     val entries: Seq<QuoteEntry>,
     val whenRequested: Instant
 ) : Command<BookId, Books> {
-    private val validation = CompleteValidation(List.of(
+    private val validation = CompleteValidation(list(
         SymbolMustMatch,
         TradingStatusAllows,
         SizesAreCorrect,

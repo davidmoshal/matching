@@ -7,7 +7,7 @@ import io.kotlintest.should
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import io.kotlintest.tables.row
-import io.vavr.collection.List
+import io.vavr.kotlin.list
 import jasition.cqrs.EventId
 import jasition.cqrs.Transaction
 import jasition.matching.domain.*
@@ -67,7 +67,7 @@ internal class PlaceOrderCommandTest : StringSpec({
                         buyLimitBook = books.buyLimitBook.add(orderPlacedEvent.toBookEntry()),
                         lastEventId = EventId(2)
                     ),
-                    events = List.of(
+                    events = list(
                         orderPlacedEvent,
                         EntryAddedToBookEvent(
                             bookId = bookId,
@@ -105,7 +105,7 @@ internal class PlaceOrderCommandTest : StringSpec({
                     buyLimitBook = books.buyLimitBook,
                     lastEventId = EventId(2)
                 ),
-                events = List.of(
+                events = list(
                     orderPlacedEvent,
                     expectedOrderCancelledByExchangeEvent(
                         bookId = bookId,
@@ -128,7 +128,7 @@ internal class PlaceOrderCommandTest : StringSpec({
                 aggregate = books.copy(
                     lastEventId = EventId(1)
                 ),
-                events = List.of(
+                events = list(
                     OrderRejectedEvent(
                         eventId = books.lastEventId.inc(),
                         requestId = command.requestId,
@@ -153,7 +153,7 @@ internal class PlaceOrderCommandTest : StringSpec({
                 aggregate = books.copy(
                     lastEventId = EventId(1)
                 ),
-                events = List.of(
+                events = list(
                     OrderRejectedEvent(
                         eventId = books.lastEventId.inc(),
                         requestId = command.requestId,
@@ -185,7 +185,7 @@ internal class PlaceOrderCommandTest : StringSpec({
                     aggregate = books.copy(
                         lastEventId = EventId(1)
                     ),
-                    events = List.of(
+                    events = list(
                         OrderRejectedEvent(
                             eventId = books.lastEventId.inc(),
                             requestId = command.requestId,
@@ -212,7 +212,7 @@ internal class PlaceOrderCommandTest : StringSpec({
                     lastEventId = EventId(1),
                     tradingStatuses = TradingStatuses(NOT_AVAILABLE_FOR_TRADING)
                 ),
-                events = List.of(
+                events = list(
                     OrderRejectedEvent(
                         eventId = books.lastEventId.inc(),
                         requestId = command.requestId,
@@ -238,7 +238,7 @@ internal class PlaceOrderCommandTest : StringSpec({
                     tradingStatuses = TradingStatuses(default = NOT_AVAILABLE_FOR_TRADING),
                     lastEventId = EventId(1)
                 ),
-                events = List.of(
+                events = list(
                     OrderRejectedEvent(
                         eventId = books.lastEventId.inc(),
                         requestId = command.requestId,
@@ -266,7 +266,7 @@ internal class PlaceOrderCommandTest : StringSpec({
                 aggregate = books.copy(
                     lastEventId = EventId(1)
                 ),
-                events = List.of(
+                events = list(
                     OrderRejectedEvent(
                         eventId = books.lastEventId.inc(),
                         requestId = command.requestId,
@@ -295,7 +295,7 @@ internal class PlaceOrderCommandTest : StringSpec({
                 aggregate = books.copy(
                     lastEventId = EventId(1)
                 ),
-                events = List.of(
+                events = list(
                     OrderRejectedEvent(
                         eventId = books.lastEventId.inc(),
                         requestId = command.requestId,

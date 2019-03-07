@@ -9,6 +9,7 @@ import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import io.kotlintest.tables.row
 import io.vavr.collection.List
+import io.vavr.kotlin.list
 import jasition.cqrs.Event
 import jasition.cqrs.EventId
 import jasition.cqrs.commitOrThrow
@@ -46,47 +47,47 @@ internal class `Aggressor order partial filled against passive quotes then cance
          */
 
         row(
-            List.of(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
+            list(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
             Tuple5(BUY, LIMIT, IMMEDIATE_OR_CANCEL, 16, 12L),
-            List.of(
+            list(
                 Tuple8(1, 6, 12L, PARTIAL_FILL, 10, 6, FILLED, 0)
             )
         ),
         row(
-            List.of(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
+            list(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
             Tuple5(SELL, LIMIT, IMMEDIATE_OR_CANCEL, 16, 11L),
-            List.of(
+            list(
                 Tuple8(0, 6, 11L, PARTIAL_FILL, 10, 6, FILLED, 0)
             )
         ),
         row(
-            List.of(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
+            list(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
             Tuple5(BUY, LIMIT, IMMEDIATE_OR_CANCEL, 16, 13L),
-            List.of(
+            list(
                 Tuple8(1, 6, 12L, PARTIAL_FILL, 10, 6, FILLED, 0),
                 Tuple8(3, 7, 13L, PARTIAL_FILL, 3, 13, FILLED, 0)
             )
         ),
         row(
-            List.of(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
+            list(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
             Tuple5(SELL, LIMIT, IMMEDIATE_OR_CANCEL, 16, 10L),
-            List.of(
+            list(
                 Tuple8(0, 6, 11L, PARTIAL_FILL, 10, 6, FILLED, 0),
                 Tuple8(2, 7, 10L, PARTIAL_FILL, 3, 13, FILLED, 0)
             )
         ),
         row(
-            List.of(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
+            list(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
             Tuple5(BUY, MARKET, IMMEDIATE_OR_CANCEL, 16, null),
-            List.of(
+            list(
                 Tuple8(1, 6, 12L, PARTIAL_FILL, 10, 6, FILLED, 0),
                 Tuple8(3, 7, 13L, PARTIAL_FILL, 3, 13, FILLED, 0)
             )
         ),
         row(
-            List.of(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
+            list(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
             Tuple5(SELL, MARKET, IMMEDIATE_OR_CANCEL, 16, null),
-            List.of(
+            list(
                 Tuple8(0, 6, 11L, PARTIAL_FILL, 10, 6, FILLED, 0),
                 Tuple8(2, 7, 10L, PARTIAL_FILL, 3, 13, FILLED, 0)
             )
@@ -101,7 +102,7 @@ internal class `Aggressor order partial filled against passive quotes then cance
                 bookId = bookId, entries = oldEntries,
                 whoRequested = Client(firmId = "firm1", firmClientId = null)
             )
-            val repo = aRepoWithABooks(bookId = bookId, commands = List.of(oldCommand))
+            val repo = aRepoWithABooks(bookId = bookId, commands = list(oldCommand))
             val command = randomPlaceOrderCommand(
                 bookId = bookId,
                 side = new.a,
@@ -114,7 +115,7 @@ internal class `Aggressor order partial filled against passive quotes then cance
 
             val result = command.execute(repo.read(bookId)) commitOrThrow repo
 
-            val oldBookEntries = List.of(
+            val oldBookEntries = list(
                 Tuple2(0,BUY),
                 Tuple2(0,SELL),
                 Tuple2(1,BUY),

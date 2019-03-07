@@ -2,6 +2,10 @@ package jasition.cqrs
 
 import io.vavr.collection.Seq
 
+/**
+ * [Event] is what has happened to an [Aggregate] in the domain, and in most cases [Event] results in state changes.
+ * Please note that one Event can relate to one and only one [Aggregate].
+ */
 interface Event<KEY, AGG : Aggregate<KEY>> {
     fun aggregateId(): KEY
     fun eventId(): EventId

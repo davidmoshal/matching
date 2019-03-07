@@ -2,6 +2,9 @@ package jasition.cqrs
 
 import arrow.core.Either
 
+/**
+ * [Command] is the intention of a behaviour. It can also be seen as the request for change.
+ */
 interface Command<KEY, AGG : Aggregate<KEY>>  {
     /**
      * Executes this command given the [aggregate]. The aggregate in domain has the final decision on how to respond to

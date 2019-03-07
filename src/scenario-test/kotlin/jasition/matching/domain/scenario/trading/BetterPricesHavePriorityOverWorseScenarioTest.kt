@@ -5,7 +5,7 @@ import io.kotlintest.data.forall
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import io.kotlintest.tables.row
-import io.vavr.collection.List
+import io.vavr.kotlin.list
 import jasition.cqrs.EventId
 import jasition.cqrs.commitOrThrow
 import jasition.matching.domain.*
@@ -34,7 +34,7 @@ internal class `Better prices have priority over worse` : StringSpec({
                     timeInForce = old.b,
                     price = Price(old.c)
                 )
-                val repo = aRepoWithABooks(bookId = bookId, commands = List.of(oldCommand))
+                val repo = aRepoWithABooks(bookId = bookId, commands = list(oldCommand))
                 val command = randomPlaceOrderCommand(
                     bookId = bookId,
                     side = side,
@@ -49,7 +49,7 @@ internal class `Better prices have priority over worse` : StringSpec({
                 val newBookEntry = expectedBookEntry(command, EventId(3))
 
                 with(result) {
-                    events shouldBe List.of(
+                    events shouldBe list(
                         expectedOrderPlacedEvent(command, EventId(3)),
                         EntryAddedToBookEvent(bookId = bookId, eventId = EventId(4), entry = newBookEntry)
                     )
@@ -58,9 +58,9 @@ internal class `Better prices have priority over worse` : StringSpec({
                     with(command.side) {
                         sameSideBook(it).entries.values() shouldBe
                                 if (expectNewOverOld)
-                                    List.of(newBookEntry, oldBookEntry)
+                                    list(newBookEntry, oldBookEntry)
                                 else
-                                    List.of(oldBookEntry, newBookEntry)
+                                    list(oldBookEntry, newBookEntry)
                         oppositeSideBook(it).entries.size() shouldBe 0
                     }
                 }

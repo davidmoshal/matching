@@ -9,6 +9,7 @@ import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import io.kotlintest.tables.row
 import io.vavr.collection.List
+import io.vavr.kotlin.list
 import jasition.cqrs.Command
 import jasition.cqrs.Event
 import jasition.cqrs.EventId
@@ -43,15 +44,15 @@ internal class `Multiple level quote entries executed in natural order` : String
          */
 
         row(
-            List.of(
+            list(
                 Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 6, 12L),
                 Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 6, 13L)
             ),
-            List.of(
+            list(
                 Tuple4(10, 13L, 10, 15L),
                 Tuple4(10, 14L, 10, 16L)
             ),
-            List.of(Tuple9(0, 1, 6, 13L, PARTIAL_FILL, 4, 6, FILLED, 0))
+            list(Tuple9(0, 1, 6, 13L, PARTIAL_FILL, 4, 6, FILLED, 0))
         )
     ) { oldEntries, newEntries, expectedTrades ->
         "Given a book has existing orders of (${orderEntriesAsString(
@@ -93,7 +94,7 @@ internal class `Multiple level quote entries executed in natural order` : String
             }
 
             val massQuotePlacedEventId = EventId(5)
-            var newBookEntries = List.of(
+            var newBookEntries = list(
                 Tuple2(0, BUY),
                 Tuple2(0, SELL),
                 Tuple2(1, BUY),
@@ -149,7 +150,7 @@ internal class `Multiple level quote entries executed in natural order` : String
                         )
                     )
                 }).appendAll(
-                    List.of(
+                    list(
                         EntryAddedToBookEvent(bookId = bookId, eventId = EventId(7), entry = newBookEntries[0]),
                         EntryAddedToBookEvent(bookId = bookId, eventId = EventId(8), entry = newBookEntries[1]),
                         EntryAddedToBookEvent(bookId = bookId, eventId = EventId(9), entry = newBookEntries[2]),
@@ -159,8 +160,8 @@ internal class `Multiple level quote entries executed in natural order` : String
             }
 
             repo.read(bookId).let {
-                it.buyLimitBook.entries.values() shouldBe List.of(newBookEntries[2], newBookEntries[0], oldBookEntries[0])
-                it.sellLimitBook.entries.values() shouldBe List.of(newBookEntries[1], newBookEntries[3])
+                it.buyLimitBook.entries.values() shouldBe list(newBookEntries[2], newBookEntries[0], oldBookEntries[0])
+                it.sellLimitBook.entries.values() shouldBe list(newBookEntries[1], newBookEntries[3])
             }
         }
     }

@@ -1,7 +1,6 @@
 package jasition.matching.domain.order.command
 
 import arrow.core.Either
-import io.vavr.collection.List
 import io.vavr.kotlin.list
 import jasition.cqrs.*
 import jasition.matching.domain.book.BookId
@@ -52,14 +51,14 @@ data class PlaceOrderCommand(
         val rejection = validation.validate(this, aggregate)
 
         rejection?.let {
-            return Either.right(Transaction<BookId, Books>(it.play(aggregate), List.of(it)))
+            return Either.right(Transaction<BookId, Books>(it.play(aggregate), list(it)))
         }
 
         val placedEvent = toPlacedEvent(books = aggregate, currentTime = whenRequested)
         val placedAggregate = placedEvent.play(aggregate)
 
         return Either.right(
-            Transaction<BookId, Books>(placedAggregate, List.of(placedEvent))
+            Transaction<BookId, Books>(placedAggregate, list(placedEvent))
                 .append(matchAndFinalise(placedEvent.toBookEntry(), placedAggregate))
         )
     }

@@ -6,7 +6,7 @@ import io.kotlintest.data.forall
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import io.kotlintest.tables.row
-import io.vavr.collection.List
+import io.vavr.kotlin.list
 import jasition.cqrs.EventId
 import jasition.cqrs.commitOrThrow
 import jasition.matching.domain.*
@@ -22,8 +22,8 @@ internal class `Mass quote rejected and existing quotes cancelled` : StringSpec(
 
     forall(
         row(
-            List.of(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
-            List.of(Tuple4(8, 10L, 8, 11L), Tuple4(9, 11L, 9, 12L)),
+            list(Tuple4(6, 11L, 6, 12L), Tuple4(7, 10L, 7, 13L)),
+            list(Tuple4(8, 10L, 8, 11L), Tuple4(9, 11L, 9, 12L)),
             INVALID_BID_ASK_SPREAD,
             "Quote prices must not cross within a mass quote: lowestSellPrice=11, highestBuyPrice=11"
         )
@@ -34,7 +34,7 @@ internal class `Mass quote rejected and existing quotes cancelled` : StringSpec(
             newEntries
         )}) of the same firm is placed, then all existing quote entries are cancelled and the mass quote is rejected and no new quote entries are added" {
             val oldCommand = randomPlaceMassQuoteCommand(bookId = bookId, entries = oldEntries)
-            val repo = aRepoWithABooks(bookId = bookId, commands = List.of(oldCommand))
+            val repo = aRepoWithABooks(bookId = bookId, commands = list(oldCommand))
             val command = randomPlaceMassQuoteCommand(
                 bookId = bookId, entries = newEntries,
                 whoRequested = oldCommand.whoRequested
@@ -42,7 +42,7 @@ internal class `Mass quote rejected and existing quotes cancelled` : StringSpec(
 
             val result = command.execute(repo.read(bookId)) commitOrThrow repo
 
-            val oldBookEntries = List.of(
+            val oldBookEntries = list(
                 Tuple2(0, BUY),
                 Tuple2(1, BUY),
                 Tuple2(0, SELL),
@@ -63,7 +63,7 @@ internal class `Mass quote rejected and existing quotes cancelled` : StringSpec(
             }
 
             with(result) {
-                events shouldBe List.of(
+                events shouldBe list(
                     MassQuoteCancelledEvent(
                         bookId = bookId,
                         eventId = EventId(6),

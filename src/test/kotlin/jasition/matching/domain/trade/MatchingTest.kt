@@ -5,7 +5,7 @@ import io.kotlintest.specs.StringSpec
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
-import io.vavr.collection.List
+import io.vavr.kotlin.list
 import jasition.cqrs.EventId
 import jasition.cqrs.Transaction
 import jasition.matching.domain.*
@@ -42,10 +42,10 @@ internal class MatchingTest : StringSpec({
     val bookId = aBookId()
     val client = aFirmWithClient()
     val otherClient = anotherFirmWithClient()
-    val existingEvents = List.of(mockk<OrderPlacedEvent>(), mockk<TradeEvent>())
+    val existingEvents = list(mockk<OrderPlacedEvent>(), mockk<TradeEvent>())
 
     "Stop matching when there is no available sizes in the aggressor" {
-        val books = aBooks(bookId, List.of(aBookEntry(side = Side.SELL, whoRequested = client)))
+        val books = aBooks(bookId, list(aBookEntry(side = Side.SELL, whoRequested = client)))
         val aggressor = aBookEntry(side = Side.BUY, whoRequested = otherClient, sizes = EntrySizes(0))
         match(
             aggressor = aggressor,
@@ -57,7 +57,7 @@ internal class MatchingTest : StringSpec({
         )
     }
     "Stop matching when there is no more entries in the opposite-side book" {
-        val books = aBooks(bookId, List.of(aBookEntry(side = Side.BUY, whoRequested = client)))
+        val books = aBooks(bookId, list(aBookEntry(side = Side.BUY, whoRequested = client)))
         val aggressor = aBookEntry(side = Side.BUY, whoRequested = otherClient)
         match(
             aggressor = aggressor,
@@ -69,7 +69,7 @@ internal class MatchingTest : StringSpec({
         )
     }
     "Stop matching when there is no more next match in the opposite-side book" {
-        val books = aBooks(bookId, List.of(aBookEntry(side = Side.SELL, whoRequested = client, price = Price(35))))
+        val books = aBooks(bookId, list(aBookEntry(side = Side.SELL, whoRequested = client, price = Price(35))))
         val aggressor = aBookEntry(side = Side.BUY, whoRequested = otherClient, price = Price(30))
         match(
             aggressor = aggressor,
@@ -89,7 +89,7 @@ internal class MatchingTest : StringSpec({
             sizes = EntrySizes(tradeSize),
             price = tradePrice
         )
-        val books = aBooks(bookId, List.of(passive))
+        val books = aBooks(bookId, list(passive))
         val aggressor = aBookEntry(
             side = Side.BUY,
             whoRequested = otherClient,
@@ -129,7 +129,7 @@ internal class MatchingTest : StringSpec({
             sizes = EntrySizes(tradeSize + 5),
             price = tradePrice
         )
-        val books = aBooks(bookId, List.of(passive))
+        val books = aBooks(bookId, list(passive))
         val aggressor = aBookEntry(
             side = Side.BUY,
             whoRequested = otherClient,
@@ -176,7 +176,7 @@ internal class MatchingTest : StringSpec({
             sizes = EntrySizes(tradeSize2 + 10),
             key = passive.key.copy(eventId = passive.key.eventId.inc())
         )
-        val books = aBooks(bookId, List.of(passive, passive2))
+        val books = aBooks(bookId, list(passive, passive2))
         val aggressor = aBookEntry(
             side = Side.BUY,
             whoRequested = otherClient,
@@ -198,7 +198,7 @@ internal class MatchingTest : StringSpec({
                     .addBookEntry(tradedPassive2)
                     .copy(lastEventId = EventId(4)),
                 events = existingEvents.appendAll(
-                    List.of(
+                    list(
                         TradeEvent(
                             eventId = EventId(3),
                             bookId = bookId,
