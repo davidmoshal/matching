@@ -3,10 +3,8 @@ package jasition.matching.domain.quote.command
 import arrow.core.Either
 import io.vavr.collection.List
 import io.vavr.collection.Seq
-import jasition.cqrs.Command
-import jasition.cqrs.Event
-import jasition.cqrs.Transaction
-import jasition.cqrs.append
+import io.vavr.kotlin.list
+import jasition.cqrs.*
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.BooksNotFoundException
@@ -19,8 +17,12 @@ import jasition.matching.domain.quote.cancelExistingQuotes
 import jasition.matching.domain.quote.event.MassQuotePlacedEvent
 import jasition.matching.domain.quote.event.MassQuoteRejectedEvent
 import jasition.matching.domain.quote.event.QuoteRejectReason
+import jasition.matching.domain.quote.event.QuoteRejectReason.*
 import jasition.matching.domain.trade.matchAndFinalise
+import jasition.monad.appendIfNotNullOrBlank
+import jasition.monad.ifNotEqualsThenUse
 import java.time.Instant
+import java.util.function.BiFunction
 
 data class PlaceMassQuoteCommand(
     val quoteId: String,
@@ -31,6 +33,17 @@ data class PlaceMassQuoteCommand(
     val entries: Seq<QuoteEntry>,
     val whenRequested: Instant
 ) : Command<BookId, Books> {
+    private val validation = CompleteValidation(list(
+        SymbolMustMatch,
+        TradingStatusAllows,
+        SizesAreCorrect,
+        NoCrossedPrices
+    ), BiFunction { left, right ->
+        right.copy(
+            rejectReason = ifNotEqualsThenUse(left.rejectReason, right.rejectReason, OTHER),
+            rejectText = appendIfNotNullOrBlank(left.rejectText, right.rejectText, "; ")
+        )
+    })
 
     override fun execute(aggregate: Books?): Either<Exception, Transaction<BookId, Books>> {
         if (aggregate == null) return Either.left(BooksNotFoundException("Books $bookId not found"))
@@ -54,10 +67,7 @@ data class PlaceMassQuoteCommand(
                 cancelledEvent.play(aggregate)
             else aggregate
 
-        val rejection = rejectDueToUnknownSymbol(cancelledBooks)
-            ?: rejectDueToIncorrectSizes(cancelledBooks)
-            ?: rejectDueToCrossedPrices(cancelledBooks)
-            ?: rejectDueToExchangeClosed(cancelledBooks)
+        val rejection = validation.validate(this, cancelledBooks)
 
         rejection?.run {
             return Either.right(Transaction(play(cancelledBooks), events.append(this)))
@@ -72,47 +82,6 @@ data class PlaceMassQuoteCommand(
             txn append matchAndFinalise(entry, txn.aggregate)
         })
     }
-
-    private fun rejectDueToUnknownSymbol(books: Books): MassQuoteRejectedEvent? =
-        if (bookId != books.bookId)
-            toRejectedEvent(
-                books = books.copy(bookId = bookId),
-                quoteRejectReason = QuoteRejectReason.UNKNOWN_SYMBOL,
-                quoteRejectText = "Unknown book ID : ${bookId.bookId}"
-            )
-        else null
-
-    private fun rejectDueToExchangeClosed(books: Books): MassQuoteRejectedEvent? =
-        if (!books.tradingStatuses.effectiveStatus().allows(this))
-            toRejectedEvent(
-                books = books,
-                quoteRejectReason = QuoteRejectReason.EXCHANGE_CLOSED,
-                quoteRejectText = "Placing mass quote is currently not allowed : ${books.tradingStatuses.effectiveStatus()}"
-            )
-        else null
-
-    private fun rejectDueToCrossedPrices(books: Books): MassQuoteRejectedEvent? {
-        val lowestSellPrice = lowestSellPrice()
-        val highestBuyPrice = highestBuyPrice()
-        return if (lowestSellPrice ?: Long.MAX_VALUE <= highestBuyPrice ?: Long.MIN_VALUE)
-            toRejectedEvent(
-                books = books,
-                quoteRejectReason = QuoteRejectReason.INVALID_BID_ASK_SPREAD,
-                quoteRejectText = "Quote prices must not cross within a mass quote: lowestSellPrice=$lowestSellPrice, highestBuyPrice=$highestBuyPrice"
-            )
-        else null
-    }
-
-    private fun rejectDueToIncorrectSizes(books: Books): MassQuoteRejectedEvent? =
-        entries.map { findNonPositiveSize(it) }
-            .filterNotNull()
-            .min()?.let {
-                toRejectedEvent(
-                    books = books,
-                    quoteRejectReason = QuoteRejectReason.INVALID_QUANTITY,
-                    quoteRejectText = "Quote sizes must be positive : $it"
-                )
-            }
 
     private fun lowestSellPrice(): Long? =
         entries.map { it.offer }
@@ -145,8 +114,8 @@ data class PlaceMassQuoteCommand(
         timeInForce = timeInForce,
         entries = entries,
         whenHappened = whenRequested,
-        quoteRejectReason = quoteRejectReason,
-        quoteRejectText = quoteRejectText
+        rejectReason = quoteRejectReason,
+        rejectText = quoteRejectText
     )
 
     private fun toPlacedEvent(books: Books): MassQuotePlacedEvent = MassQuotePlacedEvent(
@@ -159,4 +128,53 @@ data class PlaceMassQuoteCommand(
         entries = entries,
         whenHappened = whenRequested
     )
+
+    object SymbolMustMatch : Validation<BookId, Books, PlaceMassQuoteCommand, MassQuoteRejectedEvent> {
+        override fun validate(command: PlaceMassQuoteCommand, aggregate: Books): MassQuoteRejectedEvent? =
+            if (command.bookId != aggregate.bookId)
+                command.toRejectedEvent(
+                    books = aggregate,
+                    quoteRejectReason = UNKNOWN_SYMBOL,
+                    quoteRejectText = "Unknown book ID : ${command.bookId.bookId}"
+                )
+            else null
+    }
+
+    object TradingStatusAllows : Validation<BookId, Books, PlaceMassQuoteCommand, MassQuoteRejectedEvent> {
+        override fun validate(command: PlaceMassQuoteCommand, aggregate: Books): MassQuoteRejectedEvent? =
+            if (!aggregate.tradingStatuses.effectiveStatus().allows(command))
+                command.toRejectedEvent(
+                    books = aggregate,
+                    quoteRejectReason = EXCHANGE_CLOSED,
+                    quoteRejectText = "Placing mass quote is currently not allowed : ${aggregate.tradingStatuses.effectiveStatus()}"
+                )
+            else null
+    }
+
+    object NoCrossedPrices : Validation<BookId, Books, PlaceMassQuoteCommand, MassQuoteRejectedEvent> {
+        override fun validate(command: PlaceMassQuoteCommand, aggregate: Books): MassQuoteRejectedEvent? {
+            val lowestSellPrice = command.lowestSellPrice()
+            val highestBuyPrice = command.highestBuyPrice()
+            return if (lowestSellPrice ?: Long.MAX_VALUE <= highestBuyPrice ?: Long.MIN_VALUE)
+                command.toRejectedEvent(
+                    books = aggregate,
+                    quoteRejectReason = INVALID_BID_ASK_SPREAD,
+                    quoteRejectText = "Quote prices must not cross within a mass quote: lowestSellPrice=$lowestSellPrice, highestBuyPrice=$highestBuyPrice"
+                )
+            else null
+        }
+    }
+
+    object SizesAreCorrect : Validation<BookId, Books, PlaceMassQuoteCommand, MassQuoteRejectedEvent> {
+        override fun validate(command: PlaceMassQuoteCommand, aggregate: Books): MassQuoteRejectedEvent? =
+            command.entries.map { command.findNonPositiveSize(it) }
+                .filterNotNull()
+                .min()?.let {
+                    command.toRejectedEvent(
+                        books = aggregate,
+                        quoteRejectReason = INVALID_QUANTITY,
+                        quoteRejectText = "Quote sizes must be positive : $it"
+                    )
+                }
+    }
 }

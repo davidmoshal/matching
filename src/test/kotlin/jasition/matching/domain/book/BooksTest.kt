@@ -7,7 +7,7 @@ import io.kotlintest.specs.StringSpec
 import io.kotlintest.tables.row
 import io.mockk.every
 import io.mockk.spyk
-import io.vavr.collection.List
+import io.vavr.kotlin.list
 import jasition.cqrs.EventId
 import jasition.matching.domain.*
 import jasition.matching.domain.book.entry.EntryStatus
@@ -85,9 +85,7 @@ internal class BooksTest : StringSpec({
             .addBookEntry(excludedEntry)
             .findBookEntries(
                 Predicate { sellEntry.whoRequested == it.whoRequested }
-            ) shouldBe List.of(
-            buyEntry, sellEntry
-        )
+            ) shouldBe list(buyEntry, sellEntry)
     }
     "Updating BUY does not affect SELL side" {
         Books(aBookId())
@@ -138,7 +136,7 @@ internal class BooksTest : StringSpec({
             .addBookEntry(buyEntry)
             .addBookEntry(sellEntry)
             .addBookEntry(excludedEntry)
-            .removeBookEntries(List.of(buyEntry, sellEntry), excludedEntry.key.eventId) shouldBe books.copy(
+            .removeBookEntries(list(buyEntry, sellEntry), excludedEntry.key.eventId) shouldBe books.copy(
             buyLimitBook = LimitBook(Side.BUY),
             sellLimitBook = LimitBook(Side.SELL).add(excludedEntry),
             lastEventId = excludedEntry.key.eventId

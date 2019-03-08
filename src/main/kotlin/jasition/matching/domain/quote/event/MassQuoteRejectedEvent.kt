@@ -22,8 +22,8 @@ data class MassQuoteRejectedEvent(
     val timeInForce: TimeInForce,
     val entries: Seq<QuoteEntry>,
     val whenHappened: Instant,
-    val quoteRejectReason: QuoteRejectReason,
-    val quoteRejectText: String
+    val rejectReason: QuoteRejectReason,
+    val rejectText: String?
 ) : Event<BookId, Books> {
     override fun aggregateId(): BookId = bookId
     override fun eventId(): EventId = eventId

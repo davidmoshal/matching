@@ -2,7 +2,7 @@ package jasition.matching.domain.quote
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
-import io.vavr.collection.List
+import io.vavr.kotlin.list
 import jasition.matching.domain.*
 import jasition.matching.domain.book.entry.*
 import jasition.matching.domain.client.ClientRequestId
@@ -65,9 +65,7 @@ internal class QuoteEntryTest : StringSpec({
                 eventId = eventId,
                 quoteId = quoteId,
                 timeInForce = timeInForce
-            ) shouldBe List.of(
-            expectedBuyEntry
-        )
+            ) shouldBe list(expectedBuyEntry)
     }
     "Converts to a list of one offer BookEntry if only offer size was found" {
         quoteEntry.copy(offer = offer)
@@ -77,7 +75,7 @@ internal class QuoteEntryTest : StringSpec({
                 eventId = eventId,
                 quoteId = quoteId,
                 timeInForce = timeInForce
-            ) shouldBe List.of(expectedSellEntry)
+            ) shouldBe list(expectedSellEntry)
     }
     "Converts to a list of one bid and one offer BookEntry if both bid and offer sizes were found" {
         quoteEntry.copy(bid = bid, offer = offer)
@@ -87,9 +85,6 @@ internal class QuoteEntryTest : StringSpec({
                 eventId = eventId,
                 quoteId = quoteId,
                 timeInForce = timeInForce
-            ) shouldBe List.of(
-            expectedBuyEntry,
-            expectedSellEntry
-        )
+            ) shouldBe list(expectedBuyEntry, expectedSellEntry)
     }
 })

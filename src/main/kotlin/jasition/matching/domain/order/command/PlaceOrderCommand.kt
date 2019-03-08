@@ -1,10 +1,8 @@
 package jasition.matching.domain.order.command
 
 import arrow.core.Either
-import io.vavr.collection.List
-import jasition.cqrs.Command
-import jasition.cqrs.Transaction
-import jasition.cqrs.append
+import io.vavr.kotlin.list
+import jasition.cqrs.*
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.Books
 import jasition.matching.domain.book.BooksNotFoundException
@@ -13,9 +11,13 @@ import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.order.event.OrderPlacedEvent
 import jasition.matching.domain.order.event.OrderRejectReason
+import jasition.matching.domain.order.event.OrderRejectReason.*
 import jasition.matching.domain.order.event.OrderRejectedEvent
 import jasition.matching.domain.trade.matchAndFinalise
+import jasition.monad.appendIfNotNullOrBlank
+import jasition.monad.ifNotEqualsThenUse
 import java.time.Instant
+import java.util.function.BiFunction
 
 data class PlaceOrderCommand(
     val requestId: ClientRequestId,
@@ -28,55 +30,37 @@ data class PlaceOrderCommand(
     val timeInForce: TimeInForce,
     val whenRequested: Instant
 ) : Command<BookId, Books> {
-    override fun execute(aggregate: Books?): Either<Exception, Transaction<BookId, Books>> {
-        if (aggregate == null) return Either.left(BooksNotFoundException("Books $bookId not found"))
+    private val validation = CompleteValidation(
+        list(
+            SymbolMustMatch,
+            TradingStatusAllows,
+            SizesAreCorrect,
+            PricePresentBasedOnEntryType,
+            ValidEntryTypeTimeInForceCombo
+        ), BiFunction { left, right ->
+            right.copy(
+                rejectReason = ifNotEqualsThenUse(left.rejectReason, right.rejectReason, OTHER),
+                rejectText = appendIfNotNullOrBlank(left.rejectText, right.rejectText, "; ")
+            )
+        }
+    )
 
-        val rejection = rejectDueToUnknownSymbol(aggregate)
-            ?: rejectDueToIncorrectSize(aggregate)
-            ?: rejectDueToExchangeClosed(aggregate)
+    override fun execute(aggregate: Books?): Either<Exception, Transaction<BookId, Books>> {
+        if (aggregate == null) return Either.left(BooksNotFoundException("Books ${bookId.bookId} not found"))
+
+        val rejection = validation.validate(this, aggregate)
 
         rejection?.let {
-            return Either.right(Transaction<BookId, Books>(it.play(aggregate), List.of(it)))
+            return Either.right(Transaction<BookId, Books>(it.play(aggregate), list(it)))
         }
 
         val placedEvent = toPlacedEvent(books = aggregate, currentTime = whenRequested)
         val placedAggregate = placedEvent.play(aggregate)
 
         return Either.right(
-            Transaction<BookId, Books>(placedAggregate, List.of(placedEvent))
+            Transaction<BookId, Books>(placedAggregate, list(placedEvent))
                 .append(matchAndFinalise(placedEvent.toBookEntry(), placedAggregate))
         )
-    }
-
-    private fun rejectDueToUnknownSymbol(books: Books): OrderRejectedEvent? =
-        if (bookId != books.bookId)
-            toRejectedEvent(
-                books = books.copy(bookId = bookId),
-                currentTime = whenRequested,
-                rejectReason = OrderRejectReason.UNKNOWN_SYMBOL,
-                rejectText = "Unknown book ID : ${bookId.bookId}"
-            )
-        else null
-
-    private fun rejectDueToExchangeClosed(books: Books): OrderRejectedEvent? =
-        if (!books.tradingStatuses.effectiveStatus().allows(this))
-            toRejectedEvent(
-                books = books,
-                currentTime = whenRequested,
-                rejectReason = OrderRejectReason.EXCHANGE_CLOSED,
-                rejectText = "Placing orders is currently not allowed : ${books.tradingStatuses.effectiveStatus()}"
-            ) else null
-
-
-    private fun rejectDueToIncorrectSize(books: Books): OrderRejectedEvent? {
-        return if (size <= 0)
-            toRejectedEvent(
-                books = books,
-                currentTime = whenRequested,
-                rejectReason = OrderRejectReason.INCORRECT_QUANTITY,
-                rejectText = "Order sizes must be positive : $size"
-            )
-        else null
     }
 
     private fun toPlacedEvent(
@@ -102,7 +86,7 @@ data class PlaceOrderCommand(
     private fun toRejectedEvent(
         books: Books,
         currentTime: Instant = Instant.now(),
-        rejectReason: OrderRejectReason = OrderRejectReason.OTHER,
+        rejectReason: OrderRejectReason = OTHER,
         rejectText: String?
     ): OrderRejectedEvent = OrderRejectedEvent(
         eventId = books.lastEventId.inc(),
@@ -118,4 +102,62 @@ data class PlaceOrderCommand(
         rejectReason = rejectReason,
         rejectText = rejectText
     )
+
+    object SymbolMustMatch : Validation<BookId, Books, PlaceOrderCommand, OrderRejectedEvent> {
+        override fun validate(command: PlaceOrderCommand, aggregate: Books): OrderRejectedEvent? =
+            if (command.bookId != aggregate.bookId)
+                command.toRejectedEvent(
+                    books = aggregate,
+                    currentTime = command.whenRequested,
+                    rejectReason = UNKNOWN_SYMBOL,
+                    rejectText = "Unknown book ID : ${command.bookId.bookId}"
+                ) else null
+
+    }
+
+    object TradingStatusAllows : Validation<BookId, Books, PlaceOrderCommand, OrderRejectedEvent> {
+        override fun validate(command: PlaceOrderCommand, aggregate: Books): OrderRejectedEvent? =
+            if (!aggregate.tradingStatuses.effectiveStatus().allows(command))
+                command.toRejectedEvent(
+                    books = aggregate,
+                    currentTime = command.whenRequested,
+                    rejectReason = EXCHANGE_CLOSED,
+                    rejectText = "Placing orders is currently not allowed : ${aggregate.tradingStatuses.effectiveStatus()}"
+                ) else null
+
+    }
+
+    object SizesAreCorrect : Validation<BookId, Books, PlaceOrderCommand, OrderRejectedEvent> {
+        override fun validate(command: PlaceOrderCommand, aggregate: Books): OrderRejectedEvent? =
+            if (command.size <= 0)
+                command.toRejectedEvent(
+                    books = aggregate,
+                    currentTime = command.whenRequested,
+                    rejectReason = INCORRECT_QUANTITY,
+                    rejectText = "Order sizes must be positive : ${command.size}"
+                ) else null
+    }
+
+    object PricePresentBasedOnEntryType : Validation<BookId, Books, PlaceOrderCommand, OrderRejectedEvent> {
+        override fun validate(command: PlaceOrderCommand, aggregate: Books): OrderRejectedEvent? =
+            if (command.entryType.isPriceRequiredOrMustBeNull() != (command.price != null))
+                command.toRejectedEvent(
+                    books = aggregate,
+                    currentTime = command.whenRequested,
+                    rejectReason = UNSUPPORTED_ORDER_CHARACTERISTIC,
+                    rejectText = "Price must be ${if (command.entryType.isPriceRequiredOrMustBeNull()) "pre" else "ab"}sent for ${command.entryType} order"
+                ) else null
+    }
+
+    object ValidEntryTypeTimeInForceCombo : Validation<BookId, Books, PlaceOrderCommand, OrderRejectedEvent> {
+        override fun validate(command: PlaceOrderCommand, aggregate: Books): OrderRejectedEvent? =
+            if (!EntryTypeTimeInForceCombo.isValid(command.entryType, command.timeInForce))
+                command.toRejectedEvent(
+                    books = aggregate,
+                    currentTime = command.whenRequested,
+                    rejectReason = UNSUPPORTED_ORDER_CHARACTERISTIC,
+                    rejectText = "${command.entryType} ${command.timeInForce.code} is not supported"
+                ) else null
+    }
 }
+

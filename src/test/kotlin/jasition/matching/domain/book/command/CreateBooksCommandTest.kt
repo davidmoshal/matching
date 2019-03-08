@@ -5,7 +5,7 @@ import io.kotlintest.matchers.beOfType
 import io.kotlintest.should
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
-import io.vavr.collection.List
+import io.vavr.kotlin.list
 import jasition.cqrs.EventId
 import jasition.cqrs.Transaction
 import jasition.matching.domain.aBookId
@@ -31,7 +31,7 @@ internal class CreateBooksCommandTest : StringSpec({
                     bookId = bookId,
                     tradingStatuses = TradingStatuses(default = command.defaultTradingStatus)
                 ),
-                events = List.of(
+                events = list(
                     BooksCreatedEvent(
                         eventId = EventId(0),
                         bookId = bookId,

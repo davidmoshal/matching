@@ -9,6 +9,7 @@ import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import io.kotlintest.tables.row
 import io.vavr.collection.List
+import io.vavr.kotlin.list
 import jasition.cqrs.Command
 import jasition.cqrs.Event
 import jasition.cqrs.EventId
@@ -43,14 +44,12 @@ internal class `Aggressor one level bid partial filled against passive orders` :
          */
 
         row(
-            List.of(
+            list(
                 Tuple5(BUY, LIMIT, GOOD_TILL_CANCEL, 6, 12L),
                 Tuple5(SELL, LIMIT, GOOD_TILL_CANCEL, 6, 13L)
             ),
-            List.of(
-                Tuple4(10, 13L, 10, 14L)
-            ),
-            List.of(Tuple9(0, 1, 6, 13L, PARTIAL_FILL, 4, 6, FILLED, 0))
+            list(Tuple4(10, 13L, 10, 14L)),
+            list(Tuple9(0, 1, 6, 13L, PARTIAL_FILL, 4, 6, FILLED, 0))
         )
     ) { oldEntries, newEntries, expectedTrades ->
         "Given a book has existing orders of (${orderEntriesAsString(
@@ -92,7 +91,7 @@ internal class `Aggressor one level bid partial filled against passive orders` :
             }
 
             val massQuotePlacedEventId = EventId(5)
-            var newBookEntries = List.of(
+            var newBookEntries = list(
                 Tuple2(0, BUY),
                 Tuple2(0, SELL)
             ).map {
@@ -153,8 +152,8 @@ internal class `Aggressor one level bid partial filled against passive orders` :
             }
 
             repo.read(bookId).let {
-                it.buyLimitBook.entries.values() shouldBe List.of(newBookEntries[0], oldBookEntries[0])
-                it.sellLimitBook.entries.values() shouldBe List.of(newBookEntries[1])
+                it.buyLimitBook.entries.values() shouldBe list(newBookEntries[0], oldBookEntries[0])
+                it.sellLimitBook.entries.values() shouldBe list(newBookEntries[1])
             }
         }
     }

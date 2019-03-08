@@ -2,10 +2,14 @@ package jasition.cqrs
 
 import io.vavr.collection.Seq
 
-interface Event<K, A : Aggregate<K>> {
-    fun aggregateId(): K
+/**
+ * [Event] is what has happened to an [Aggregate] in the domain, and in most cases [Event] results in state changes.
+ * Please note that one Event can relate to one and only one [Aggregate].
+ */
+interface Event<KEY, AGG : Aggregate<KEY>> {
+    fun aggregateId(): KEY
     fun eventId(): EventId
-    fun play(aggregate: A): A
+    fun play(aggregate: AGG): AGG
 }
 
 data class EventId(val value: Long) : Comparable<EventId> {

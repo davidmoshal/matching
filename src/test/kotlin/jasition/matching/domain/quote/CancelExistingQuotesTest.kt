@@ -2,7 +2,7 @@ package jasition.matching.domain.quote
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
-import io.vavr.collection.List
+import io.vavr.kotlin.list
 import jasition.cqrs.Event
 import jasition.cqrs.EventId
 import jasition.cqrs.play
@@ -26,7 +26,7 @@ internal class CancelExistingQuotesTest : StringSpec({
         whoRequested = aFirmWithoutClient(),
         quoteModelType = QuoteModelType.QUOTE_ENTRY,
         timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-        entries = List.of(
+        entries = list(
             aQuoteEntry(
                 bid = SizeAtPrice(size = 4, price = Price(9)),
                 offer = SizeAtPrice(size = 5, price = Price(10))
@@ -53,7 +53,7 @@ internal class CancelExistingQuotesTest : StringSpec({
         ) shouldBe MassQuoteCancelledEvent(
             eventId = EventId(6),
             bookId = event.bookId,
-            entries = List.of(
+            entries = list(
                 expectedBookEntry(
                     event = event,
                     quoteEntry = event.entries.get(0),

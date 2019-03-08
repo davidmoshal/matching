@@ -4,7 +4,7 @@ import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import io.mockk.every
 import io.mockk.spyk
-import io.vavr.collection.List
+import io.vavr.kotlin.list
 import jasition.matching.domain.aBookEntry
 import jasition.matching.domain.aBookId
 import jasition.matching.domain.aFirmWithoutClient
@@ -20,7 +20,7 @@ internal class MassQuoteCancelledEventPropertyTest : StringSpec({
         whenHappened = Instant.now(),
         eventId = eventId,
         whoRequested = aFirmWithoutClient(),
-        entries = List.of(aBookEntry(eventId = eventId, isQuote = true))
+        entries = list(aBookEntry(eventId = eventId, isQuote = true))
     )
     "Has Book ID as Aggregate ID" {
         event.aggregateId() shouldBe bookId

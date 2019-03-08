@@ -1,6 +1,6 @@
 package jasition.matching.domain.book.entry
 
-import io.vavr.collection.List
+import io.vavr.kotlin.list
 import jasition.cqrs.Transaction
 import jasition.cqrs.append
 import jasition.matching.domain.book.BookId
@@ -10,7 +10,11 @@ import jasition.matching.domain.trade.MatchingResult
 
 enum class TimeInForce(val code: String) {
     GOOD_TILL_CANCEL("GTC") {
-        override fun finalise(result: MatchingResult): Transaction<BookId, Books> {
+        override fun finalise(
+            originalAggressor: BookEntry,
+            originalBooks: Books,
+            result: MatchingResult
+        ): Transaction<BookId, Books> {
             with(result) {
                 with(transaction) {
                     return if (canStayOnBook(aggressor.sizes)) {
@@ -22,7 +26,7 @@ enum class TimeInForce(val code: String) {
                         )
 
                         val addedBooks = addedEvent.play(aggregate)
-                        append(Transaction<BookId, Books>(aggregate = addedBooks, events = List.of(addedEvent)))
+                        append(Transaction<BookId, Books>(aggregate = addedBooks, events = list(addedEvent)))
                     } else
                         this
 
@@ -34,26 +38,57 @@ enum class TimeInForce(val code: String) {
     },
 
     IMMEDIATE_OR_CANCEL("IOC") {
-        override fun finalise(result: MatchingResult): Transaction<BookId, Books> {
+        override fun finalise(
+            originalAggressor: BookEntry,
+            originalBooks: Books,
+            result: MatchingResult
+        ): Transaction<BookId, Books> {
             with(result) {
                 return if (aggressor.sizes.available > 0) {
                     with(transaction) {
                         val cancelledEvent = aggressor.toOrderCancelledByExchangeEvent(
-                                eventId = aggregate.lastEventId.inc(),
-                                bookId = aggregate.bookId
+                            eventId = aggregate.lastEventId.inc(),
+                            bookId = aggregate.bookId
 
                         )
 
                         val cancelledBooks = cancelledEvent.play(aggregate)
 
-                        append(Transaction<BookId, Books>(aggregate = cancelledBooks, events = List.of(cancelledEvent)))
+                        append(Transaction<BookId, Books>(aggregate = cancelledBooks, events = list(cancelledEvent)))
                     }
                 } else transaction
             }
         }
 
         override fun canStayOnBook(size: EntrySizes): Boolean = false
-    };
+    },
+    FILL_OR_KILL("FOK") {
+        override fun finalise(
+            originalAggressor: BookEntry,
+            originalBooks: Books,
+            result: MatchingResult
+        ): Transaction<BookId, Books> {
+            with(result) {
+                return if (aggressor.sizes.available != 0) {
+                    val cancelledEvent =
+                        originalAggressor.toOrderCancelledByExchangeEvent(
+                            eventId = originalBooks.lastEventId.inc(),
+                            bookId = originalBooks.bookId
+                        )
+
+                    val cancelledBooks = cancelledEvent.play(originalBooks)
+
+                    Transaction<BookId, Books>(
+                        aggregate = cancelledBooks,
+                        events = list(cancelledEvent)
+                    )
+                } else transaction
+            }
+        }
+
+        override fun canStayOnBook(size: EntrySizes): Boolean = false
+    },
+    ;
 
     abstract fun canStayOnBook(size: EntrySizes): Boolean
 
@@ -64,5 +99,9 @@ enum class TimeInForce(val code: String) {
      * the book, cancelling the remaining size of the aggressor, or cancelling the whole aggressor or
      * reverting the whole [MatchingResult].
      */
-    abstract fun finalise(result: MatchingResult): Transaction<BookId, Books>
+    abstract fun finalise(
+        originalAggressor: BookEntry,
+        originalBooks: Books,
+        result: MatchingResult
+    ): Transaction<BookId, Books>
 }

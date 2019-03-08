@@ -4,7 +4,7 @@ import io.kotlintest.data.forall
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import io.kotlintest.tables.row
-import io.vavr.collection.List
+import io.vavr.kotlin.list
 import jasition.cqrs.EventId
 import jasition.cqrs.commitOrThrow
 import jasition.matching.domain.*
@@ -35,14 +35,14 @@ internal class `Order placed on and added to empty book` : StringSpec({
             val expectedBookEntry = expectedBookEntry(command, EventId(1))
 
             with(result) {
-                events shouldBe List.of(
+                events shouldBe list(
                     expectedOrderPlacedEvent(command, EventId(1)),
                     EntryAddedToBookEvent(bookId = bookId, eventId = EventId(2), entry = expectedBookEntry)
                 )
             }
             repo.read(bookId).let {
                 with(command.side) {
-                    sameSideBook(it).entries.values() shouldBe List.of(expectedBookEntry)
+                    sameSideBook(it).entries.values() shouldBe list(expectedBookEntry)
                     oppositeSideBook(it).entries.size() shouldBe 0
                 }
             }

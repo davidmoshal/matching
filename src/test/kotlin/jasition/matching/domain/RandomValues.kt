@@ -7,6 +7,12 @@ import io.vavr.collection.Array
 import io.vavr.collection.List
 import jasition.matching.domain.book.BookId
 import jasition.matching.domain.book.entry.*
+import jasition.matching.domain.book.entry.EntryType.LIMIT
+import jasition.matching.domain.book.entry.EntryType.MARKET
+import jasition.matching.domain.book.entry.Side.BUY
+import jasition.matching.domain.book.entry.Side.SELL
+import jasition.matching.domain.book.entry.TimeInForce.GOOD_TILL_CANCEL
+import jasition.matching.domain.book.entry.TimeInForce.IMMEDIATE_OR_CANCEL
 import jasition.matching.domain.client.Client
 import jasition.matching.domain.client.ClientRequestId
 import jasition.matching.domain.order.command.PlaceOrderCommand
@@ -36,10 +42,10 @@ fun randomFirmClientId() = randomId(prefix = "client", from = 1, to = 1000)
 fun randomPlaceOrderCommand(
     requestId: ClientRequestId = randomClientRequestId(),
     bookId: BookId = aBookId(),
-    entryType: EntryType = EntryType.LIMIT,
-    side: Side = if (Random.nextBoolean()) Side.BUY else Side.SELL,
+    entryType: EntryType = if (Random.nextBoolean()) LIMIT else MARKET,
+    side: Side = if (Random.nextBoolean()) BUY else SELL,
     price: Price? = randomPrice(),
-    timeInForce: TimeInForce = TimeInForce.GOOD_TILL_CANCEL,
+    timeInForce: TimeInForce = if (Random.nextBoolean()) GOOD_TILL_CANCEL else IMMEDIATE_OR_CANCEL,
     whenRequested: Instant = Instant.now(),
     whoRequested: Client = randomFirmWithClient(),
     size: Int = randomSize()
@@ -59,7 +65,7 @@ fun randomPlaceMassQuoteCommand(
     quoteId: String = randomId(),
     bookId: BookId = aBookId(),
     entries: List<Tuple4<Int, Long, Int, Long>>,
-    timeInForce: TimeInForce = TimeInForce.GOOD_TILL_CANCEL,
+    timeInForce: TimeInForce = GOOD_TILL_CANCEL,
     whenRequested: Instant = Instant.now(),
     whoRequested: Client = randomFirmWithoutClient()
 ): PlaceMassQuoteCommand = PlaceMassQuoteCommand(
@@ -87,7 +93,7 @@ fun randomPlaceMassQuoteCommand(
     maxBuy: Price = Price(27),
     minSell: Price = Price(26),
     maxSell: Price = Price(35),
-    timeInForce: TimeInForce = TimeInForce.GOOD_TILL_CANCEL,
+    timeInForce: TimeInForce = GOOD_TILL_CANCEL,
     whenRequested: Instant = Instant.now(),
     whoRequested: Client = randomFirmWithClient()
 ): PlaceMassQuoteCommand {

@@ -2,7 +2,7 @@ package jasition.matching.domain.quote.event
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
-import io.vavr.collection.List
+import io.vavr.kotlin.list
 import jasition.cqrs.EventId
 import jasition.matching.domain.*
 import jasition.matching.domain.book.entry.Price
@@ -23,7 +23,7 @@ internal class MassQuotePlacedEventPropertyTest : StringSpec({
         whoRequested = anotherFirmWithoutClient(),
         quoteModelType = QuoteModelType.QUOTE_ENTRY,
         timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-        entries = List.of(
+        entries = list(
             aQuoteEntry(
                 quoteEntryId = "qe1",
                 bid = SizeAtPrice(size = 4, price = Price(9)),
@@ -42,7 +42,7 @@ internal class MassQuotePlacedEventPropertyTest : StringSpec({
         event.eventId() shouldBe eventId
     }
     "Converts to BookEntries" {
-        event.toBookEntries() shouldBe List.of(
+        event.toBookEntries() shouldBe list(
             expectedBookEntry(quoteEntry = event.entries.get(0), side = Side.BUY, event = event),
             expectedBookEntry(quoteEntry = event.entries.get(0), side = Side.SELL, event = event),
             expectedBookEntry(quoteEntry = event.entries.get(1), side = Side.BUY, event = event),

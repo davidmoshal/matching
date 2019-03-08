@@ -9,6 +9,7 @@ import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
 import io.vavr.collection.List
+import io.vavr.kotlin.list
 
 internal class TransactionTest : StringSpec({
     val event1 = TestEvent(eventId = EventId(1))
@@ -17,12 +18,12 @@ internal class TransactionTest : StringSpec({
     val event4 = TestEvent(eventId = EventId(4))
 
     val originalAggregate = TestAggregate(value = "original")
-    val originalEvents: List<Event<Int, TestAggregate>> = List.of(event1, event2)
+    val originalEvents: List<Event<Int, TestAggregate>> = list(event1, event2)
     val originalTransaction = Transaction(originalAggregate, originalEvents)
 
     "When appending transaction, uses new aggregate and appends new events after original events" {
         val newAggregate = TestAggregate(value = "new")
-        val newEvents: List<Event<Int, TestAggregate>> = List.of(event3, event4)
+        val newEvents: List<Event<Int, TestAggregate>> = list(event3, event4)
 
         originalTransaction append Transaction(newAggregate, newEvents) shouldBe Transaction(
             newAggregate,

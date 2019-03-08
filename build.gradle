@@ -133,6 +133,7 @@ jacocoTestCoverageVerification {
         rule {
             element = 'CLASS'
             limit {
+//                minimum = 0
                 minimum = 1
             }
             excludes = [

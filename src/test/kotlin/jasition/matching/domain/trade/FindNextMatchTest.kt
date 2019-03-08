@@ -2,7 +2,7 @@ package jasition.matching.domain.trade
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
-import io.vavr.collection.List
+import io.vavr.kotlin.list
 import jasition.matching.domain.aBookEntry
 import jasition.matching.domain.anotherFirmWithClient
 import jasition.matching.domain.book.entry.Price
@@ -11,10 +11,10 @@ import jasition.matching.domain.book.entry.Side
 internal class FindNextMatchTest : StringSpec({
     val entry = aBookEntry()
     "Not found when the offset is greater than the number of passive entries" {
-        findNextMatch(aggressor = entry, passives = List.of(entry), offset = 2) shouldBe null
+        findNextMatch(aggressor = entry, passives = list(entry), offset = 2) shouldBe null
     }
     "Not found when the offset is equal to the number of passive entries" {
-        findNextMatch(aggressor = entry, passives = List.of(entry), offset = 1) shouldBe null
+        findNextMatch(aggressor = entry, passives = list(entry), offset = 1) shouldBe null
     }
     val entryKey = entry.key
     val otherFirmClient = anotherFirmWithClient()
@@ -24,7 +24,7 @@ internal class FindNextMatchTest : StringSpec({
                 side = Side.BUY,
                 key = entryKey.copy(price = Price(9))
             ),
-            passives = List.of(
+            passives = list(
                 entry.copy(
                     side = Side.SELL,
                     key = entryKey.copy(price = Price(10)),
@@ -50,7 +50,7 @@ internal class FindNextMatchTest : StringSpec({
                 side = Side.BUY,
                 key = entryKey.copy(price = Price(10))
             ),
-            passives = List.of(
+            passives = list(
                 passive,
                 passive.copy(key = entryKey.copy(price = Price(9)))
             )
@@ -67,7 +67,7 @@ internal class FindNextMatchTest : StringSpec({
                 side = Side.BUY,
                 key = entryKey.copy(price = Price(10))
             ),
-            passives = List.of(
+            passives = list(
                 passive.copy(whoRequested = entry.whoRequested),
                 passive
             )
@@ -84,7 +84,7 @@ internal class FindNextMatchTest : StringSpec({
                 side = Side.BUY,
                 key = entryKey.copy(price = Price(10))
             ),
-            passives = List.of(
+            passives = list(
                 passive.copy(whoRequested = entry.whoRequested.copy(firmClientId = null)),
                 passive
             )
@@ -104,7 +104,7 @@ internal class FindNextMatchTest : StringSpec({
                 whoRequested = entry.whoRequested,
                 isQuote = true
             ),
-            passives = List.of(
+            passives = list(
                 passive.copy(isQuote = true),
                 passive
             )
@@ -121,7 +121,7 @@ internal class FindNextMatchTest : StringSpec({
                 side = Side.BUY,
                 key = entryKey.copy(price = null)
             ),
-            passives = List.of(
+            passives = list(
                 passive.copy(key = entryKey.copy(price = null)),
                 passive
             )

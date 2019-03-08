@@ -1,7 +1,7 @@
 package jasition.matching.domain.book.command
 
 import arrow.core.Either
-import io.vavr.collection.List
+import io.vavr.kotlin.list
 import jasition.cqrs.Command
 import jasition.cqrs.Transaction
 import jasition.matching.domain.book.*
@@ -23,7 +23,7 @@ data class CreateBooksCommand(
         )
         return Either.right(Transaction<BookId, Books>(
             aggregate = event.play(Books(bookId)),
-            events = List.of(event)
+            events = list(event)
         ))
     }
 }

@@ -2,7 +2,7 @@ package jasition.matching.domain.quote.event
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
-import io.vavr.collection.List
+import io.vavr.kotlin.list
 import jasition.cqrs.EventId
 import jasition.matching.domain.*
 import jasition.matching.domain.book.entry.Price
@@ -24,7 +24,7 @@ internal class MassQuoteRejectedEventPropertyTest : StringSpec({
         whoRequested = anotherFirmWithoutClient(),
         quoteModelType = QuoteModelType.QUOTE_ENTRY,
         timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-        entries = List.of(
+        entries = list(
             aQuoteEntry(
                 bid = SizeAtPrice(size = 4, price = Price(9)),
                 offer = SizeAtPrice(size = 4, price = Price(10))
@@ -33,8 +33,8 @@ internal class MassQuoteRejectedEventPropertyTest : StringSpec({
                 offer = SizeAtPrice(size = 5, price = Price(11))
             )
         ),
-        quoteRejectReason = QuoteRejectReason.DUPLICATE_QUOTE,
-        quoteRejectText = "for some reasons"
+        rejectReason = QuoteRejectReason.DUPLICATE_QUOTE,
+        rejectText = "for some reasons"
     )
     "Has Book ID as Aggregate ID" {
         event.aggregateId() shouldBe bookId
@@ -55,7 +55,7 @@ internal class `Given a mass quote is rejected by an empty book` : StringSpec({
         whoRequested = anotherFirmWithoutClient(),
         quoteModelType = QuoteModelType.QUOTE_ENTRY,
         timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-        entries = List.of(
+        entries = list(
             aQuoteEntry(
                 bid = SizeAtPrice(size = 4, price = Price(9)),
                 offer = SizeAtPrice(size = 4, price = Price(10))
@@ -64,8 +64,8 @@ internal class `Given a mass quote is rejected by an empty book` : StringSpec({
                 offer = SizeAtPrice(size = 5, price = Price(11))
             )
         ),
-        quoteRejectReason = QuoteRejectReason.EXCHANGE_CLOSED,
-        quoteRejectText = "Exchange closed"
+        rejectReason = QuoteRejectReason.EXCHANGE_CLOSED,
+        rejectText = "Exchange closed"
     )
     val result = event.play(books)
 
@@ -102,7 +102,7 @@ internal class MassQuoteRejectedEventTest : StringSpec({
         whoRequested = aFirmWithoutClient(),
         quoteModelType = QuoteModelType.QUOTE_ENTRY,
         timeInForce = TimeInForce.GOOD_TILL_CANCEL,
-        entries = List.of(
+        entries = list(
             aQuoteEntry(
                 bid = SizeAtPrice(size = 4, price = Price(9)),
                 offer = SizeAtPrice(size = 4, price = Price(10))
@@ -111,8 +111,8 @@ internal class MassQuoteRejectedEventTest : StringSpec({
                 offer = SizeAtPrice(size = 5, price = Price(11))
             )
         ),
-        quoteRejectReason = QuoteRejectReason.EXCHANGE_CLOSED,
-        quoteRejectText = "Exchange closed"
+        rejectReason = QuoteRejectReason.EXCHANGE_CLOSED,
+        rejectText = "Exchange closed"
     )
     val result = event.play(books)
 
@@ -120,6 +120,6 @@ internal class MassQuoteRejectedEventTest : StringSpec({
         result.buyLimitBook.entries.size() shouldBe 0
     }
     "All the previous order remains in the SELL book" {
-        result.sellLimitBook.entries.values() shouldBe List.of(existingEntry)
+        result.sellLimitBook.entries.values() shouldBe list(existingEntry)
     }
 })
